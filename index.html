@@ -182,6 +182,94 @@
       resize: vertical;
     }
 
+    .material-group-box {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fbfcfd;
+    }
+
+    .material-group-title {
+      display: block;
+      margin-bottom: 12px;
+      color: #3f4d5b;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .material-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .material-option {
+      position: relative;
+    }
+
+    .material-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .material-option label {
+      display: inline-flex;
+      min-width: 100px;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 18px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: #45525f;
+      background: var(--white);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .material-option label::before {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      border: 1px solid #9aa6b2;
+      border-radius: 4px;
+      content: "";
+      background: var(--white);
+    }
+
+    .material-option input:checked + label {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .material-option input:checked + label::before {
+      border-color: var(--green);
+      content: "✓";
+      color: var(--white);
+      background: var(--green);
+      font-size: 12px;
+      line-height: 15px;
+      text-align: center;
+    }
+
+    .auditor-divider {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      padding-top: 4px;
+    }
+
+    .auditor-divider h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .auditor-divider p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .audit-accordion {
       overflow: hidden;
       margin-bottom: 18px;
@@ -273,8 +361,8 @@
     }
 
     .self-audit-card {
-      background: var(--self-audit-soft);
       border-color: #b9cee2;
+      background: var(--self-audit-soft);
     }
 
     .self-audit-card span {
@@ -445,7 +533,8 @@
         grid-template-columns: 1fr;
       }
 
-      .form-group.full {
+      .form-group.full,
+      .auditor-divider {
         grid-column: auto;
       }
 
@@ -540,22 +629,133 @@
         </div>
 
         <div class="form-group">
-          <label for="auditor">Auditor</label>
+          <label>Main Product / Business</label>
 
           <input
-            id="auditor"
+            id="mainProduct"
             type="text"
-            placeholder="심사원 이름을 입력하세요"
+            placeholder="주요 생산품목 또는 사업 내용을 입력하세요"
           >
         </div>
 
         <div class="form-group full">
-          <label for="mainProduct">Main Product / Business</label>
+          <div class="material-group-box">
+            <span class="material-group-title">
+              Material Group
+            </span>
 
-          <textarea
-            id="mainProduct"
-            placeholder="주요 생산품목 또는 사업 내용을 입력하세요"
-          ></textarea>
+            <div class="material-options">
+              <div class="material-option">
+                <input
+                  id="materialOem"
+                  name="materialGroup"
+                  type="checkbox"
+                  value="OEM"
+                >
+
+                <label for="materialOem">OEM</label>
+              </div>
+
+              <div class="material-option">
+                <input
+                  id="materialOdm"
+                  name="materialGroup"
+                  type="checkbox"
+                  value="ODM"
+                >
+
+                <label for="materialOdm">ODM</label>
+              </div>
+
+              <div class="material-option">
+                <input
+                  id="materialModm"
+                  name="materialGroup"
+                  type="checkbox"
+                  value="M.ODM"
+                >
+
+                <label for="materialModm">M.ODM</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="auditor-divider">
+          <h3>Department Auditors</h3>
+          <p>부서별 심사원 정보를 입력해 주세요.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="productionAuditor">
+            Production Auditor
+          </label>
+
+          <input
+            id="productionAuditor"
+            type="text"
+            placeholder="생산부서 심사원 이름"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="qualityAuditor">
+            Quality Auditor
+          </label>
+
+          <input
+            id="qualityAuditor"
+            type="text"
+            placeholder="품질부서 심사원 이름"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="purchaseAuditor">
+            Purchase Auditor
+          </label>
+
+          <input
+            id="purchaseAuditor"
+            type="text"
+            placeholder="구매부서 심사원 이름"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="securityAuditor">
+            Security Auditor
+          </label>
+
+          <input
+            id="securityAuditor"
+            type="text"
+            placeholder="보안부서 심사원 이름"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="systemAuditor">
+            System Auditor
+          </label>
+
+          <input
+            id="systemAuditor"
+            type="text"
+            placeholder="시스템부서 심사원 이름"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="complianceAuditor">
+            Compliance &amp; Ethics Auditor
+          </label>
+
+          <input
+            id="complianceAuditor"
+            type="text"
+            placeholder="Compliance & Ethics 심사원 이름"
+          >
         </div>
       </div>
     </section>
@@ -723,122 +923,22 @@
         7,
         "Non-Conforming Materials Management",
         [
-          createQuestionData(
-            1,
-            "1.1",
-            "부적합 관리 프로세스는 보유하고 있는가?"
-          ),
-
-          createQuestionData(
-            1,
-            "1.2",
-            `부적합 발생 시 해당 제품에 대한
-            식별 / 분리 / 담당자 지정되어 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.1",
-            "고객 부적합에 대해 개선대책 수립 및 F/B 완료되었는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.2",
-            `내부 부적합에 대해 발생 이력 관리되고 있으며,
-            대책서는 작성되고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.3",
-            `협력업체 부적합에 대해 발생 이력 관리되고 있으며,
-            대책서는 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.4",
-            `부적합품을 그대로 출하할 경우(특채)에 대한
-            고객 승인 프로세스는 수립되어 있으며,
-            특채 발행 이력은 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.1",
-            `회의체 or E-Mail 등을 통하여 발생되는 부적합 및
-            부적합 발생 전체 현황에 대해 내부 공유 활동 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.2",
-            `고객 및 내부 부적합에 대한 유효성 평가 기준 및
-            프로세스는 수립되었으며, 준수하고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.3",
-            `고객 부적합에 대해 부적합의 재발 여부를 확인하고 있는가?<br>
-            또한, 재발에 대한 기준은 수립되어 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.4",
-            `특채로 출하된 품목이 있을 경우,
-            내부 대책 수립 및 고객 출하 후 발생되는 문제에 대해
-            모니터링 후 종결 처리되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.5",
-            `부적합 프로세스에 대해 교육 Curriculum에 추가되어
-            기준에 맞춰 교육 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.1",
-            `시스템을 통해 부적합 발생 내역 등록부터 조치 요청,
-            대책 입력 및 유효성 평가까지 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.2",
-            `고객 부적합 중 재발 부적합의 대책 수립 시,
-            신규 부적합과는 다른 절차로 대책이 수립되고 있는가?<br>
-            또한 해당 부분이 표준 문서에 반영되어 누락되지 않고 운영되고 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.3",
-            `부적합 관리 지표는 주기적으로 집계 및
-            경영진과 함께 검토되고 있으며,
-            목표 대비 높게 집계될 경우 이에 대한 대책안까지
-            논의가 되고 있는가?`
-          ),
-
-          createQuestionData(
-            5,
-            "5.1",
-            `부적합 관리 지표는 매년 분석 및 개선을 통해
-            기준 대비 향상된 지표를 보여주고 있으며,
-            개선된 부적합 관리 지표 달성을 위한 계획은
-            적절하게 수립되고 있는가?`
-          ),
-
-          createQuestionData(
-            5,
-            "5.2",
-            `부적합은 통합 지표가 아닌 Part별 혹은 고객사별로
-            세분화하여 목표 수립 및 주기적으로 집계되고 있는가?`
-          )
+          createQuestionData(1, "1.1", "부적합 관리 프로세스는 보유하고 있는가?"),
+          createQuestionData(1, "1.2", "부적합 발생 시 해당 제품에 대한 식별 / 분리 / 담당자 지정되어 있는가?"),
+          createQuestionData(2, "2.1", "고객 부적합에 대해 개선대책 수립 및 F/B 완료되었는가?"),
+          createQuestionData(2, "2.2", "내부 부적합에 대해 발생 이력 관리되고 있으며, 대책서는 작성되고 있는가?"),
+          createQuestionData(2, "2.3", "협력업체 부적합에 대해 발생 이력 관리되고 있으며, 대책서는 관리되고 있는가?"),
+          createQuestionData(2, "2.4", "부적합품을 그대로 출하할 경우(특채)에 대한 고객 승인 프로세스는 수립되어 있으며, 특채 발행 이력은 관리되고 있는가?"),
+          createQuestionData(3, "3.1", "회의체 or E-Mail 등을 통하여 발생되는 부적합 및 부적합 발생 전체 현황에 대해 내부 공유 활동 진행되고 있는가?"),
+          createQuestionData(3, "3.2", "고객 및 내부 부적합에 대한 유효성 평가 기준 및 프로세스는 수립되었으며, 준수하고 있는가?"),
+          createQuestionData(3, "3.3", "고객 부적합에 대해 부적합의 재발 여부를 확인하고 있는가?<br>또한, 재발에 대한 기준은 수립되어 있는가?"),
+          createQuestionData(3, "3.4", "특채로 출하된 품목이 있을 경우, 내부 대책 수립 및 고객 출하 후 발생되는 문제에 대해 모니터링 후 종결 처리되고 있는가?"),
+          createQuestionData(3, "3.5", "부적합 프로세스에 대해 교육 Curriculum에 추가되어 기준에 맞춰 교육 진행되고 있는가?"),
+          createQuestionData(4, "4.1", "시스템을 통해 부적합 발생 내역 등록부터 조치 요청, 대책 입력 및 유효성 평가까지 관리되고 있는가?"),
+          createQuestionData(4, "4.2", "고객 부적합 중 재발 부적합의 대책 수립 시, 신규 부적합과는 다른 절차로 대책이 수립되고 있는가?<br>또한 해당 부분이 표준 문서에 반영되어 누락되지 않고 운영되고 있는가?"),
+          createQuestionData(4, "4.3", "부적합 관리 지표는 주기적으로 집계 및 경영진과 함께 검토되고 있으며, 목표 대비 높게 집계될 경우 이에 대한 대책안까지 논의가 되고 있는가?"),
+          createQuestionData(5, "5.1", "부적합 관리 지표는 매년 분석 및 개선을 통해 기준 대비 향상된 지표를 보여주고 있으며, 개선된 부적합 관리 지표 달성을 위한 계획은 적절하게 수립되고 있는가?"),
+          createQuestionData(5, "5.2", "부적합은 통합 지표가 아닌 Part별 혹은 고객사별로 세분화하여 목표 수립 및 주기적으로 집계되고 있는가?")
         ]
       ),
 
@@ -846,91 +946,18 @@
         8,
         "Document & Drawing Control System",
         [
-          createQuestionData(
-            1,
-            "1.1",
-            `사내 표준(매뉴얼 / 절차서 / 지침서류) 관리 프로세스는 보유하고 있는가?<br>
-            (문서 제정, 개정, 배포, 폐지 등 절차 포함)`
-          ),
-
-          createQuestionData(
-            1,
-            "1.2",
-            "사내 표준별 담당부서는 지정되어 관리되고 있는가?"
-          ),
-
-          createQuestionData(
-            1,
-            "1.3",
-            `도면(사내/고객) 관리 프로세스는 보유하고 있는가?<br>
-            (배포, 회수, 폐기 등 절차 포함)`
-          ),
-
-          createQuestionData(
-            2,
-            "2.1",
-            `사내 표준의 제정, 개정, 배포, 폐지는
-            정해진 절차에 의거하여 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.2",
-            `표준 문서별(규정 및 지침서, 작업표준서 등) 제정, 개정,
-            확인 및 폐지 승인권자는 지정 및 준수되고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.3",
-            `도면의 배포, 회수, 폐기는
-            정해진 절차에 의하여 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.4",
-            "자체 제작 도면에 대해 승인권자는 지정 및 준수되고 있는가?"
-          ),
-
-          createQuestionData(
-            3,
-            "3.1",
-            `정해진 절차로 승인된 최신 표준 문서만
-            접근 및 사용할 수 있도록 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.2",
-            `표준 문서의 개정 시, 담당 부서 외 관련 부서 협의 후
-            개정 진행되고 있으며,
-            관련 내용은 모두 기록으로 남기고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.3",
-            `도면 변경점 발생 시, 기존 도면은 폐기 혹은
-            접근할 수 없도록 관리되고 있는가?<br>
-            (고객, 자체 제작 도면, 가공 프로그램 등)`
-          ),
-
-          createQuestionData(
-            4,
-            "4.1",
-            `표준 문서의 관리 절차는 시스템으로 관리되고 있는가?<br>
-            (제정, 개정, 배포, 폐지 등 -
-            네트워크 공유 폴더의 경우 시스템으로 인정하지 않음)`
-          ),
-
-          createQuestionData(
-            5,
-            "5.1",
-            `표준 문서의 검토 주기는 설정되어 있으며,
-            주기에 맞게 검토되고 있는가?<br>
-            또한, 검토된 내용은 기록으로 남기고 있는가?`
-          )
+          createQuestionData(1, "1.1", "사내 표준(매뉴얼 / 절차서 / 지침서류) 관리 프로세스는 보유하고 있는가?<br>(문서 제정, 개정, 배포, 폐지 등 절차 포함)"),
+          createQuestionData(1, "1.2", "사내 표준별 담당부서는 지정되어 관리되고 있는가?"),
+          createQuestionData(1, "1.3", "도면(사내/고객) 관리 프로세스는 보유하고 있는가?<br>(배포, 회수, 폐기 등 절차 포함)"),
+          createQuestionData(2, "2.1", "사내 표준의 제정, 개정, 배포, 폐지는 정해진 절차에 의거하여 진행되고 있는가?"),
+          createQuestionData(2, "2.2", "표준 문서별(규정 및 지침서, 작업표준서 등) 제정, 개정, 확인 및 폐지 승인권자는 지정 및 준수되고 있는가?"),
+          createQuestionData(2, "2.3", "도면의 배포, 회수, 폐기는 정해진 절차에 의하여 진행되고 있는가?"),
+          createQuestionData(2, "2.4", "자체 제작 도면에 대해 승인권자는 지정 및 준수되고 있는가?"),
+          createQuestionData(3, "3.1", "정해진 절차로 승인된 최신 표준 문서만 접근 및 사용할 수 있도록 관리되고 있는가?"),
+          createQuestionData(3, "3.2", "표준 문서의 개정 시, 담당 부서 외 관련 부서 협의 후 개정 진행되고 있으며, 관련 내용은 모두 기록으로 남기고 있는가?"),
+          createQuestionData(3, "3.3", "도면 변경점 발생 시, 기존 도면은 폐기 혹은 접근할 수 없도록 관리되고 있는가?<br>(고객, 자체 제작 도면, 가공 프로그램 등)"),
+          createQuestionData(4, "4.1", "표준 문서의 관리 절차는 시스템으로 관리되고 있는가?<br>(제정, 개정, 배포, 폐지 등 - 네트워크 공유 폴더의 경우 시스템으로 인정하지 않음)"),
+          createQuestionData(5, "5.1", "표준 문서의 검토 주기는 설정되어 있으며, 주기에 맞게 검토되고 있는가?<br>또한, 검토된 내용은 기록으로 남기고 있는가?")
         ]
       ),
 
@@ -938,106 +965,20 @@
         9,
         "Change Management",
         [
-          createQuestionData(
-            1,
-            "1.1",
-            "변경점 관리 프로세스는 보유하고 있는가?"
-          ),
-
-          createQuestionData(
-            1,
-            "1.2",
-            "변경점 내부 승인권자 및 고객 통보 담당은 지정되어 있는가?"
-          ),
-
-          createQuestionData(
-            1,
-            "1.3",
-            "변경점 통보에 대한 기준은 수립되어 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.1",
-            `변경점 통보 일정은 고객과 사전 협의된 일정으로
-            내부 절차서에 명시되어 있으며,
-            변경점 통보 시 고객과 사전 협의된 일정을 준수하여
-            통보하고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.2",
-            `변경점 관리 대장, 변경점 관리 신고서 양식은 정립되었으며
-            실제로 운영되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.1",
-            `신고된 변경점에 대해 고객 회신 이력은 관리되고 있는가?
-            (Accept / Reject 포함)`
-          ),
-
-          createQuestionData(
-            3,
-            "3.2",
-            `고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해
-            이력관리가 되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.3",
-            `고객 승인 후 변경점이 적용되는 첫 번째 제작 Part 진행 시,
-            변경점에 대한 관련 인원 공유되고 있는가?<br>
-            (변경점 승인 즉시 공유가 아닌 제작 시 확인 가능하도록
-            공유 여부 확인 필요)`
-          ),
-
-          createQuestionData(
-            3,
-            "3.4",
-            `고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해
-            변경점 적용 여부에 대한 검사는 진행되고 있으며,
-            기록으로 확인 가능한가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.5",
-            `변경점 관리 프로세스에 대해 교육 Curriculum에 추가되어
-            기준에 맞춰 교육 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.1",
-            `시스템을 통해 변경점 관리가 진행되고 있는가?<br>
-            (변경 이력, 변경점 적용 시점, 변경 대상 Model 등)`
-          ),
-
-          createQuestionData(
-            4,
-            "4.2",
-            `특정 고객 요청에 의한 변경점일 경우,
-            해당 변경점이 다른 고객에게 적용되지 않도록 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.3",
-            `생산 시작 전 이전 생산 품목 대비 변경점 발생 여부에 대한
-            검토는 진행되고 있는가?<br>
-            (Repeat Order일 경우에도 변경점 발생 여부 확인 체크 필요)`
-          ),
-
-          createQuestionData(
-            5,
-            "5.1",
-            `적용된 변경 사항에 대해 보증방안은 수립되어 있는가?<br>
-            (변경점에 대한 Test 진행 여부, Test 항목, 기간 등)`
-          )
+          createQuestionData(1, "1.1", "변경점 관리 프로세스는 보유하고 있는가?"),
+          createQuestionData(1, "1.2", "변경점 내부 승인권자 및 고객 통보 담당은 지정되어 있는가?"),
+          createQuestionData(1, "1.3", "변경점 통보에 대한 기준은 수립되어 있는가?"),
+          createQuestionData(2, "2.1", "변경점 통보 일정은 고객과 사전 협의된 일정으로 내부 절차서에 명시되어 있으며, 변경점 통보 시 고객과 사전 협의된 일정을 준수하여 통보하고 있는가?"),
+          createQuestionData(2, "2.2", "변경점 관리 대장, 변경점 관리 신고서 양식은 정립되었으며 실제로 운영되고 있는가?"),
+          createQuestionData(3, "3.1", "신고된 변경점에 대해 고객 회신 이력은 관리되고 있는가? (Accept / Reject 포함)"),
+          createQuestionData(3, "3.2", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해 이력관리가 되고 있는가?"),
+          createQuestionData(3, "3.3", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part 진행 시, 변경점에 대한 관련 인원 공유되고 있는가?<br>(변경점 승인 즉시 공유가 아닌 제작 시 확인 가능하도록 공유 여부 확인 필요)"),
+          createQuestionData(3, "3.4", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해 변경점 적용 여부에 대한 검사는 진행되고 있으며, 기록으로 확인 가능한가?"),
+          createQuestionData(3, "3.5", "변경점 관리 프로세스에 대해 교육 Curriculum에 추가되어 기준에 맞춰 교육 진행되고 있는가?"),
+          createQuestionData(4, "4.1", "시스템을 통해 변경점 관리가 진행되고 있는가?<br>(변경 이력, 변경점 적용 시점, 변경 대상 Model 등)"),
+          createQuestionData(4, "4.2", "특정 고객 요청에 의한 변경점일 경우, 해당 변경점이 다른 고객에게 적용되지 않도록 관리되고 있는가?"),
+          createQuestionData(4, "4.3", "생산 시작 전 이전 생산 품목 대비 변경점 발생 여부에 대한 검토는 진행되고 있는가?<br>(Repeat Order일 경우에도 변경점 발생 여부 확인 체크 필요)"),
+          createQuestionData(5, "5.1", "적용된 변경 사항에 대해 보증방안은 수립되어 있는가?<br>(변경점에 대한 Test 진행 여부, Test 항목, 기간 등)")
         ]
       ),
 
@@ -1045,81 +986,17 @@
         10,
         "Business Continuity Management System",
         [
-          createQuestionData(
-            1,
-            "1.1",
-            "Business 연속성을 유지하기 위한 BCP가 수립되어 있는가?"
-          ),
-
-          createQuestionData(
-            1,
-            "1.2",
-            "Business 연속성을 유지하기 위한 업무 Process가 구축되어 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.1",
-            "BCP는 전 직원이 인지할 수 있도록 게시 혹은 배포되고 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.2",
-            `BCP에는 복구 절차, 수행 인원, 필요 자원, 복구 기간 등이
-            명시되어 있는가?<br>
-            (위 내용은 필수적으로 포함되어야 함)`
-          ),
-
-          createQuestionData(
-            3,
-            "3.1",
-            `BCP는 경영진의 검토 및 승인을 받고 있으며,
-            검토 주기 설정 및 주기에 맞춰 검토되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.2",
-            "BCP에 대한 연습 절차는 수립되어 있는가? (주기, 유형 등)"
-          ),
-
-          createQuestionData(
-            3,
-            "3.3",
-            "BCP 연습 과정에서 발생된 개선 사항은 BCP에 반영되고 있는가?"
-          ),
-
-          createQuestionData(
-            4,
-            "4.1",
-            `BCP는 Business에 영향을 줄 수 있는 프로세스를 선별하여
-            수립되었는가?<br>
-            (프로세스는 주관적이 아닌 객관적인 기준에 의거하여
-            선정되어야 한다.)`
-          ),
-
-          createQuestionData(
-            4,
-            "4.2",
-            `BCP 연습은 최소 1년 1회로 진행되고 있으며,
-            최소 1건 이상은 회람, 토론 형식이 아닌
-            실제 모의 훈련으로 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            5,
-            "5.1",
-            `주요 공급 업체에 대해 공급 업체 정보를 보유 관리하고 있는가?<br>
-            또한 주요 공급 업체의 BCMS 능력 평가 진행하고 있는가?`
-          ),
-
-          createQuestionData(
-            5,
-            "5.2",
-            `BCMS 프로세스 개선 목표 및 달성 방안은 매년 수립되고 있는가?<br>
-            또한 매년 동일 목표가 아닌 새로운 목표를 수립하고 있는가?`
-          )
+          createQuestionData(1, "1.1", "Business 연속성을 유지하기 위한 BCP가 수립되어 있는가?"),
+          createQuestionData(1, "1.2", "Business 연속성을 유지하기 위한 업무 Process가 구축되어 있는가?"),
+          createQuestionData(2, "2.1", "BCP는 전 직원이 인지할 수 있도록 게시 혹은 배포되고 있는가?"),
+          createQuestionData(2, "2.2", "BCP에는 복구 절차, 수행 인원, 필요 자원, 복구 기간 등이 명시되어 있는가?<br>(위 내용은 필수적으로 포함되어야 함)"),
+          createQuestionData(3, "3.1", "BCP는 경영진의 검토 및 승인을 받고 있으며, 검토 주기 설정 및 주기에 맞춰 검토되고 있는가?"),
+          createQuestionData(3, "3.2", "BCP에 대한 연습 절차는 수립되어 있는가? (주기, 유형 등)"),
+          createQuestionData(3, "3.3", "BCP 연습 과정에서 발생된 개선 사항은 BCP에 반영되고 있는가?"),
+          createQuestionData(4, "4.1", "BCP는 Business에 영향을 줄 수 있는 프로세스를 선별하여 수립되었는가?<br>(프로세스는 주관적이 아닌 객관적인 기준에 의거하여 선정되어야 한다.)"),
+          createQuestionData(4, "4.2", "BCP 연습은 최소 1년 1회로 진행되고 있으며, 최소 1건 이상은 회람, 토론 형식이 아닌 실제 모의 훈련으로 진행되고 있는가?"),
+          createQuestionData(5, "5.1", "주요 공급 업체에 대해 공급 업체 정보를 보유 관리하고 있는가?<br>또한 주요 공급 업체의 BCMS 능력 평가 진행하고 있는가?"),
+          createQuestionData(5, "5.2", "BCMS 프로세스 개선 목표 및 달성 방안은 매년 수립되고 있는가?<br>또한 매년 동일 목표가 아닌 새로운 목표를 수립하고 있는가?")
         ]
       ),
 
@@ -1127,69 +1004,16 @@
         11,
         "Employee Training",
         [
-          createQuestionData(
-            1,
-            "1.1",
-            "신규 입사자에 대한 OJT Curriculum은 수립되어 있는가?"
-          ),
-
-          createQuestionData(
-            1,
-            "1.2",
-            "전사 필수 교육에 대한 연간 교육훈련계획서가 수립되어 있는가?"
-          ),
-
-          createQuestionData(
-            1,
-            "1.3",
-            `임직원에 대한 교육 훈련 절차가 수립되어 있는가?
-            (신입, 기존 임직원 포함)`
-          ),
-
-          createQuestionData(
-            2,
-            "2.1",
-            "교육 훈련 후 교육보고서를 통해 실적 관리되고 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.2",
-            "모든 직무에 대해 직무 수행 내용 및 직무 요건이 정의되어 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.3",
-            "교육 훈련 현황은 주기별로(최소 반기별) 모니터링 되고 있는가?"
-          ),
-
-          createQuestionData(
-            3,
-            "3.1",
-            `직무별 경력, 업무에 따른 필수 교육 체계도가 수립되어 있으며,
-            체계에 맞춰 교육이 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.2",
-            `매년 이수해야 하는 교육 훈련에 대한 기준은 수립되어 있는가?
-            또한 해당 기준에 맞춰 교육이 수립되고 있는가?<br>
-            (법정 필수 교육 외)`
-          ),
-
-          createQuestionData(
-            4,
-            "4.1",
-            "교육 훈련 Process는 시스템으로 관리가 되고 있는가?"
-          ),
-
-          createQuestionData(
-            5,
-            "5.1",
-            "회사 평가(승진, KPI 등)와 교육이 제도적으로 연계가 되어 있는가?"
-          )
+          createQuestionData(1, "1.1", "신규 입사자에 대한 OJT Curriculum은 수립되어 있는가?"),
+          createQuestionData(1, "1.2", "전사 필수 교육에 대한 연간 교육훈련계획서가 수립되어 있는가?"),
+          createQuestionData(1, "1.3", "임직원에 대한 교육 훈련 절차가 수립되어 있는가? (신입, 기존 임직원 포함)"),
+          createQuestionData(2, "2.1", "교육 훈련 후 교육보고서를 통해 실적 관리되고 있는가?"),
+          createQuestionData(2, "2.2", "모든 직무에 대해 직무 수행 내용 및 직무 요건이 정의되어 있는가?"),
+          createQuestionData(2, "2.3", "교육 훈련 현황은 주기별로(최소 반기별) 모니터링 되고 있는가?"),
+          createQuestionData(3, "3.1", "직무별 경력, 업무에 따른 필수 교육 체계도가 수립되어 있으며, 체계에 맞춰 교육이 진행되고 있는가?"),
+          createQuestionData(3, "3.2", "매년 이수해야 하는 교육 훈련에 대한 기준은 수립되어 있는가? 또한 해당 기준에 맞춰 교육이 수립되고 있는가?<br>(법정 필수 교육 외)"),
+          createQuestionData(4, "4.1", "교육 훈련 Process는 시스템으로 관리가 되고 있는가?"),
+          createQuestionData(5, "5.1", "회사 평가(승진, KPI 등)와 교육이 제도적으로 연계가 되어 있는가?")
         ]
       ),
 
@@ -1197,82 +1021,17 @@
         12,
         "Design, New Product",
         [
-          createQuestionData(
-            1,
-            "1.1",
-            "초도품 설계 및 검증에 대한 문서화된 절차는 보유하고 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.1",
-            "초도품에 대한 최종 검사 보고서는 작성되고 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.2",
-            `초도품에 대한 작업 표준서 및 검사 기준서 작성에 대한
-            절차 보유 및 절차 준수하고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.3",
-            "초도품에 대해서 식별 및 이력관리는 진행되고 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.4",
-            `개발 단계에서 양산 단계로 전환하는 절차에 대한
-            프로세스가 수립되어 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.1",
-            `초도품의 설계 혹은 최종 제품이 안전, 보건 및 환경 규제 또는
-            법적 요구 사항을 완벽하게 준수하는지 확인하는
-            절차 보유 및 절차 준수하고 있는가?<br>
-            (고객사 요구사항 외)`
-          ),
-
-          createQuestionData(
-            3,
-            "3.2",
-            `초도품의 설계 or 제작 단계에서 고객의 요구사항을 충족하는지
-            검토하는 절차 보유 및 절차 준수하고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.3",
-            `개발 단계에서 양산으로 전환 시,
-            필요한 필수 문서가 정의되어 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.1",
-            `초도품 개발 과정에서 확인된 실패 DB에 대해 문서화되고 있는가?<br>
-            또한 해당 실패 DB는 향후 초도품 개발 단계에서 검토되고 있으며
-            해당 절차는 문서화되어 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.2",
-            `초도품 개발 Status는 시스템으로 관리되며,
-            각각의 산출물도 모두 시스템을 통해 등록 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            5,
-            "5.1",
-            `초도품 개발 전 목표는 명확하게 수치화되어 관리되고 있으며,
-            양산 전환 전 목표 대비 실적에 대해 관리되고 있는가?`
-          )
+          createQuestionData(1, "1.1", "초도품 설계 및 검증에 대한 문서화된 절차는 보유하고 있는가?"),
+          createQuestionData(2, "2.1", "초도품에 대한 최종 검사 보고서는 작성되고 있는가?"),
+          createQuestionData(2, "2.2", "초도품에 대한 작업 표준서 및 검사 기준서 작성에 대한 절차 보유 및 절차 준수하고 있는가?"),
+          createQuestionData(2, "2.3", "초도품에 대해서 식별 및 이력관리는 진행되고 있는가?"),
+          createQuestionData(2, "2.4", "개발 단계에서 양산 단계로 전환하는 절차에 대한 프로세스가 수립되어 있는가?"),
+          createQuestionData(3, "3.1", "초도품의 설계 혹은 최종 제품이 안전, 보건 및 환경 규제 또는 법적 요구 사항을 완벽하게 준수하는지 확인하는 절차 보유 및 절차 준수하고 있는가?<br>(고객사 요구사항 외)"),
+          createQuestionData(3, "3.2", "초도품의 설계 or 제작 단계에서 고객의 요구사항을 충족하는지 검토하는 절차 보유 및 절차 준수하고 있는가?"),
+          createQuestionData(3, "3.3", "개발 단계에서 양산으로 전환 시, 필요한 필수 문서가 정의되어 있는가?"),
+          createQuestionData(4, "4.1", "초도품 개발 과정에서 확인된 실패 DB에 대해 문서화되고 있는가?<br>또한 해당 실패 DB는 향후 초도품 개발 단계에서 검토되고 있으며 해당 절차는 문서화되어 있는가?"),
+          createQuestionData(4, "4.2", "초도품 개발 Status는 시스템으로 관리되며, 각각의 산출물도 모두 시스템을 통해 등록 관리되고 있는가?"),
+          createQuestionData(5, "5.1", "초도품 개발 전 목표는 명확하게 수치화되어 관리되고 있으며, 양산 전환 전 목표 대비 실적에 대해 관리되고 있는가?")
         ]
       ),
 
@@ -1280,123 +1039,36 @@
         13,
         "Inspection and Test",
         [
-          createQuestionData(
-            1,
-            "1.1",
-            `QC 공정도에 각 공정별 검사 항목과 관리 Spec 및
-            검사 담당은 설정되어 있는가?`
-          ),
-
-          createQuestionData(
-            1,
-            "1.2",
-            `검사자에 대한 적격성 기준은 수립되어 있으며,
-            평가 결과에 대해서는 상위권자 승인을 득하여 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            1,
-            "1.3",
-            "계측기에 대해서는 관리대장 및 이력카드 작성되어 관리되고 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.1",
-            "수입 / 공정 / 출하 검사 기준서는 작성되어 있는가?"
-          ),
-
-          createQuestionData(
-            2,
-            "2.2",
-            `각 단계별(수입/공정/출하) 검사 실시 및
-            성적서 작성관리 되고 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.3",
-            `계측기에 대해 주기적으로 검교정 진행되고 있으며,
-            교정라벨은 해당 계측기에 부착되어 있는가?`
-          ),
-
-          createQuestionData(
-            2,
-            "2.4",
-            `계측기 담당 부서와 보관 위치는 지정 및 기록 관리되고 있는가?<br>
-            또한, 계측기의 계측기 보관위치는 식별관리 되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.1",
-            `수입 / 공정 / 출하 검사 성적서는 각각 Revision
-            (개정 이력 포함) 관리가 진행되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.2",
-            `중요 공정(CTQ)가 설정되어 있으며,
-            해당 공정은 작업 표준서, 공정 검사 Check Sheet 등으로
-            관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.3",
-            `검사원에 대한 갱신 기준은 수립되어 있는가?
-            또한 기준에 맞춰 갱신되고 있는가?`
-          ),
-
-          createQuestionData(
-            3,
-            "3.4",
-            `계측기의 검교정 진행 여부 및 검교정 주기 선정 기준은
-            문서화되어 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.1",
-            `검사 Data는 시스템으로 관리되고 있는가?<br>
-            또한 시스템에 Spec Out 값 입력 시,
-            작업자가 인지할 수 있도록 관리되고 있는가?`
-          ),
-
-          createQuestionData(
-            4,
-            "4.2",
-            "계측기 이력 및 관리 대장은 시스템으로 관리되고 있는가?"
-          ),
-
-          createQuestionData(
-            4,
-            "4.3",
-            `특별 관리 대상 계측기에 대해 정의되어 있으며,
-            정의된 계측기에 대한 관리 방안이 수립되어 있는가?`
-          ),
-
-          createQuestionData(
-            5,
-            "5.1",
-            `검사 프로세스의 건전성을 측정하기 위한 KPI는 수립 및
-            주기적으로 모니터링 되고 있는가?<br>
-            (ex: Gauge R&R, 공정능력지수 등)`
-          ),
-
-          createQuestionData(
-            5,
-            "5.2",
-            `통계적 품질 관리를 통해 데이터 수집,
-            분석 및 개선 활동 진행하고 있는가?`
-          )
+          createQuestionData(1, "1.1", "QC 공정도에 각 공정별 검사 항목과 관리 Spec 및 검사 담당은 설정되어 있는가?"),
+          createQuestionData(1, "1.2", "검사자에 대한 적격성 기준은 수립되어 있으며, 평가 결과에 대해서는 상위권자 승인을 득하여 관리되고 있는가?"),
+          createQuestionData(1, "1.3", "계측기에 대해서는 관리대장 및 이력카드 작성되어 관리되고 있는가?"),
+          createQuestionData(2, "2.1", "수입 / 공정 / 출하 검사 기준서는 작성되어 있는가?"),
+          createQuestionData(2, "2.2", "각 단계별(수입/공정/출하) 검사 실시 및 성적서 작성관리 되고 있는가?"),
+          createQuestionData(2, "2.3", "계측기에 대해 주기적으로 검교정 진행되고 있으며, 교정라벨은 해당 계측기에 부착되어 있는가?"),
+          createQuestionData(2, "2.4", "계측기 담당 부서와 보관 위치는 지정 및 기록 관리되고 있는가?<br>또한, 계측기의 계측기 보관위치는 식별관리 되고 있는가?"),
+          createQuestionData(3, "3.1", "수입 / 공정 / 출하 검사 성적서는 각각 Revision(개정 이력 포함) 관리가 진행되고 있는가?"),
+          createQuestionData(3, "3.2", "중요 공정(CTQ)가 설정되어 있으며, 해당 공정은 작업 표준서, 공정 검사 Check Sheet 등으로 관리되고 있는가?"),
+          createQuestionData(3, "3.3", "검사원에 대한 갱신 기준은 수립되어 있는가? 또한 기준에 맞춰 갱신되고 있는가?"),
+          createQuestionData(3, "3.4", "계측기의 검교정 진행 여부 및 검교정 주기 선정 기준은 문서화되어 관리되고 있는가?"),
+          createQuestionData(4, "4.1", "검사 Data는 시스템으로 관리되고 있는가?<br>또한 시스템에 Spec Out 값 입력 시, 작업자가 인지할 수 있도록 관리되고 있는가?"),
+          createQuestionData(4, "4.2", "계측기 이력 및 관리 대장은 시스템으로 관리되고 있는가?"),
+          createQuestionData(4, "4.3", "특별 관리 대상 계측기에 대해 정의되어 있으며, 정의된 계측기에 대한 관리 방안이 수립되어 있는가?"),
+          createQuestionData(5, "5.1", "검사 프로세스의 건전성을 측정하기 위한 KPI는 수립 및 주기적으로 모니터링 되고 있는가?<br>(ex: Gauge R&R, 공정능력지수 등)"),
+          createQuestionData(5, "5.2", "통계적 품질 관리를 통해 데이터 수집, 분석 및 개선 활동 진행하고 있는가?")
         ]
       )
     ];
 
     function createSelfAuditOptions(sectionNumber) {
-      const values = ["", "0.0", "1.0", "2.0", "3.0", "4.0", "5.0"];
+      const values = [
+        "",
+        "0.0",
+        "1.0",
+        "2.0",
+        "3.0",
+        "4.0",
+        "5.0"
+      ];
 
       return `
         <select
@@ -1405,9 +1077,10 @@
           aria-label="Section ${sectionNumber} Self-Audit Score"
         >
           ${values.map(value => {
-            const label = value === ""
-              ? "선택 안 함"
-              : value;
+            const label =
+              value === ""
+                ? "선택 안 함"
+                : value;
 
             return `
               <option value="${value}">
@@ -1431,7 +1104,8 @@
         "권고": "recommend"
       };
 
-      const id = `${name}-${suffixMap[value]}`;
+      const id =
+        `${name}-${suffixMap[value]}`;
 
       return `
         <div class="result-option">
@@ -1506,8 +1180,11 @@
     }
 
     function createSectionHtml(section) {
-      const sectionNumber = section.sectionNumber;
-      const totalQuestions = section.questions.length;
+      const sectionNumber =
+        section.sectionNumber;
+
+      const totalQuestions =
+        section.questions.length;
 
       return `
         <div class="audit-accordion">
@@ -1638,13 +1315,15 @@
         .join("");
 
     function updateSectionResult(sectionNumber) {
-      const body = document.getElementById(
-        `section${sectionNumber}Body`
-      );
+      const body =
+        document.getElementById(
+          `section${sectionNumber}Body`
+        );
 
-      const rows = Array.from(
-        body.querySelectorAll("tr")
-      );
+      const rows =
+        Array.from(
+          body.querySelectorAll("tr")
+        );
 
       let lowestFailLevel = null;
       let failCount = 0;
@@ -1652,15 +1331,18 @@
       let completedCount = 0;
 
       rows.forEach(row => {
-        const level = Number(row.dataset.level);
+        const level =
+          Number(row.dataset.level);
 
-        const selected = row.querySelector(
-          'input[type="radio"]:checked'
-        );
+        const selected =
+          row.querySelector(
+            'input[type="radio"]:checked'
+          );
 
-        const result = selected
-          ? selected.value
-          : "미평가";
+        const result =
+          selected
+            ? selected.value
+            : "미평가";
 
         row.classList.remove(
           "status-pass",
@@ -1673,11 +1355,15 @@
         }
 
         if (result === "적합") {
-          row.classList.add("status-pass");
+          row.classList.add(
+            "status-pass"
+          );
         }
 
         if (result === "부적합") {
-          row.classList.add("status-fail");
+          row.classList.add(
+            "status-fail"
+          );
 
           failCount += 1;
 
@@ -1690,7 +1376,9 @@
         }
 
         if (result === "권고") {
-          row.classList.add("status-recommend");
+          row.classList.add(
+            "status-recommend"
+          );
 
           recommendCount += 1;
         }
@@ -1703,15 +1391,18 @@
 
       document.getElementById(
         `section${sectionNumber}AuditScore`
-      ).textContent = auditScore.toFixed(1);
+      ).textContent =
+        auditScore.toFixed(1);
 
       document.getElementById(
         `section${sectionNumber}FailCount`
-      ).textContent = failCount;
+      ).textContent =
+        failCount;
 
       document.getElementById(
         `section${sectionNumber}RecommendCount`
-      ).textContent = recommendCount;
+      ).textContent =
+        recommendCount;
 
       document.getElementById(
         `section${sectionNumber}CompletedCount`
@@ -1720,36 +1411,55 @@
     }
 
     auditSections.forEach(section => {
-      const sectionNumber = section.sectionNumber;
+      const sectionNumber =
+        section.sectionNumber;
 
-      const header = document.getElementById(
-        `section${sectionNumber}Header`
-      );
+      const header =
+        document.getElementById(
+          `section${sectionNumber}Header`
+        );
 
-      const content = document.getElementById(
-        `section${sectionNumber}Content`
-      );
+      const content =
+        document.getElementById(
+          `section${sectionNumber}Content`
+        );
 
-      const body = document.getElementById(
-        `section${sectionNumber}Body`
-      );
+      const body =
+        document.getElementById(
+          `section${sectionNumber}Body`
+        );
 
-      header.addEventListener("click", () => {
-        header.classList.toggle("open");
-        content.classList.toggle("open");
-      });
+      header.addEventListener(
+        "click",
+        () => {
+          header.classList.toggle(
+            "open"
+          );
 
-      body.addEventListener("change", event => {
-        if (
-          event.target.matches(
-            'input[type="radio"]'
-          )
-        ) {
-          updateSectionResult(sectionNumber);
+          content.classList.toggle(
+            "open"
+          );
         }
-      });
+      );
 
-      updateSectionResult(sectionNumber);
+      body.addEventListener(
+        "change",
+        event => {
+          if (
+            event.target.matches(
+              'input[type="radio"]'
+            )
+          ) {
+            updateSectionResult(
+              sectionNumber
+            );
+          }
+        }
+      );
+
+      updateSectionResult(
+        sectionNumber
+      );
     });
   </script>
 </body>
