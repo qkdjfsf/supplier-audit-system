@@ -17,10 +17,13 @@
       --text: #202933;
       --muted: #697582;
       --border: #d9dee5;
+
       --pass: #2f7d4a;
       --pass-soft: #e8f5ec;
+
       --fail: #b44343;
       --fail-soft: #fbe9e9;
+
       --recommend: #b27a14;
       --recommend-soft: #fff4dc;
     }
@@ -173,6 +176,7 @@
 
     .audit-accordion {
       overflow: hidden;
+      margin-bottom: 18px;
       border: 1px solid var(--border);
       border-radius: 14px;
       background: var(--white);
@@ -190,12 +194,6 @@
       color: var(--white);
       text-align: left;
       cursor: pointer;
-    }
-
-    .accordion-title {
-      display: flex;
-      align-items: center;
-      gap: 14px;
     }
 
     .accordion-title strong {
@@ -420,10 +418,6 @@
       .card {
         padding: 20px;
       }
-
-      .accordion-header {
-        align-items: flex-start;
-      }
     }
   </style>
 </head>
@@ -458,29 +452,17 @@
       <div class="profile-grid">
         <div class="form-group">
           <label for="companyName">Company Name</label>
-          <input
-            id="companyName"
-            type="text"
-            placeholder="회사명을 입력하세요"
-          >
+          <input id="companyName" type="text" placeholder="회사명을 입력하세요">
         </div>
 
         <div class="form-group">
           <label for="sales">Y2025 Sales</label>
-          <input
-            id="sales"
-            type="text"
-            placeholder="Y2025 매출액을 입력하세요"
-          >
+          <input id="sales" type="text" placeholder="Y2025 매출액을 입력하세요">
         </div>
 
         <div class="form-group full">
           <label for="address">Business Address</label>
-          <input
-            id="address"
-            type="text"
-            placeholder="사업장 주소를 입력하세요"
-          >
+          <input id="address" type="text" placeholder="사업장 주소를 입력하세요">
         </div>
 
         <div class="form-group full">
@@ -494,19 +476,12 @@
 
         <div class="form-group">
           <label for="auditDate">Audit Date</label>
-          <input
-            id="auditDate"
-            type="date"
-          >
+          <input id="auditDate" type="date">
         </div>
 
         <div class="form-group">
           <label for="auditor">Auditor</label>
-          <input
-            id="auditor"
-            type="text"
-            placeholder="심사원 이름을 입력하세요"
-          >
+          <input id="auditor" type="text" placeholder="심사원 이름을 입력하세요">
         </div>
 
         <div class="form-group full">
@@ -529,583 +504,7 @@
         </div>
       </div>
 
-      <div class="audit-accordion">
-        <button
-          class="accordion-header open"
-          id="section6Header"
-          type="button"
-        >
-          <div class="accordion-title">
-            <div>
-              <strong>Section 6 · Leadership &amp; Planning</strong>
-              <span>Level 1부터 Level 5까지 총 15개 평가항목</span>
-            </div>
-          </div>
-
-          <div class="accordion-arrow">⌃</div>
-        </button>
-
-        <div
-          class="accordion-content open"
-          id="section6Content"
-        >
-          <div class="section-summary">
-            <div class="summary-card score-card">
-              <span>Section 6 Audit Score</span>
-              <strong id="auditScore">5.0</strong>
-            </div>
-
-            <div class="summary-card">
-              <span>부적합</span>
-              <strong id="failCount">0</strong>
-            </div>
-
-            <div class="summary-card">
-              <span>권고</span>
-              <strong id="recommendCount">0</strong>
-            </div>
-
-            <div class="summary-card">
-              <span>평가 완료</span>
-              <strong id="completedCount">0 / 15</strong>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Scoring Level</th>
-                  <th>Question Number</th>
-                  <th>Evaluation Contents</th>
-                  <th>Evaluation Result</th>
-                  <th>PSK Notes / Comments</th>
-                </tr>
-              </thead>
-
-              <tbody id="section6Body">
-                <tr data-level="1">
-                  <td class="level-cell">1</td>
-                  <td class="question-cell">1.1</td>
-                  <td class="evaluation-cell">
-                    ISO 9001 보유하고 있는가?<br>
-                    - 인증서 유효 여부
-                    (인증서 내 유효 기간이 평가일 이후인지 확인)<br>
-                    - 국내 KAB / 해외: 해외 인정된 인증을 받은 인증기관에서
-                    발행된 인증서인지 확인
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input
-                          type="radio"
-                          id="q11-none"
-                          name="q11"
-                          value="미평가"
-                          checked
-                        >
-                        <label for="q11-none">미평가</label>
-                      </div>
-
-                      <div class="result-option">
-                        <input
-                          type="radio"
-                          id="q11-pass"
-                          name="q11"
-                          value="적합"
-                        >
-                        <label for="q11-pass">적합</label>
-                      </div>
-
-                      <div class="result-option">
-                        <input
-                          type="radio"
-                          id="q11-fail"
-                          name="q11"
-                          value="부적합"
-                        >
-                        <label for="q11-fail">부적합</label>
-                      </div>
-
-                      <div class="result-option">
-                        <input
-                          type="radio"
-                          id="q11-recommend"
-                          name="q11"
-                          value="권고"
-                        >
-                        <label for="q11-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea
-                      class="comment-input"
-                      placeholder="PSK Notes / Comments 입력"
-                    ></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="1">
-                  <td class="level-cell">1</td>
-                  <td class="question-cell">1.2</td>
-                  <td class="evaluation-cell">
-                    품질목표는 부서별로 수립되어 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q12-none" name="q12" value="미평가" checked>
-                        <label for="q12-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q12-pass" name="q12" value="적합">
-                        <label for="q12-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q12-fail" name="q12" value="부적합">
-                        <label for="q12-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q12-recommend" name="q12" value="권고">
-                        <label for="q12-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="1">
-                  <td class="level-cell">1</td>
-                  <td class="question-cell">1.3</td>
-                  <td class="evaluation-cell">
-                    내부 심사는 내부적으로 정해진 Rule에 의거 정기적으로 실시되며,
-                    심사 결과는 부적합 항목을 포함하여 상위권자에게 보고되고 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q13-none" name="q13" value="미평가" checked>
-                        <label for="q13-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q13-pass" name="q13" value="적합">
-                        <label for="q13-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q13-fail" name="q13" value="부적합">
-                        <label for="q13-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q13-recommend" name="q13" value="권고">
-                        <label for="q13-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="1">
-                  <td class="level-cell">1</td>
-                  <td class="question-cell">1.4</td>
-                  <td class="evaluation-cell">
-                    ISO 9001 사후 및 갱신심사는 주기적으로 진행 및 결과는
-                    상위권자에게 보고되고 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q14-none" name="q14" value="미평가" checked>
-                        <label for="q14-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q14-pass" name="q14" value="적합">
-                        <label for="q14-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q14-fail" name="q14" value="부적합">
-                        <label for="q14-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q14-recommend" name="q14" value="권고">
-                        <label for="q14-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="2">
-                  <td class="level-cell">2</td>
-                  <td class="question-cell">2.1</td>
-                  <td class="evaluation-cell">
-                    ISO 사후 및 갱신 심사 부적합 항목에 대해서
-                    조치 결과에 대해 기록 관리되고 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q21-none" name="q21" value="미평가" checked>
-                        <label for="q21-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q21-pass" name="q21" value="적합">
-                        <label for="q21-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q21-fail" name="q21" value="부적합">
-                        <label for="q21-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q21-recommend" name="q21" value="권고">
-                        <label for="q21-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="2">
-                  <td class="level-cell">2</td>
-                  <td class="question-cell">2.2</td>
-                  <td class="evaluation-cell">
-                    품질 관리 부서가 별도로 구성되어 있으며,
-                    제조 부서와의 독립성을 유지하고 있는가?<br>
-                    (품질 업무를 하는 부서에 제조 인원이 포함되어 있을 경우
-                    점수 부여 불가)
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q22-none" name="q22" value="미평가" checked>
-                        <label for="q22-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q22-pass" name="q22" value="적합">
-                        <label for="q22-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q22-fail" name="q22" value="부적합">
-                        <label for="q22-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q22-recommend" name="q22" value="권고">
-                        <label for="q22-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="2">
-                  <td class="level-cell">2</td>
-                  <td class="question-cell">2.3</td>
-                  <td class="evaluation-cell">
-                    품질목표에 따른 달성방안이 수립되어 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q23-none" name="q23" value="미평가" checked>
-                        <label for="q23-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q23-pass" name="q23" value="적합">
-                        <label for="q23-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q23-fail" name="q23" value="부적합">
-                        <label for="q23-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q23-recommend" name="q23" value="권고">
-                        <label for="q23-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="2">
-                  <td class="level-cell">2</td>
-                  <td class="question-cell">2.4</td>
-                  <td class="evaluation-cell">
-                    내부 심사 시 발생된 부적합 항목에 대해서는
-                    대책이 모두 수립되어 시정조치가 완료되었는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q24-none" name="q24" value="미평가" checked>
-                        <label for="q24-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q24-pass" name="q24" value="적합">
-                        <label for="q24-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q24-fail" name="q24" value="부적합">
-                        <label for="q24-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q24-recommend" name="q24" value="권고">
-                        <label for="q24-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="3">
-                  <td class="level-cell">3</td>
-                  <td class="question-cell">3.1</td>
-                  <td class="evaluation-cell">
-                    시스템 평가(내부 심사 등)에 대한
-                    유효성 평가 절차는 수립되어 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q31-none" name="q31" value="미평가" checked>
-                        <label for="q31-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q31-pass" name="q31" value="적합">
-                        <label for="q31-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q31-fail" name="q31" value="부적합">
-                        <label for="q31-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q31-recommend" name="q31" value="권고">
-                        <label for="q31-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="3">
-                  <td class="level-cell">3</td>
-                  <td class="question-cell">3.2</td>
-                  <td class="evaluation-cell">
-                    전년도 내부 심사 부적합 항목에 대한
-                    유효성 평가는 진행 및 기록관리 되고 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q32-none" name="q32" value="미평가" checked>
-                        <label for="q32-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q32-pass" name="q32" value="적합">
-                        <label for="q32-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q32-fail" name="q32" value="부적합">
-                        <label for="q32-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q32-recommend" name="q32" value="권고">
-                        <label for="q32-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="3">
-                  <td class="level-cell">3</td>
-                  <td class="question-cell">3.3</td>
-                  <td class="evaluation-cell">
-                    품질목표 달성방안은 기간별로
-                    (월 or 분기 or 반기) 계획이 수립되어 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q33-none" name="q33" value="미평가" checked>
-                        <label for="q33-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q33-pass" name="q33" value="적합">
-                        <label for="q33-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q33-fail" name="q33" value="부적합">
-                        <label for="q33-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q33-recommend" name="q33" value="권고">
-                        <label for="q33-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="3">
-                  <td class="level-cell">3</td>
-                  <td class="question-cell">3.4</td>
-                  <td class="evaluation-cell">
-                    품질목표는 주기적으로 결과 체크 및
-                    주기에 맞춰 보고되고 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q34-none" name="q34" value="미평가" checked>
-                        <label for="q34-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q34-pass" name="q34" value="적합">
-                        <label for="q34-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q34-fail" name="q34" value="부적합">
-                        <label for="q34-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q34-recommend" name="q34" value="권고">
-                        <label for="q34-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="4">
-                  <td class="level-cell">4</td>
-                  <td class="question-cell">4.1</td>
-                  <td class="evaluation-cell">
-                    주요 품질 목표에 대해서 시스템으로 관리되어
-                    실시간으로 모니터링 가능하도록 관리되고 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q41-none" name="q41" value="미평가" checked>
-                        <label for="q41-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q41-pass" name="q41" value="적합">
-                        <label for="q41-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q41-fail" name="q41" value="부적합">
-                        <label for="q41-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q41-recommend" name="q41" value="권고">
-                        <label for="q41-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="4">
-                  <td class="level-cell">4</td>
-                  <td class="question-cell">4.2</td>
-                  <td class="evaluation-cell">
-                    수립한 품질목표 달성방안 및 목표 대비 미흡한 사항에 대해서는
-                    조치 방안까지 반영되어 상위권자에게 보고되고 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q42-none" name="q42" value="미평가" checked>
-                        <label for="q42-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q42-pass" name="q42" value="적합">
-                        <label for="q42-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q42-fail" name="q42" value="부적합">
-                        <label for="q42-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q42-recommend" name="q42" value="권고">
-                        <label for="q42-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-
-                <tr data-level="5">
-                  <td class="level-cell">5</td>
-                  <td class="question-cell">5.1</td>
-                  <td class="evaluation-cell">
-                    품질목표는 매년 동일한 수준이 아닌 개선된 지표로
-                    목표 관리 되고 있으며,<br>
-                    목표에 맞는 달성방안이 지속적으로 수립되어 있는가?
-                  </td>
-                  <td class="result-cell">
-                    <div class="result-options">
-                      <div class="result-option">
-                        <input type="radio" id="q51-none" name="q51" value="미평가" checked>
-                        <label for="q51-none">미평가</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q51-pass" name="q51" value="적합">
-                        <label for="q51-pass">적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q51-fail" name="q51" value="부적합">
-                        <label for="q51-fail">부적합</label>
-                      </div>
-                      <div class="result-option">
-                        <input type="radio" id="q51-recommend" name="q51" value="권고">
-                        <label for="q51-recommend">권고</label>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="comment-cell">
-                    <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="score-rule">
-            <strong>Audit Score 계산 기준</strong><br>
-            부적합이 발생한 가장 낮은 Level의 직전 Level을 Audit Score로 계산합니다.
-            예: Level 3 항목에서 부적합 발생 → Audit Score 2.0.
-            권고는 Audit Score를 차감하지 않으며 별도 분석 대상으로 집계합니다.
-          </div>
-        </div>
-      </div>
+      <div id="auditSections"></div>
     </section>
   </main>
 
@@ -1114,30 +513,396 @@
   </footer>
 
   <script>
-    const section6Header = document.getElementById("section6Header");
-    const section6Content = document.getElementById("section6Content");
-    const section6Body = document.getElementById("section6Body");
+    const auditSections = [
+      {
+        sectionNumber: 6,
+        title: "Leadership & Planning",
+        open: true,
+        questions: [
+          {
+            level: 1,
+            number: "1.1",
+            content: `ISO 9001 보유하고 있는가?<br>
+              - 인증서 유효 여부
+              (인증서 내 유효 기간이 평가일 이후인지 확인)<br>
+              - 국내 KAB / 해외: 해외 인정된 인증을 받은 인증기관에서
+              발행된 인증서인지 확인`
+          },
+          {
+            level: 1,
+            number: "1.2",
+            content: "품질목표는 부서별로 수립되어 있는가?"
+          },
+          {
+            level: 1,
+            number: "1.3",
+            content: `내부 심사는 내부적으로 정해진 Rule에 의거 정기적으로 실시되며,
+              심사 결과는 부적합 항목을 포함하여 상위권자에게 보고되고 있는가?`
+          },
+          {
+            level: 1,
+            number: "1.4",
+            content: `ISO 9001 사후 및 갱신심사는 주기적으로 진행 및 결과는
+              상위권자에게 보고되고 있는가?`
+          },
+          {
+            level: 2,
+            number: "2.1",
+            content: `ISO 사후 및 갱신 심사 부적합 항목에 대해서
+              조치 결과에 대해 기록 관리되고 있는가?`
+          },
+          {
+            level: 2,
+            number: "2.2",
+            content: `품질 관리 부서가 별도로 구성되어 있으며,
+              제조 부서와의 독립성을 유지하고 있는가?<br>
+              (품질 업무를 하는 부서에 제조 인원이 포함되어 있을 경우
+              점수 부여 불가)`
+          },
+          {
+            level: 2,
+            number: "2.3",
+            content: "품질목표에 따른 달성방안이 수립되어 있는가?"
+          },
+          {
+            level: 2,
+            number: "2.4",
+            content: `내부 심사 시 발생된 부적합 항목에 대해서는
+              대책이 모두 수립되어 시정조치가 완료되었는가?`
+          },
+          {
+            level: 3,
+            number: "3.1",
+            content: `시스템 평가(내부 심사 등)에 대한
+              유효성 평가 절차는 수립되어 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.2",
+            content: `전년도 내부 심사 부적합 항목에 대한
+              유효성 평가는 진행 및 기록관리 되고 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.3",
+            content: `품질목표 달성방안은 기간별로
+              (월 or 분기 or 반기) 계획이 수립되어 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.4",
+            content: `품질목표는 주기적으로 결과 체크 및
+              주기에 맞춰 보고되고 있는가?`
+          },
+          {
+            level: 4,
+            number: "4.1",
+            content: `주요 품질 목표에 대해서 시스템으로 관리되어
+              실시간으로 모니터링 가능하도록 관리되고 있는가?`
+          },
+          {
+            level: 4,
+            number: "4.2",
+            content: `수립한 품질목표 달성방안 및 목표 대비 미흡한 사항에 대해서는
+              조치 방안까지 반영되어 상위권자에게 보고되고 있는가?`
+          },
+          {
+            level: 5,
+            number: "5.1",
+            content: `품질목표는 매년 동일한 수준이 아닌 개선된 지표로
+              목표 관리 되고 있으며,<br>
+              목표에 맞는 달성방안이 지속적으로 수립되어 있는가?`
+          }
+        ]
+      },
 
-    section6Header.addEventListener("click", function () {
-      section6Header.classList.toggle("open");
-      section6Content.classList.toggle("open");
-    });
+      {
+        sectionNumber: 7,
+        title: "Non-Conforming Materials Management",
+        open: false,
+        questions: [
+          {
+            level: 1,
+            number: "1.1",
+            content: "부적합 관리 프로세스는 보유하고 있는가?"
+          },
+          {
+            level: 1,
+            number: "1.2",
+            content: `부적합 발생 시 해당 제품에 대한
+              식별 / 분리 / 담당자 지정되어 있는가?`
+          },
+          {
+            level: 2,
+            number: "2.1",
+            content: "고객 부적합에 대해 개선대책 수립 및 F/B 완료되었는가?"
+          },
+          {
+            level: 2,
+            number: "2.2",
+            content: `내부 부적합에 대해 발생 이력 관리되고 있으며,
+              대책서는 작성되고 있는가?`
+          },
+          {
+            level: 2,
+            number: "2.3",
+            content: `협력업체 부적합에 대해 발생 이력 관리되고 있으며,
+              대책서는 관리되고 있는가?`
+          },
+          {
+            level: 2,
+            number: "2.4",
+            content: `부적합품을 그대로 출하할 경우(특채)에 대한
+              고객 승인 프로세스는 수립되어 있으며,
+              특채 발행 이력은 관리되고 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.1",
+            content: `회의체 or E-Mail 등을 통하여 발생되는 부적합 및
+              부적합 발생 전체 현황에 대해 내부 공유 활동 진행되고 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.2",
+            content: `고객 및 내부 부적합에 대한 유효성 평가 기준 및
+              프로세스는 수립되었으며, 준수하고 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.3",
+            content: `고객 부적합에 대해 부적합의 재발 여부를 확인하고 있는가?<br>
+              또한, 재발에 대한 기준은 수립되어 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.4",
+            content: `특채로 출하된 품목이 있을 경우,
+              내부 대책 수립 및 고객 출하 후 발생되는 문제에 대해
+              모니터링 후 종결 처리되고 있는가?`
+          },
+          {
+            level: 3,
+            number: "3.5",
+            content: `부적합 프로세스에 대해 교육 Curriculum에 추가되어
+              기준에 맞춰 교육 진행되고 있는가?`
+          },
+          {
+            level: 4,
+            number: "4.1",
+            content: `시스템을 통해 부적합 발생 내역 등록부터 조치 요청,
+              대책 입력 및 유효성 평가까지 관리되고 있는가?`
+          },
+          {
+            level: 4,
+            number: "4.2",
+            content: `고객 부적합 중 재발 부적합의 대책 수립 시,
+              신규 부적합과는 다른 절차로 대책이 수립되고 있는가?<br>
+              또한 해당 부분이 표준 문서에 반영되어 누락되지 않고 운영되고 있는가?`
+          },
+          {
+            level: 4,
+            number: "4.3",
+            content: `부적합 관리 지표는 주기적으로 집계 및
+              경영진과 함께 검토되고 있으며,
+              목표 대비 높게 집계될 경우 이에 대한 대책안까지
+              논의가 되고 있는가?`
+          },
+          {
+            level: 5,
+            number: "5.1",
+            content: `부적합 관리 지표는 매년 분석 및 개선을 통해
+              기준 대비 향상된 지표를 보여주고 있으며,
+              개선된 부적합 관리 지표 달성을 위한 계획은
+              적절하게 수립되고 있는가?`
+          },
+          {
+            level: 5,
+            number: "5.2",
+            content: `부적합은 통합 지표가 아닌 Part별 혹은 고객사별로
+              세분화하여 목표 수립 및 주기적으로 집계되고 있는가?`
+          }
+        ]
+      }
+    ];
 
-    function updateSection6Result() {
-      const rows = Array.from(section6Body.querySelectorAll("tr"));
+    function resultOptions(sectionNumber, questionNumber) {
+      const safeNumber = questionNumber.replace(".", "");
+      const name = `s${sectionNumber}q${safeNumber}`;
+
+      return `
+        <div class="result-options">
+          ${createResultOption(name, "미평가", true)}
+          ${createResultOption(name, "적합")}
+          ${createResultOption(name, "부적합")}
+          ${createResultOption(name, "권고")}
+        </div>
+      `;
+    }
+
+    function createResultOption(name, value, checked = false) {
+      const suffix = {
+        "미평가": "none",
+        "적합": "pass",
+        "부적합": "fail",
+        "권고": "recommend"
+      }[value];
+
+      const id = `${name}-${suffix}`;
+
+      return `
+        <div class="result-option">
+          <input
+            type="radio"
+            id="${id}"
+            name="${name}"
+            value="${value}"
+            ${checked ? "checked" : ""}
+          >
+          <label for="${id}">${value}</label>
+        </div>
+      `;
+    }
+
+    function createQuestionRow(sectionNumber, question) {
+      return `
+        <tr data-level="${question.level}">
+          <td class="level-cell">${question.level}</td>
+
+          <td class="question-cell">
+            ${question.number}
+          </td>
+
+          <td class="evaluation-cell">
+            ${question.content}
+          </td>
+
+          <td class="result-cell">
+            ${resultOptions(sectionNumber, question.number)}
+          </td>
+
+          <td class="comment-cell">
+            <textarea
+              class="comment-input"
+              placeholder="PSK Notes / Comments 입력"
+            ></textarea>
+          </td>
+        </tr>
+      `;
+    }
+
+    function createSection(section) {
+      const sectionNumber = section.sectionNumber;
+      const totalQuestions = section.questions.length;
+
+      return `
+        <div class="audit-accordion">
+          <button
+            class="accordion-header ${section.open ? "open" : ""}"
+            id="section${sectionNumber}Header"
+            type="button"
+          >
+            <div class="accordion-title">
+              <strong>
+                Section ${sectionNumber} · ${section.title}
+              </strong>
+
+              <span>
+                Level 1부터 Level 5까지 총 ${totalQuestions}개 평가항목
+              </span>
+            </div>
+
+            <div class="accordion-arrow">⌃</div>
+          </button>
+
+          <div
+            class="accordion-content ${section.open ? "open" : ""}"
+            id="section${sectionNumber}Content"
+          >
+            <div class="section-summary">
+              <div class="summary-card score-card">
+                <span>Section ${sectionNumber} Audit Score</span>
+                <strong id="section${sectionNumber}AuditScore">5.0</strong>
+              </div>
+
+              <div class="summary-card">
+                <span>부적합</span>
+                <strong id="section${sectionNumber}FailCount">0</strong>
+              </div>
+
+              <div class="summary-card">
+                <span>권고</span>
+                <strong id="section${sectionNumber}RecommendCount">0</strong>
+              </div>
+
+              <div class="summary-card">
+                <span>평가 완료</span>
+                <strong id="section${sectionNumber}CompletedCount">
+                  0 / ${totalQuestions}
+                </strong>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Scoring Level</th>
+                    <th>Question Number</th>
+                    <th>Evaluation Contents</th>
+                    <th>Evaluation Result</th>
+                    <th>PSK Notes / Comments</th>
+                  </tr>
+                </thead>
+
+                <tbody id="section${sectionNumber}Body">
+                  ${section.questions
+                    .map(question =>
+                      createQuestionRow(sectionNumber, question)
+                    )
+                    .join("")}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="score-rule">
+              <strong>Audit Score 계산 기준</strong><br>
+              부적합이 발생한 가장 낮은 Level의 직전 Level을
+              Audit Score로 계산합니다.
+              예: Level 3 항목에서 부적합 발생 → Audit Score 2.0.
+              권고는 Audit Score를 차감하지 않으며
+              별도 분석 대상으로 집계합니다.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    document.getElementById("auditSections").innerHTML =
+      auditSections.map(createSection).join("");
+
+    function updateSectionResult(sectionNumber) {
+      const body = document.getElementById(
+        `section${sectionNumber}Body`
+      );
+
+      const rows = Array.from(body.querySelectorAll("tr"));
 
       let lowestFailLevel = null;
       let failCount = 0;
       let recommendCount = 0;
       let completedCount = 0;
 
-      rows.forEach(function (row) {
+      rows.forEach(row => {
         const level = Number(row.dataset.level);
+
         const selected = row.querySelector(
           'input[type="radio"]:checked'
         );
 
-        const result = selected ? selected.value : "미평가";
+        const result = selected
+          ? selected.value
+          : "미평가";
 
         row.classList.remove(
           "status-pass",
@@ -1176,26 +941,51 @@
           ? 5
           : lowestFailLevel - 1;
 
-      document.getElementById("auditScore").textContent =
-        auditScore.toFixed(1);
+      document.getElementById(
+        `section${sectionNumber}AuditScore`
+      ).textContent = auditScore.toFixed(1);
 
-      document.getElementById("failCount").textContent =
-        failCount;
+      document.getElementById(
+        `section${sectionNumber}FailCount`
+      ).textContent = failCount;
 
-      document.getElementById("recommendCount").textContent =
-        recommendCount;
+      document.getElementById(
+        `section${sectionNumber}RecommendCount`
+      ).textContent = recommendCount;
 
-      document.getElementById("completedCount").textContent =
-        completedCount + " / " + rows.length;
+      document.getElementById(
+        `section${sectionNumber}CompletedCount`
+      ).textContent = `${completedCount} / ${rows.length}`;
     }
 
-    section6Body.addEventListener("change", function (event) {
-      if (event.target.matches('input[type="radio"]')) {
-        updateSection6Result();
-      }
-    });
+    auditSections.forEach(section => {
+      const sectionNumber = section.sectionNumber;
 
-    updateSection6Result();
+      const header = document.getElementById(
+        `section${sectionNumber}Header`
+      );
+
+      const content = document.getElementById(
+        `section${sectionNumber}Content`
+      );
+
+      const body = document.getElementById(
+        `section${sectionNumber}Body`
+      );
+
+      header.addEventListener("click", () => {
+        header.classList.toggle("open");
+        content.classList.toggle("open");
+      });
+
+      body.addEventListener("change", event => {
+        if (event.target.matches('input[type="radio"]')) {
+          updateSectionResult(sectionNumber);
+        }
+      });
+
+      updateSectionResult(sectionNumber);
+    });
   </script>
 </body>
 </html>
