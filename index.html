@@ -3,72 +3,327 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Supplier Quality Audit System</title>
 
   <style>
+    :root {
+      --navy: #172331;
+      --navy-light: #243447;
+      --green: #6f8f5e;
+      --green-soft: #edf3e9;
+      --background: #f4f6f8;
+      --white: #ffffff;
+      --text: #202933;
+      --muted: #697582;
+      --border: #d9dee5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, "Malgun Gothic", sans-serif;
-      background: #f4f6f8;
-      color: #202933;
+      background: var(--background);
+      color: var(--text);
     }
 
     header {
-      padding: 30px;
-      background: #172331;
-      color: white;
-      border-bottom: 5px solid #6f8f5e;
+      background: var(--navy);
+      color: var(--white);
+      border-bottom: 5px solid var(--green);
+    }
+
+    .header-inner {
+      width: min(1200px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 30px 0;
+    }
+
+    .header-label {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      color: #ced7e0;
+      font-size: 15px;
     }
 
     main {
-      max-width: 1000px;
-      margin: 30px auto;
-      padding: 0 20px;
+      width: min(1200px, calc(100% - 40px));
+      margin: 30px auto 60px;
     }
 
-    section {
+    .page-guide {
       margin-bottom: 20px;
-      padding: 25px;
-      background: white;
-      border: 1px solid #d9dee5;
-      border-radius: 12px;
-    }
-
-    h1,
-    h2 {
-      margin-top: 0;
-    }
-
-    .success {
-      padding: 18px;
-      background: #eaf1e5;
-      border-left: 5px solid #6f8f5e;
+      padding: 16px 18px;
+      border-left: 5px solid var(--green);
+      border-radius: 10px;
+      background: var(--green-soft);
       line-height: 1.6;
+    }
+
+    .card {
+      margin-bottom: 22px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--white);
+      box-shadow: 0 5px 18px rgba(23, 35, 49, 0.05);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .section-number {
+      display: flex;
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    .section-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #3f4d5b;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fbfcfd;
+      color: var(--text);
+      font: inherit;
+      transition: 0.2s;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--green);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(111, 143, 94, 0.15);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .future-area {
+      padding: 30px;
+      border: 2px dashed #b7c1cb;
+      border-radius: 12px;
+      background: #fafbfc;
+      text-align: center;
+    }
+
+    .future-area strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .future-area span {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      padding: 22px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    @media (max-width: 720px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+      header h1 {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>Supplier Quality Audit System</h1>
-    <p>BP社 품질 심사 및 분석 시스템</p>
+    <div class="header-inner">
+      <span class="header-label">QUALITY AUDIT</span>
+
+      <h1>Supplier Quality Audit System</h1>
+
+      <p>BP社 품질심사 결과 입력 및 분석 시스템</p>
+    </div>
   </header>
 
   <main>
-    <section class="success">
-      <strong>홈페이지 배포 테스트에 성공했습니다.</strong><br>
-      이 화면이 보이면 GitHub와 Vercel 연결이 정상적으로 완료된 것입니다.
+    <div class="page-guide">
+      <strong>BP社 기본정보를 입력해 주세요.</strong><br>
+      입력된 정보는 추후 최종 Audit Report의 Company Profile 영역에 반영됩니다.
+    </div>
+
+    <section class="card">
+      <div class="section-heading">
+        <div class="section-number">01</div>
+
+        <div>
+          <h2>BP社 Profile</h2>
+          <p>협력업체 및 심사 기본정보</p>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <div class="form-group">
+          <label for="companyName">Company Name</label>
+          <input
+            id="companyName"
+            type="text"
+            placeholder="회사명을 입력하세요"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="sales">Y2025 Sales</label>
+          <input
+            id="sales"
+            type="text"
+            placeholder="Y2025 매출액을 입력하세요"
+          >
+        </div>
+
+        <div class="form-group full">
+          <label for="address">Business Address</label>
+          <input
+            id="address"
+            type="text"
+            placeholder="사업장 주소를 입력하세요"
+          >
+        </div>
+
+        <div class="form-group full">
+          <label for="certification">Certification</label>
+          <input
+            id="certification"
+            type="text"
+            placeholder="예: ISO 9001, ISO 14001, IATF 16949"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="auditDate">Audit Date</label>
+          <input
+            id="auditDate"
+            type="date"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="auditor">Auditor</label>
+          <input
+            id="auditor"
+            type="text"
+            placeholder="심사원 이름을 입력하세요"
+          >
+        </div>
+
+        <div class="form-group full">
+          <label for="mainProduct">Main Product / Business</label>
+          <textarea
+            id="mainProduct"
+            placeholder="주요 생산품목 또는 사업 내용을 입력하세요"
+          ></textarea>
+        </div>
+      </div>
     </section>
 
-    <section>
-      <h2>BP社 Profile</h2>
-      <p>회사 기본정보 입력 화면이 들어갈 예정입니다.</p>
-    </section>
+    <section class="card">
+      <div class="section-heading">
+        <div class="section-number">02</div>
 
-    <section>
-      <h2>Quality Audit Sections</h2>
-      <p>Section 6부터 Section 13까지의 심사 체크시트가 들어갈 예정입니다.</p>
+        <div>
+          <h2>Quality Audit Sections</h2>
+          <p>Section 6부터 Section 13까지의 품질심사 체크시트</p>
+        </div>
+      </div>
+
+      <div class="future-area">
+        <strong>Section 6 · Leadership &amp; Planning</strong>
+
+        <span>
+          다음 단계에서 Section 6의 전체 평가항목과<br>
+          적합 / 부적합 / 권고 입력 기능을 추가합니다.
+        </span>
+      </div>
     </section>
   </main>
+
+  <footer>
+    Supplier Quality Audit System · Prototype
+  </footer>
 </body>
 </html>
