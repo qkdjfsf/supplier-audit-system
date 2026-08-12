@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Supplier Quality Audit System</title>
+  <title>SRE Analysis System</title>
 
   <style>
     :root {
@@ -629,7 +629,7 @@
         </div>
 
         <div class="form-group">
-          <label>Main Product / Business</label>
+          <label for="mainProduct">Main Product / Business</label>
 
           <input
             id="mainProduct"
@@ -776,7 +776,7 @@
   </main>
 
   <footer>
-    Supplier Quality Audit System · Quality Audit Prototype
+    SRE Analysis System · PSK Audit Prototype
   </footer>
 
   <script>
@@ -1149,7 +1149,11 @@
       question
     ) {
       return `
-        <tr data-level="${question.level}">
+        <tr
+          data-level="${question.level}"
+          data-question-number="${question.number}"
+          data-applicable="true"
+        >
           <td class="level-cell">
             ${question.level}
           </td>
@@ -1187,7 +1191,12 @@
         section.questions.length;
 
       return `
-        <div class="audit-accordion">
+        <div
+          class="audit-accordion"
+          id="section${sectionNumber}Wrapper"
+          data-section-number="${sectionNumber}"
+          data-applicable="true"
+        >
           <button
             class="accordion-header ${section.open ? "open" : ""}"
             id="section${sectionNumber}Header"
@@ -1198,7 +1207,9 @@
                 Section ${sectionNumber} · ${section.title}
               </strong>
 
-              <span>
+              <span
+                id="section${sectionNumber}QuestionSummary"
+              >
                 Level 1부터 Level 5까지 총
                 ${totalQuestions}개 평가항목
               </span>
@@ -1314,7 +1325,84 @@
         .map(createSectionHtml)
         .join("");
 
+    function isOemOnlySelected() {
+      const oem =
+        document.getElementById("materialOem").checked;
+
+      const odm =
+        document.getElementById("materialOdm").checked;
+
+      const modm =
+        document.getElementById("materialModm").checked;
+
+      return oem && !odm && !modm;
+    }
+
+    function setSectionApplicable(
+      sectionNumber,
+      applicable
+    ) {
+      const wrapper =
+        document.getElementById(
+          `section${sectionNumber}Wrapper`
+        );
+
+      if (!wrapper) {
+        return;
+      }
+
+      wrapper.dataset.applicable =
+        applicable ? "true" : "false";
+
+      wrapper.style.display =
+        applicable ? "" : "none";
+    }
+
+    function setQuestionApplicable(
+      sectionNumber,
+      questionNumber,
+      applicable
+    ) {
+      const body =
+        document.getElementById(
+          `section${sectionNumber}Body`
+        );
+
+      if (!body) {
+        return;
+      }
+
+      const row =
+        Array.from(
+          body.querySelectorAll("tr")
+        ).find(item =>
+          item.dataset.questionNumber === questionNumber
+        );
+
+      if (!row) {
+        return;
+      }
+
+      row.dataset.applicable =
+        applicable ? "true" : "false";
+
+      row.style.display =
+        applicable ? "" : "none";
+    }
+
     function updateSectionResult(sectionNumber) {
+      const wrapper =
+        document.getElementById(
+          `section${sectionNumber}Wrapper`
+        );
+
+      if (
+        wrapper &&
+        wrapper.dataset.applicable === "false"
+      ) {
+        return;
+      }
+
       const body =
         document.getElementById(
           `section${sectionNumber}Body`
@@ -1323,6 +1411,8 @@
       const rows =
         Array.from(
           body.querySelectorAll("tr")
+        ).filter(row =>
+          row.dataset.applicable !== "false"
         );
 
       let lowestFailLevel = null;
@@ -1408,6 +1498,66 @@
         `section${sectionNumber}CompletedCount`
       ).textContent =
         `${completedCount} / ${rows.length}`;
+
+      const questionSummary =
+        document.getElementById(
+          `section${sectionNumber}QuestionSummary`
+        );
+
+      if (questionSummary) {
+        questionSummary.textContent =
+          `Level 1부터 Level 5까지 총 ${rows.length}개 평가항목`;
+      }
+    }
+
+    function applyMaterialGroupRules() {
+      const oemOnly =
+        isOemOnlySelected();
+
+      /*
+        OEM 단독 선택 시:
+        - Section 8 Question 2.4 제외
+        - Section 9 전체 제외
+        - Section 12 전체 제외
+
+        OEM + ODM / OEM + M.ODM 등
+        중복 선택 시에는 전체 항목 복원
+      */
+
+      setQuestionApplicable(
+        8,
+        "2.4",
+        !oemOnly
+      );
+
+      setSectionApplicable(
+        9,
+        !oemOnly
+      );
+
+      setSectionApplicable(
+        12,
+        !oemOnly
+      );
+
+      auditSections.forEach(section => {
+        const sectionNumber =
+          section.sectionNumber;
+
+        const wrapper =
+          document.getElementById(
+            `section${sectionNumber}Wrapper`
+          );
+
+        if (
+          wrapper &&
+          wrapper.dataset.applicable !== "false"
+        ) {
+          updateSectionResult(
+            sectionNumber
+          );
+        }
+      });
     }
 
     auditSections.forEach(section => {
@@ -1461,6 +1611,19 @@
         sectionNumber
       );
     });
+
+    document
+      .querySelectorAll(
+        'input[name="materialGroup"]'
+      )
+      .forEach(checkbox => {
+        checkbox.addEventListener(
+          "change",
+          applyMaterialGroupRules
+        );
+      });
+
+    applyMaterialGroupRules();
   </script>
 </body>
 </html>
