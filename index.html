@@ -648,6 +648,30 @@
                 >
                 <label for="materialModm">M.ODM</label>
               </div>
+
+              <div class="material-option">
+                <input
+                  id="materialAssemblyHarness"
+                  name="materialGroup"
+                  type="checkbox"
+                  value="조립/Harness"
+                >
+                <label for="materialAssemblyHarness">
+                  조립/Harness
+                </label>
+              </div>
+
+              <div class="material-option">
+                <input
+                  id="materialCleaning"
+                  name="materialGroup"
+                  type="checkbox"
+                  value="세정"
+                >
+                <label for="materialCleaning">
+                  세정
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -1760,7 +1784,23 @@
       const modm =
         document.getElementById("materialModm").checked;
 
-      return oem && !odm && !modm;
+      const assemblyHarness =
+        document.getElementById(
+          "materialAssemblyHarness"
+        ).checked;
+
+      const cleaning =
+        document.getElementById(
+          "materialCleaning"
+        ).checked;
+
+      return (
+        oem &&
+        !odm &&
+        !modm &&
+        !assemblyHarness &&
+        !cleaning
+      );
     }
 
     function setSectionApplicable(
@@ -1940,7 +1980,8 @@
         isOemOnlySelected();
 
       /*
-        OEM 단독 선택 시 Quality에만 적용:
+        OEM 단독 선택 시 Quality에만 적용
+
         - Section 8 Question 2.4 제외
         - Section 9 전체 제외
         - Section 12 전체 제외
@@ -1948,8 +1989,12 @@
         Production Section 1~5에는
         Material Group 조건을 적용하지 않음.
 
-        OEM + ODM / OEM + M.ODM 등
-        중복 선택 시에는 Quality 전체 항목 복원
+        OEM + ODM
+        OEM + M.ODM
+        OEM + 조립/Harness
+        OEM + 세정
+        등 다른 Material Group과 중복 선택할 경우
+        Quality 전체 항목을 다시 적용함.
       */
 
       setQuestionApplicable(
