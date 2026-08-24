@@ -614,6 +614,36 @@ margin-bottom: 8px;
 }
 }
 
+
+/* Department color themes */
+.production-card { border-top: 5px solid #172331; }
+.quality-card { border-top: 5px solid #b9d9a8; }
+.purchase-card { border-top: 5px solid #f2b8c6; }
+.security-card { border-top: 5px solid #c9b7e8; }
+.system-card { border-top: 5px solid #f2df8b; }
+.compliance-card { border-top: 5px solid #afd8ef; }
+
+.production-number { background: #172331; }
+.quality-number { background: #b9d9a8; color: #253022; }
+.purchase-number { background: #f2b8c6; color: #4a2d34; }
+.security-number { background: #c9b7e8; color: #352c47; }
+.system-number { background: #f2df8b; color: #4a431f; }
+.compliance-number { background: #afd8ef; color: #203b4a; }
+
+.audit-accordion.dept-production .accordion-header { background: #172331; color: #ffffff; }
+.audit-accordion.dept-quality .accordion-header { background: #dcebd4; color: #263224; }
+.audit-accordion.dept-purchase .accordion-header { background: #f9dde4; color: #4a3037; }
+.audit-accordion.dept-security .accordion-header { background: #e7def4; color: #3c334e; }
+.audit-accordion.dept-system .accordion-header { background: #fbf1bd; color: #494322; }
+.audit-accordion.dept-compliance .accordion-header { background: #dceff8; color: #263e4a; }
+
+.audit-accordion:not(.dept-production) .accordion-title > span { color: #5d6670; }
+.audit-accordion:not(.dept-production) .section-material-badge {
+  color: #3c4650;
+  background: rgba(255,255,255,0.55);
+  border-color: rgba(50,60,70,0.18);
+}
+
 footer {
 padding: 22px;
 color: var(--muted);
@@ -657,13 +687,12 @@ flex-direction: column;
 </header>
 <main>
 <div class="page-guide">
-<strong>BP社 기본정보 및 생산/품질/구매/보안 심사 결과를 입력해 주세요.</strong><br>
+<strong>BP社 기본정보 및 생산/품질/구매/보안/시스템/Compliance & Ethics 심사 결과를 입력해 주세요.</strong><br>
 BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비교하여
 해당되는 심사항목만 자동으로 표시합니다.
 </div>
-<section class="card">
+<section class="card profile-card">
 <div class="section-heading">
-<div class="section-number">01</div>
 <div>
 <h2>BP社 Profile</h2>
 <p>협력업체 및 심사 기본정보</p>
@@ -684,11 +713,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </div>
 <div class="form-group full">
 <label for="certification">Certification</label>
-<input
-id="certification"
-type="text"
-placeholder="예: ISO 9001, ISO 14001, IATF 16949"
->
+<input id="certification" type="text" placeholder="예: ISO 9001, ISO 14001, IATF 16949">
 </div>
 <div class="form-group">
 <label for="auditDate">Audit Date</label>
@@ -696,145 +721,64 @@ placeholder="예: ISO 9001, ISO 14001, IATF 16949"
 </div>
 <div class="form-group">
 <label for="mainProduct">Main Product / Business</label>
-<input
-id="mainProduct"
-type="text"
-placeholder="주요 생산품목 또는 사업 내용을 입력하세요"
->
+<input id="mainProduct" type="text" placeholder="주요 생산품목 또는 사업 내용을 입력하세요">
 </div>
 <div class="form-group full">
 <div class="material-group-box">
 <span class="material-group-title">Material Group</span>
 <div class="material-options">
-<div class="material-option">
-<input id="materialOem" name="materialGroup" type="checkbox" value="OEM">
-<label for="materialOem">OEM</label>
-</div>
-<div class="material-option">
-<input id="materialOdm" name="materialGroup" type="checkbox" value="ODM">
-<label for="materialOdm">ODM</label>
-</div>
-<div class="material-option">
-<input id="materialModm" name="materialGroup" type="checkbox" value="M.ODM">
-<label for="materialModm">M.ODM</label>
-</div>
-<div class="material-option">
-<input
-id="materialAssemblyHarness"
-name="materialGroup"
-type="checkbox"
-value="조립/Harness"
->
-<label for="materialAssemblyHarness">조립/Harness</label>
-</div>
-<div class="material-option">
-<input
-id="materialCleaning"
-name="materialGroup"
-type="checkbox"
-value="세정"
->
-<label for="materialCleaning">세정</label>
+<div class="material-option"><input id="materialOem" name="materialGroup" type="checkbox" value="OEM"><label for="materialOem">OEM</label></div>
+<div class="material-option"><input id="materialOdm" name="materialGroup" type="checkbox" value="ODM"><label for="materialOdm">ODM</label></div>
+<div class="material-option"><input id="materialModm" name="materialGroup" type="checkbox" value="M.ODM"><label for="materialModm">M.ODM</label></div>
+<div class="material-option"><input id="materialAssemblyHarness" name="materialGroup" type="checkbox" value="조립/Harness"><label for="materialAssemblyHarness">조립/Harness</label></div>
+<div class="material-option"><input id="materialCleaning" name="materialGroup" type="checkbox" value="세정"><label for="materialCleaning">세정</label></div>
 </div>
 </div>
 </div>
 </div>
-<div class="auditor-divider">
-<h3>Department Auditors</h3>
+</section>
+
+<section class="card auditors-card">
+<div class="section-heading">
+<div>
+<h2>Department Auditors</h2>
 <p>부서별 심사원 정보를 입력해 주세요.</p>
 </div>
-<div class="form-group">
-<label for="productionAuditor">Production Auditor</label>
-<input id="productionAuditor" type="text" placeholder="Production Auditor Name">
 </div>
-<div class="form-group">
-<label for="qualityAuditor">Quality Auditor</label>
-<input id="qualityAuditor" type="text" placeholder="Quality Auditor Name">
-</div>
-<div class="form-group">
-<label for="purchaseAuditor">Purchase Auditor</label>
-<input id="purchaseAuditor" type="text" placeholder="Purchase Auditor Name">
-</div>
-<div class="form-group">
-<label for="securityAuditor">Security Auditor</label>
-<input id="securityAuditor" type="text" placeholder="Security Auditor Name">
-</div>
-<div class="form-group">
-<label for="systemAuditor">System Auditor</label>
-<input id="systemAuditor" type="text" placeholder="System Auditor Name">
-</div>
-<div class="form-group">
-<label for="complianceAuditor">Compliance &amp; Ethics Auditor</label>
-<input
-id="complianceAuditor"
-type="text"
-placeholder="Compliance & Ethics Auditor Name"
->
-</div>
+<div class="profile-grid">
+<div class="form-group"><label for="productionAuditor">Production Auditor</label><input id="productionAuditor" type="text" placeholder="Production Auditor Name"></div>
+<div class="form-group"><label for="qualityAuditor">Quality Auditor</label><input id="qualityAuditor" type="text" placeholder="Quality Auditor Name"></div>
+<div class="form-group"><label for="purchaseAuditor">Purchase Auditor</label><input id="purchaseAuditor" type="text" placeholder="Purchase Auditor Name"></div>
+<div class="form-group"><label for="securityAuditor">Security Auditor</label><input id="securityAuditor" type="text" placeholder="Security Auditor Name"></div>
+<div class="form-group"><label for="systemAuditor">System Auditor</label><input id="systemAuditor" type="text" placeholder="System Auditor Name"></div>
+<div class="form-group"><label for="complianceAuditor">Compliance &amp; Ethics Auditor</label><input id="complianceAuditor" type="text" placeholder="Compliance & Ethics Auditor Name"></div>
 </div>
 </section>
-<section class="card">
-<div class="section-heading">
-<div class="section-number">02</div>
-<div>
-<h2>Production Audit Sections</h2>
-<p>Section 1부터 Section 5까지의 생산부서 심사 체크시트</p>
-</div>
-</div>
+
+<section class="card department-card production-card">
+<div class="section-heading"><div class="section-number production-number">01</div><div><h2>Production Audit Sections</h2><p>Section 1부터 Section 5까지의 생산부서 심사 체크시트</p></div></div>
 <div id="productionAuditSections"></div>
 </section>
-<section class="card">
-<div class="section-heading">
-<div class="section-number">03</div>
-<div>
-<h2>Quality Audit Sections</h2>
-<p>Section 6부터 Section 13까지의 품질부서 심사 체크시트</p>
-</div>
-</div>
+<section class="card department-card quality-card">
+<div class="section-heading"><div class="section-number quality-number">02</div><div><h2>Quality Audit Sections</h2><p>Section 6부터 Section 13까지의 품질부서 심사 체크시트</p></div></div>
 <div id="qualityAuditSections"></div>
 </section>
-<section class="card">
-<div class="section-heading">
-<div class="section-number">04</div>
-<div>
-<h2>Purchase Audit Sections</h2>
-<p>Section 14부터 Section 18까지의 구매부서 심사 체크시트</p>
-</div>
-</div>
+<section class="card department-card purchase-card">
+<div class="section-heading"><div class="section-number purchase-number">03</div><div><h2>Purchase Audit Sections</h2><p>Section 14부터 Section 18까지의 구매부서 심사 체크시트</p></div></div>
 <div id="purchaseAuditSections"></div>
 </section>
-<section class="card">
-<div class="section-heading">
-<div class="section-number">05</div>
-<div>
-<h2>Security Audit Sections</h2>
-<p>Section 21부터 Section 25까지의 보안부서 심사 체크시트</p>
-</div>
-</div>
+<section class="card department-card security-card">
+<div class="section-heading"><div class="section-number security-number">04</div><div><h2>Security Audit Sections</h2><p>Section 21부터 Section 25까지의 보안부서 심사 체크시트</p></div></div>
 <div id="securityAuditSections"></div>
 </section>
-
-<section class="card">
-<div class="section-heading">
-<div class="section-number">06</div>
-<div>
-<h2>System Audit Sections</h2>
-<p>Section 26 시스템부서 심사 체크시트</p>
-</div>
-</div>
+<section class="card department-card system-card">
+<div class="section-heading"><div class="section-number system-number">05</div><div><h2>System Audit Sections</h2><p>Section 26 시스템부서 심사 체크시트</p></div></div>
 <div id="systemAuditSections"></div>
 </section>
-<section class="card">
-<div class="section-heading">
-<div class="section-number">07</div>
-<div>
-<h2>Compliance &amp; Ethics Audit Sections</h2>
-<p>Section 27부터 Section 28까지의 Compliance &amp; Ethics 심사 체크시트</p>
-</div>
-</div>
+<section class="card department-card compliance-card">
+<div class="section-heading"><div class="section-number compliance-number">06</div><div><h2>Compliance &amp; Ethics Audit Sections</h2><p>Section 27부터 Section 28까지의 Compliance &amp; Ethics 심사 체크시트</p></div></div>
 <div id="complianceAuditSections"></div>
 </section>
-
 </main>
 <footer>
 SRE Analysis System · PSK Audit Prototype
@@ -886,7 +830,6 @@ const createComplianceCriteria = () => [
 ["규정/지침 중 한 가지 이상을 갖추고 있으며, 규정/지침 수립여부와 평가항목과 관련된 모든 실제 준수 사례 증빙을 제시할 수 있다.", "A", 5],
 ["규정/지침 중 한 가지 이상을 갖추고 있으며, 규정/지침 수립여부와 평가항목과 관련된 일부 실제 준수 사례에 대해 관련 증빙을 제시할 수 있다.", "B", 3],
 ["규정/지침이 없으나, 평가항목과 관련된 실제 준수 사례에 대해 관련 증빙을 제시할 수 있다.", "C", 1],
-["규정/지침은 있으나, 평가항목과 관련된 실제 준수 사례에 대해 관련 증빙을 제시할 수 없다.", "C", 1],
 ["규정/지침이 수립되어 있지 않고, 평가항목과 관련된 실제 준수 사례에 대해 관련 증빙을 제시할 수 없다.", "D", 0]
 ];
 const createWageStatementCriteria = () => [
@@ -1687,6 +1630,16 @@ return `
 `;
 }
 
+function getDepartmentClass(sectionNumber) {
+if (sectionNumber >= 1 && sectionNumber <= 5) return "dept-production";
+if (sectionNumber >= 6 && sectionNumber <= 13) return "dept-quality";
+if (sectionNumber >= 14 && sectionNumber <= 18) return "dept-purchase";
+if (sectionNumber >= 21 && sectionNumber <= 25) return "dept-security";
+if (sectionNumber === 26) return "dept-system";
+if (sectionNumber >= 27 && sectionNumber <= 28) return "dept-compliance";
+return "";
+}
+
 function createSectionHtml(section) {
 const key = safeKey(section.sectionKey);
 const totalQuestions = section.questions.length;
@@ -1753,7 +1706,7 @@ Self-Audit Score는 협력업체 자체평가 평균점수를 직접 입력합�
 `;
 return `
 <div
-class="audit-accordion"
+class="audit-accordion ${getDepartmentClass(section.sectionNumber)}"
 id="section${key}Wrapper"
 data-section-key="${key}"
 data-section-number="${section.sectionNumber}"
