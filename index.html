@@ -1,1843 +1,1840 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>SRE Analysis System</title>
-
-  <style>
-    :root {
-      --navy: #172331;
-      --navy-light: #243447;
-      --green: #6f8f5e;
-      --green-soft: #edf3e9;
-      --background: #f4f6f8;
-      --white: #ffffff;
-      --text: #202933;
-      --muted: #697582;
-      --border: #d9dee5;
-
-      --pass: #2f7d4a;
-      --pass-soft: #e8f5ec;
-
-      --fail: #b44343;
-      --fail-soft: #fbe9e9;
-
-      --recommend: #b27a14;
-      --recommend-soft: #fff4dc;
-
-      --self-audit: #315f8c;
-      --self-audit-soft: #eaf2fa;
-
-      --material: #66568c;
-      --material-soft: #eeeaf7;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, "Malgun Gothic", sans-serif;
-      color: var(--text);
-      background: var(--background);
-    }
-
-    header {
-      color: var(--white);
-      background: var(--navy);
-      border-bottom: 5px solid var(--green);
-    }
-
-    .header-inner,
-    main {
-      width: min(1400px, calc(100% - 40px));
-      margin: 0 auto;
-    }
-
-    .header-inner {
-      padding: 30px 0;
-    }
-
-    .header-label {
-      display: inline-block;
-      margin-bottom: 10px;
-      padding: 5px 10px;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.12);
-      font-size: 12px;
-      letter-spacing: 1px;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 30px;
-    }
-
-    header p {
-      margin: 10px 0 0;
-      color: #ced7e0;
-      font-size: 15px;
-    }
-
-    main {
-      margin-top: 30px;
-      margin-bottom: 60px;
-    }
-
-    .page-guide {
-      margin-bottom: 20px;
-      padding: 16px 18px;
-      border-left: 5px solid var(--green);
-      border-radius: 10px;
-      background: var(--green-soft);
-      line-height: 1.6;
-    }
-
-    .card {
-      margin-bottom: 22px;
-      padding: 28px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: var(--white);
-      box-shadow: 0 5px 18px rgba(23, 35, 49, 0.05);
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .section-number {
-      display: flex;
-      width: 38px;
-      height: 38px;
-      flex-shrink: 0;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      color: var(--white);
-      background: var(--navy);
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    .section-heading h2 {
-      margin: 0;
-      font-size: 23px;
-    }
-
-    .section-heading p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .profile-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .form-group.full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      color: #3f4d5b;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    input,
-    textarea,
-    select {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      color: var(--text);
-      background: #fbfcfd;
-      font: inherit;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--green);
-      background: var(--white);
-      box-shadow: 0 0 0 3px rgba(111, 143, 94, 0.15);
-    }
-
-    textarea {
-      min-height: 78px;
-      resize: vertical;
-    }
-
-    .material-group-box {
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #fbfcfd;
-    }
-
-    .material-group-title {
-      display: block;
-      margin-bottom: 12px;
-      color: #3f4d5b;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    .material-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .material-option {
-      position: relative;
-    }
-
-    .material-option input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .material-option label {
-      display: inline-flex;
-      min-width: 100px;
-      align-items: center;
-      justify-content: center;
-      padding: 11px 18px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      color: #45525f;
-      background: var(--white);
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .material-option label::before {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
-      border: 1px solid #9aa6b2;
-      border-radius: 4px;
-      content: "";
-      background: var(--white);
-    }
-
-    .material-option input:checked + label {
-      border-color: var(--green);
-      color: var(--green);
-      background: var(--green-soft);
-    }
-
-    .material-option input:checked + label::before {
-      border-color: var(--green);
-      content: "✓";
-      color: var(--white);
-      background: var(--green);
-      font-size: 12px;
-      line-height: 15px;
-      text-align: center;
-    }
-
-    .auditor-divider {
-      grid-column: 1 / -1;
-      margin-top: 4px;
-      padding-top: 4px;
-    }
-
-    .auditor-divider h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .auditor-divider p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .audit-accordion {
-      overflow: hidden;
-      margin-bottom: 18px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: var(--white);
-    }
-
-    .accordion-header {
-      display: flex;
-      width: 100%;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      padding: 20px 22px;
-      border: 0;
-      color: var(--white);
-      background: var(--navy);
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .accordion-title {
-      flex: 1;
-    }
-
-    .accordion-title-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .accordion-title strong {
-      display: block;
-      font-size: 18px;
-    }
-
-    .section-material-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 9px;
-      border: 1px solid rgba(255,255,255,0.22);
-      border-radius: 20px;
-      color: #f6f3fb;
-      background: rgba(255,255,255,0.11);
-      font-size: 11px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .accordion-title > span {
-      display: block;
-      margin-top: 6px;
-      color: #d4dde6;
-      font-size: 13px;
-    }
-
-    .accordion-arrow {
-      flex-shrink: 0;
-      font-size: 22px;
-      transition: transform 0.25s;
-    }
-
-    .accordion-header.open .accordion-arrow {
-      transform: rotate(180deg);
-    }
-
-    .accordion-content {
-      display: none;
-      padding: 22px;
-    }
-
-    .accordion-content.open {
-      display: block;
-    }
-
-    .section-summary {
-      display: grid;
-      grid-template-columns:
-        minmax(160px, 1fr)
-        minmax(160px, 1fr)
-        repeat(3, minmax(105px, 0.55fr));
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .summary-card {
-      min-height: 92px;
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      background: #fafbfc;
-    }
-
-    .summary-card span {
-      display: block;
-      margin-bottom: 7px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .summary-card strong {
-      font-size: 24px;
-    }
-
-    .score-card {
-      color: var(--white);
-      background: var(--navy);
-    }
-
-    .score-card span {
-      color: #cfd8e3;
-    }
-
-    .self-audit-card {
-      border-color: #b9cee2;
-      background: var(--self-audit-soft);
-    }
-
-    .self-audit-card span {
-      color: var(--self-audit);
-      font-weight: bold;
-    }
-
-    .self-audit-select {
-      height: 43px;
-      padding: 8px 11px;
-      border-color: #9fbbd5;
-      color: var(--self-audit);
-      background: var(--white);
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      min-width: 1180px;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
-      padding: 10px;
-      border: 1px solid var(--border);
-      vertical-align: middle;
-      font-size: 13px;
-    }
-
-    th {
-      color: var(--white);
-      background: var(--navy-light);
-      text-align: center;
-    }
-
-    .level-cell,
-    .question-cell {
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .level-cell {
-      width: 78px;
-      background: #f3f5f7;
-    }
-
-    .question-cell {
-      width: 90px;
-    }
-
-    .evaluation-cell {
-      min-width: 460px;
-      line-height: 1.6;
-    }
-
-    .result-cell {
-      width: 230px;
-    }
-
-    .comment-cell {
-      width: 330px;
-    }
-
-    .result-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .result-option {
-      position: relative;
-    }
-
-    .result-option input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .result-option label {
-      display: inline-flex;
-      min-width: 62px;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: #45525f;
-      background: var(--white);
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .result-option input[value="적합"]:checked + label {
-      border-color: var(--pass);
-      color: var(--pass);
-      background: var(--pass-soft);
-    }
-
-    .result-option input[value="부적합"]:checked + label {
-      border-color: var(--fail);
-      color: var(--fail);
-      background: var(--fail-soft);
-    }
-
-    .result-option input[value="권고"]:checked + label {
-      border-color: var(--recommend);
-      color: var(--recommend);
-      background: var(--recommend-soft);
-    }
-
-    .result-option input[value="미평가"]:checked + label {
-      border-color: #8c98a5;
-      color: #596674;
-      background: #eef1f4;
-    }
-
-    .comment-input {
-      min-height: 72px;
-      font-size: 13px;
-    }
-
-    tr.status-pass td {
-      background-color: rgba(47, 125, 74, 0.035);
-    }
-
-    tr.status-fail td {
-      background-color: rgba(180, 67, 67, 0.055);
-    }
-
-    tr.status-recommend td {
-      background-color: rgba(178, 122, 20, 0.055);
-    }
-
-    .score-rule {
-      margin-top: 18px;
-      padding: 14px 16px;
-      border-radius: 9px;
-      color: var(--muted);
-      background: #f2f5f7;
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-
-    .average-self-input {
-      height: 43px;
-      padding: 8px 11px;
-      border-color: #9fbbd5;
-      color: var(--self-audit);
-      background: var(--white);
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .average-grade-select {
-      min-width: 90px;
-      padding: 9px 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--white);
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .average-score-cell {
-      width: 110px;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .average-criteria {
-      min-width: 360px;
-      line-height: 1.7;
-    }
-
-    .average-criteria-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 2px 0;
-      border-bottom: 1px dotted #aab4be;
-    }
-
-    .average-criteria-line:last-child {
-      border-bottom: 0;
-    }
-
-    .average-result-a td { background-color: rgba(47, 125, 74, 0.045); }
-    .average-result-b td { background-color: rgba(49, 95, 140, 0.04); }
-    .average-result-c td { background-color: rgba(178, 122, 20, 0.04); }
-    .average-result-d td { background-color: rgba(180, 67, 67, 0.04); }
-    .average-result-e td { background-color: rgba(180, 67, 67, 0.075); }
-
-    footer {
-      padding: 22px;
-      color: var(--muted);
-      text-align: center;
-      font-size: 12px;
-    }
-
-    @media (max-width: 1050px) {
-      .section-summary {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 850px) {
-      .profile-grid,
-      .section-summary {
-        grid-template-columns: 1fr;
-      }
-
-      .form-group.full,
-      .auditor-divider {
-        grid-column: auto;
-      }
-
-      header h1 {
-        font-size: 24px;
-      }
-
-      .card {
-        padding: 20px;
-      }
-
-      .accordion-title-row {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRE Analysis System</title>
+<style>
+:root {
+--navy: #172331;
+--navy-light: #243447;
+--green: #6f8f5e;
+--green-soft: #edf3e9;
+--background: #f4f6f8;
+--white: #ffffff;
+--text: #202933;
+--muted: #697582;
+--border: #d9dee5;
+--pass: #2f7d4a;
+--pass-soft: #e8f5ec;
+--fail: #b44343;
+--fail-soft: #fbe9e9;
+--recommend: #b27a14;
+--recommend-soft: #fff4dc;
+--self-audit: #315f8c;
+--self-audit-soft: #eaf2fa;
+--material: #66568c;
+--material-soft: #eeeaf7;
+}
+* {
+box-sizing: border-box;
+}
+body {
+margin: 0;
+font-family: Arial, "Malgun Gothic", sans-serif;
+color: var(--text);
+background: var(--background);
+}
+header {
+color: var(--white);
+background: var(--navy);
+border-bottom: 5px solid var(--green);
+}
+.header-inner,
+main {
+width: min(1400px, calc(100% - 40px));
+margin: 0 auto;
+}
+.header-inner {
+padding: 30px 0;
+}
+.header-label {
+display: inline-block;
+margin-bottom: 10px;
+padding: 5px 10px;
+border-radius: 20px;
+background: rgba(255, 255, 255, 0.12);
+font-size: 12px;
+letter-spacing: 1px;
+}
+header h1 {
+margin: 0;
+font-size: 30px;
+}
+header p {
+margin: 10px 0 0;
+color: #ced7e0;
+font-size: 15px;
+}
+main {
+margin-top: 30px;
+margin-bottom: 60px;
+}
+.page-guide {
+margin-bottom: 20px;
+padding: 16px 18px;
+border-left: 5px solid var(--green);
+border-radius: 10px;
+background: var(--green-soft);
+line-height: 1.6;
+}
+.card {
+margin-bottom: 22px;
+padding: 28px;
+border: 1px solid var(--border);
+border-radius: 14px;
+background: var(--white);
+box-shadow: 0 5px 18px rgba(23, 35, 49, 0.05);
+}
+.section-heading {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 24px;
+}
+.section-number {
+display: flex;
+width: 38px;
+height: 38px;
+flex-shrink: 0;
+align-items: center;
+justify-content: center;
+border-radius: 50%;
+color: var(--white);
+background: var(--navy);
+font-size: 13px;
+font-weight: bold;
+}
+.section-heading h2 {
+margin: 0;
+font-size: 23px;
+}
+.section-heading p {
+margin: 5px 0 0;
+color: var(--muted);
+font-size: 13px;
+}
+.profile-grid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 18px;
+}
+.form-group {
+display: flex;
+flex-direction: column;
+gap: 7px;
+}
+.form-group.full {
+grid-column: 1 / -1;
+}
+label {
+color: #3f4d5b;
+font-size: 13px;
+font-weight: bold;
+}
+input,
+textarea,
+select {
+width: 100%;
+padding: 13px 14px;
+border: 1px solid var(--border);
+border-radius: 9px;
+color: var(--text);
+background: #fbfcfd;
+font: inherit;
+}
+input:focus,
+textarea:focus,
+select:focus {
+outline: none;
+border-color: var(--green);
+background: var(--white);
+box-shadow: 0 0 0 3px rgba(111, 143, 94, 0.15);
+}
+textarea {
+min-height: 78px;
+resize: vertical;
+}
+.material-group-box {
+padding: 16px;
+border: 1px solid var(--border);
+border-radius: 10px;
+background: #fbfcfd;
+}
+.material-group-title {
+display: block;
+margin-bottom: 12px;
+color: #3f4d5b;
+font-size: 13px;
+font-weight: bold;
+}
+.material-options {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+}
+.material-option {
+position: relative;
+}
+.material-option input {
+position: absolute;
+opacity: 0;
+pointer-events: none;
+}
+.material-option label {
+display: inline-flex;
+min-width: 100px;
+align-items: center;
+justify-content: center;
+padding: 11px 18px;
+border: 1px solid var(--border);
+border-radius: 9px;
+color: #45525f;
+background: var(--white);
+cursor: pointer;
+transition: 0.2s;
+}
+.material-option label::before {
+width: 16px;
+height: 16px;
+margin-right: 8px;
+border: 1px solid #9aa6b2;
+border-radius: 4px;
+content: "";
+background: var(--white);
+}
+.material-option input:checked + label {
+border-color: var(--green);
+color: var(--green);
+background: var(--green-soft);
+}
+.material-option input:checked + label::before {
+border-color: var(--green);
+content: "✓";
+color: var(--white);
+background: var(--green);
+font-size: 12px;
+line-height: 15px;
+text-align: center;
+}
+.auditor-divider {
+grid-column: 1 / -1;
+margin-top: 4px;
+padding-top: 4px;
+}
+.auditor-divider h3 {
+margin: 0;
+font-size: 16px;
+}
+.auditor-divider p {
+margin: 5px 0 0;
+color: var(--muted);
+font-size: 12px;
+}
+.audit-accordion {
+overflow: hidden;
+margin-bottom: 18px;
+border: 1px solid var(--border);
+border-radius: 14px;
+background: var(--white);
+}
+.accordion-header {
+display: flex;
+width: 100%;
+align-items: center;
+justify-content: space-between;
+gap: 20px;
+padding: 20px 22px;
+border: 0;
+color: var(--white);
+background: var(--navy);
+text-align: left;
+cursor: pointer;
+}
+.accordion-title {
+flex: 1;
+}
+.accordion-title-row {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+gap: 10px;
+}
+.accordion-title strong {
+display: block;
+font-size: 18px;
+}
+.section-material-badge {
+display: inline-flex;
+align-items: center;
+padding: 5px 9px;
+border: 1px solid rgba(255,255,255,0.22);
+border-radius: 20px;
+color: #f6f3fb;
+background: rgba(255,255,255,0.11);
+font-size: 11px;
+font-weight: bold;
+white-space: nowrap;
+}
+.accordion-title > span {
+display: block;
+margin-top: 6px;
+color: #d4dde6;
+font-size: 13px;
+}
+.accordion-arrow {
+flex-shrink: 0;
+font-size: 22px;
+transition: transform 0.25s;
+}
+.accordion-header.open .accordion-arrow {
+transform: rotate(180deg);
+}
+.accordion-content {
+display: none;
+padding: 22px;
+}
+.accordion-content.open {
+display: block;
+}
+.section-summary {
+display: grid;
+grid-template-columns:
+minmax(160px, 1fr)
+minmax(160px, 1fr)
+repeat(3, minmax(105px, 0.55fr));
+gap: 12px;
+margin-bottom: 20px;
+}
+.summary-card {
+min-height: 92px;
+padding: 16px;
+border: 1px solid var(--border);
+border-radius: 11px;
+background: #fafbfc;
+}
+.summary-card span {
+display: block;
+margin-bottom: 7px;
+color: var(--muted);
+font-size: 12px;
+}
+.summary-card strong {
+font-size: 24px;
+}
+.score-card {
+color: var(--white);
+background: var(--navy);
+}
+.score-card span {
+color: #cfd8e3;
+}
+.self-audit-card {
+border-color: #b9cee2;
+background: var(--self-audit-soft);
+}
+.self-audit-card span {
+color: var(--self-audit);
+font-weight: bold;
+}
+.self-audit-select {
+height: 43px;
+padding: 8px 11px;
+border-color: #9fbbd5;
+color: var(--self-audit);
+background: var(--white);
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+}
+.table-wrap {
+overflow-x: auto;
+}
+table {
+width: 100%;
+min-width: 1180px;
+border-collapse: collapse;
+}
+th,
+td {
+padding: 10px;
+border: 1px solid var(--border);
+vertical-align: middle;
+font-size: 13px;
+}
+th {
+color: var(--white);
+background: var(--navy-light);
+text-align: center;
+}
+.level-cell,
+.question-cell {
+text-align: center;
+font-weight: bold;
+}
+.level-cell {
+width: 78px;
+background: #f3f5f7;
+}
+.question-cell {
+width: 90px;
+}
+.evaluation-cell {
+min-width: 460px;
+line-height: 1.6;
+}
+.result-cell {
+width: 230px;
+}
+.comment-cell {
+width: 330px;
+}
+.result-options {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+}
+.result-option {
+position: relative;
+}
+.result-option input {
+position: absolute;
+opacity: 0;
+pointer-events: none;
+}
+.result-option label {
+display: inline-flex;
+min-width: 62px;
+align-items: center;
+justify-content: center;
+padding: 8px 10px;
+border: 1px solid var(--border);
+border-radius: 8px;
+color: #45525f;
+background: var(--white);
+font-size: 12px;
+cursor: pointer;
+}
+.result-option input[value="적합"]:checked + label {
+border-color: var(--pass);
+color: var(--pass);
+background: var(--pass-soft);
+}
+.result-option input[value="부적합"]:checked + label {
+border-color: var(--fail);
+color: var(--fail);
+background: var(--fail-soft);
+}
+.result-option input[value="권고"]:checked + label {
+border-color: var(--recommend);
+color: var(--recommend);
+background: var(--recommend-soft);
+}
+.result-option input[value="미평가"]:checked + label {
+border-color: #8c98a5;
+color: #596674;
+background: #eef1f4;
+}
+.comment-input {
+min-height: 72px;
+font-size: 13px;
+}
+tr.status-pass td {
+background-color: rgba(47, 125, 74, 0.035);
+}
+tr.status-fail td {
+background-color: rgba(180, 67, 67, 0.055);
+}
+tr.status-recommend td {
+background-color: rgba(178, 122, 20, 0.055);
+}
+.score-rule {
+margin-top: 18px;
+padding: 14px 16px;
+border-radius: 9px;
+color: var(--muted);
+background: #f2f5f7;
+font-size: 12px;
+line-height: 1.7;
+}
+.average-self-input {
+height: 43px;
+padding: 8px 11px;
+border-color: #9fbbd5;
+color: var(--self-audit);
+background: var(--white);
+font-size: 16px;
+font-weight: bold;
+}
+.average-grade-select {
+min-width: 90px;
+padding: 9px 10px;
+border: 1px solid var(--border);
+border-radius: 8px;
+background: var(--white);
+font-weight: bold;
+cursor: pointer;
+}
+.average-score-cell {
+width: 110px;
+text-align: center;
+font-weight: bold;
+}
+.average-criteria {
+min-width: 360px;
+line-height: 1.7;
+}
+.average-criteria-line {
+display: flex;
+justify-content: space-between;
+gap: 12px;
+padding: 2px 0;
+border-bottom: 1px dotted #aab4be;
+}
+.average-criteria-line:last-child {
+border-bottom: 0;
+}
+.average-result-a td { background-color: rgba(47, 125, 74, 0.045); }
+.average-result-b td { background-color: rgba(49, 95, 140, 0.04); }
+.average-result-c td { background-color: rgba(178, 122, 20, 0.04); }
+.average-result-d td { background-color: rgba(180, 67, 67, 0.04); }
+.average-result-e td { background-color: rgba(180, 67, 67, 0.075); }
+
+.server-type-selector {
+margin: 14px 0 18px;
+padding: 16px;
+border: 1px solid #b9cee2;
+border-radius: 10px;
+background: #f4f8fc;
+}
+.server-type-selector-title {
+display: block;
+margin-bottom: 10px;
+color: #315f8c;
+font-size: 13px;
+font-weight: bold;
+}
+.server-type-options {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+}
+.server-type-option {
+position: relative;
+}
+.server-type-option input {
+position: absolute;
+opacity: 0;
+pointer-events: none;
+}
+.server-type-option label {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+min-width: 150px;
+padding: 10px 14px;
+border: 1px solid var(--border);
+border-radius: 8px;
+background: var(--white);
+cursor: pointer;
+}
+.server-type-option input:checked + label {
+border-color: var(--self-audit);
+color: var(--self-audit);
+background: var(--self-audit-soft);
+}
+.server-type-divider td {
+padding: 0 !important;
+border-left: 0;
+border-right: 0;
+background: var(--white) !important;
+}
+
+footer {
+padding: 22px;
+color: var(--muted);
+text-align: center;
+font-size: 12px;
+}
+@media (max-width: 1050px) {
+.section-summary {
+grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+}
+@media (max-width: 850px) {
+.profile-grid,
+.section-summary {
+grid-template-columns: 1fr;
+}
+.form-group.full,
+.auditor-divider {
+grid-column: auto;
+}
+header h1 {
+font-size: 24px;
+}
+.card {
+padding: 20px;
+}
+.accordion-title-row {
+align-items: flex-start;
+flex-direction: column;
+}
+}
+</style>
 </head>
-
 <body>
-  <header>
-    <div class="header-inner">
-      <span class="header-label">PSK</span>
-      <h1>SRE Analysis System</h1>
-      <p>[A.I Report] Audit Result Summary &amp; Analysis</p>
-    </div>
-  </header>
-
-  <main>
-    <div class="page-guide">
-      <strong>BP社 기본정보 및 생산/품질/구매 심사 결과를 입력해 주세요.</strong><br>
-      BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비교하여
-      해당되는 심사항목만 자동으로 표시합니다.
-    </div>
-
-    <section class="card">
-      <div class="section-heading">
-        <div class="section-number">01</div>
-
-        <div>
-          <h2>BP社 Profile</h2>
-          <p>협력업체 및 심사 기본정보</p>
-        </div>
-      </div>
-
-      <div class="profile-grid">
-        <div class="form-group">
-          <label for="companyName">Company Name</label>
-          <input id="companyName" type="text" placeholder="회사명을 입력하세요">
-        </div>
-
-        <div class="form-group">
-          <label for="sales">Y2025 Sales</label>
-          <input id="sales" type="text" placeholder="Y2025 매출액을 입력하세요">
-        </div>
-
-        <div class="form-group full">
-          <label for="address">Business Address</label>
-          <input id="address" type="text" placeholder="사업장 주소를 입력하세요">
-        </div>
-
-        <div class="form-group full">
-          <label for="certification">Certification</label>
-          <input
-            id="certification"
-            type="text"
-            placeholder="예: ISO 9001, ISO 14001, IATF 16949"
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="auditDate">Audit Date</label>
-          <input id="auditDate" type="date">
-        </div>
-
-        <div class="form-group">
-          <label for="mainProduct">Main Product / Business</label>
-          <input
-            id="mainProduct"
-            type="text"
-            placeholder="주요 생산품목 또는 사업 내용을 입력하세요"
-          >
-        </div>
-
-        <div class="form-group full">
-          <div class="material-group-box">
-            <span class="material-group-title">Material Group</span>
-
-            <div class="material-options">
-              <div class="material-option">
-                <input id="materialOem" name="materialGroup" type="checkbox" value="OEM">
-                <label for="materialOem">OEM</label>
-              </div>
-
-              <div class="material-option">
-                <input id="materialOdm" name="materialGroup" type="checkbox" value="ODM">
-                <label for="materialOdm">ODM</label>
-              </div>
-
-              <div class="material-option">
-                <input id="materialModm" name="materialGroup" type="checkbox" value="M.ODM">
-                <label for="materialModm">M.ODM</label>
-              </div>
-
-              <div class="material-option">
-                <input
-                  id="materialAssemblyHarness"
-                  name="materialGroup"
-                  type="checkbox"
-                  value="조립/Harness"
-                >
-                <label for="materialAssemblyHarness">조립/Harness</label>
-              </div>
-
-              <div class="material-option">
-                <input
-                  id="materialCleaning"
-                  name="materialGroup"
-                  type="checkbox"
-                  value="세정"
-                >
-                <label for="materialCleaning">세정</label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="auditor-divider">
-          <h3>Department Auditors</h3>
-          <p>부서별 심사원 정보를 입력해 주세요.</p>
-        </div>
-
-        <div class="form-group">
-          <label for="productionAuditor">Production Auditor</label>
-          <input id="productionAuditor" type="text" placeholder="Production Auditor Name">
-        </div>
-
-        <div class="form-group">
-          <label for="qualityAuditor">Quality Auditor</label>
-          <input id="qualityAuditor" type="text" placeholder="Quality Auditor Name">
-        </div>
-
-        <div class="form-group">
-          <label for="purchaseAuditor">Purchase Auditor</label>
-          <input id="purchaseAuditor" type="text" placeholder="Purchase Auditor Name">
-        </div>
-
-        <div class="form-group">
-          <label for="securityAuditor">Security Auditor</label>
-          <input id="securityAuditor" type="text" placeholder="Security Auditor Name">
-        </div>
-
-        <div class="form-group">
-          <label for="systemAuditor">System Auditor</label>
-          <input id="systemAuditor" type="text" placeholder="System Auditor Name">
-        </div>
-
-        <div class="form-group">
-          <label for="complianceAuditor">Compliance &amp; Ethics Auditor</label>
-          <input
-            id="complianceAuditor"
-            type="text"
-            placeholder="Compliance & Ethics Auditor Name"
-          >
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-heading">
-        <div class="section-number">02</div>
-
-        <div>
-          <h2>Production Audit Sections</h2>
-          <p>Section 1부터 Section 5까지의 생산부서 심사 체크시트</p>
-        </div>
-      </div>
-
-      <div id="productionAuditSections"></div>
-    </section>
-
-    <section class="card">
-      <div class="section-heading">
-        <div class="section-number">03</div>
-
-        <div>
-          <h2>Quality Audit Sections</h2>
-          <p>Section 6부터 Section 13까지의 품질부서 심사 체크시트</p>
-        </div>
-      </div>
-
-      <div id="qualityAuditSections"></div>
-    </section>
-
-    <section class="card">
-      <div class="section-heading">
-        <div class="section-number">04</div>
-
-        <div>
-          <h2>Purchase Audit Sections</h2>
-          <p>Section 14부터 Section 18까지의 구매부서 심사 체크시트</p>
-        </div>
-      </div>
-
-      <div id="purchaseAuditSections"></div>
-    </section>
-  </main>
-
-  <footer>
-    SRE Analysis System · PSK Audit Prototype
-  </footer>
-
-  <script>
-    const createSectionData = (
-      sectionNumber,
-      title,
-      materialGroups,
-      questions,
-      open = false,
-      scoringType = "level",
-      sectionKey = String(sectionNumber)
-    ) => ({
-      sectionNumber,
-      title,
-      materialGroups,
-      questions,
-      open,
-      scoringType,
-      sectionKey
-    });
-
-    const createQuestionData = (
-      level,
-      number,
-      content,
-      materialGroups = ["ALL"]
-    ) => ({
-      level,
-      number,
-      content,
-      materialGroups
-    });
-
-    const createAverageQuestionData = (
-      number,
-      content,
-      criteria,
-      materialGroups = ["ALL"]
-    ) => ({
-      number,
-      content,
-      criteria,
-      materialGroups
-    });
-
-    const auditSections = [
-      createSectionData(
-        1,
-        "생산 일정 관리",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", `생산 계획표로 생산 일정을 관리 하고 있는가?<br>(제품 별 생산 계획표 내에 생산 Start, End 일정 관리, 생산 계획 선정 기준)`),
-          createQuestionData(1, "1.2", "생산 작업에 대한 작업 공정도(흐름도)가 있는가?"),
-          createQuestionData(2, "2.1", "생산 계획표에서 일차별로 제품 별 생산 진척 현황을 확인 할 수 있는가?"),
-          createQuestionData(2, "2.2", `제품 별 작업 공정도 상 작업 공정별 작업 공수 내용이 포함 되어 있는가?<br>(작업 공수 관리 기준: 공수측정 대상 엔지니어 Level 기준 정립 여부)<br>*작업 공수 : 작업 하는데 실제 작업 시 소요되는 작업 시간`),
-          createQuestionData(2, "2.3", `제품 별 대체 공정 혹은 대체 설비 운영에 대한 내용을 확인할 수 있는 문서가 있는가?<br>(생산 라인 Non-stop 지속 가능에 대한 관리 방안)`),
-          createQuestionData(2, "2.4", "Engineer 교육 진행 시 작업 공정도를 통해 전체적인 작업 흐름에 대해 교육이 되고 있는가?"),
-          createQuestionData(3, "3.1", `제품 별 생산 표준 Capa. 또는 설비 가동율 분석이 되어 있는가?<br>(LOT/월/분기/년)`),
-          createQuestionData(3, "3.2", "생산 진행 시 각 단위 작업별 작업자 작업 이력이 관리가 되고 있는가? (작업 실명제 증빙)"),
-          createQuestionData(3, "3.3", "긴급 발주(출하 요청) 품목에 대한 생산 Process가 있으며, 긴급 발주(출하 요청) 품목의 생산 일정이 관리가 되고 있는가?"),
-          createQuestionData(3, "3.4", `제품 별 최대 생산 Capa. 혹은 최대 생산량을 위한 설비 운영량을 확인할 수 있는가?<br>(최대 생산 Capa.를 고려한 생산계획 일정 수립의 근거자료 확인)<br>(월/분기/년 Forecasting 기준 일정관리)`),
-          createQuestionData(4, "4.1", `생산 Capa.는 주기적으로 분석 하며, Capa. Up 활동을 진행하고 있는가?<br>(인원 관리/설비 및 시설 투자/유실 및 작업 공수 최적화/생산 부자재, JIG, 공구관리 등 4M 에 해당하는 모든 항목에 대한 Capa. Up 활동 이력 첨부 必)`),
-          createQuestionData(4, "4.2", "System을 통해 당일 생산 실적에 대해서 등록 할 수 있고, 당일 생산 진척율을 확인 할 수 있는 환경이 구축되어 있는가?"),
-          createQuestionData(4, "4.3", "생산 Capa.Up 활동에 대한 활동 이력들은 시스템을 통해 실시간으로 진행 상태를 확인 할 수 있는 환경이 구축되어 관리 되고 있는가?"),
-          createQuestionData(5, "5.1", "생산 실적은 주기적으로 집계 되며, 경영진과 함께 검토 되고 있는가?"),
-          createQuestionData(5, "5.2", "생산 Capa.Up 활동에 대한 목표를 정하고, Capa. Up 목표 달성 여부에 대한 결과가 그룹 또는 Team 고과평가와 연계되어있는가?")
-        ],
-        true
-      ),
-
-      createSectionData(
-        2,
-        "생산 작업 관리",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", `공정 별 단위 작업의 작업 표준서가 있는가?<br>(작업 공정도 기준)`),
-          createQuestionData(1, "1.2", "작업 표준서 변경점 발생 시 개정을 진행 하고 있는가?"),
-          createQuestionData(2, "2.1", `작업 표준서 양식, 작성 방법에 대해서 정의되어 있는가?<br>(필수 내용: 작업 공구 및 부자재/Part List/작업 순서 및 작업 내용/안전주의사항/안전보호구)`),
-          createQuestionData(2, "2.2", `제정 된 작업 표준서에는 작업 공정에 필요한 내용이 포함되어 있는가?<br>(필수 내용: 작업 공구 및 부자재/Part List/작업 순서 및 작업 내용/안전주의사항/안전보호구/개정부분표시)`),
-          createQuestionData(2, "2.3", `생산 현장에 작업표준서가 작업인원이 실시간으로 확인 가능한 위치에 비치 관리되고 있는가? [현장 검토]<br>- 작업 Layout 내에 실제 작업 표준서를 비치 후 작업 진행`),
-          createQuestionData(3, "3.1", "작업 표준서 내용, 변경된 작업 방법 등 작업표준서에 대해서 Engineer 교육 진행 중인가?"),
-          createQuestionData(3, "3.2", "작업 공정 별 수립한 안전 관리 대책을 작업 엔지니어 대상으로 주기적인 교육이 진행중이고, 작업 엔지니어 별 교육 이수 여부를 증빙할 자료가 있는가?"),
-          createQuestionData(3, "3.3", "감독자를 중심으로 작업현장에서 작업자에게 당일 작업 List, 작업 표준에 대해 공유 하며, 작업 간 발생 할 수 있는 위험요인과 안전대책을 공유하는 활동을 하고 있는가? (일상작업 공유 활동)"),
-          createQuestionData(4, "4.1", "공정 별로 작업 내용에 대한 작업 표준서를 System을 통해 확인 할 수 있는가?"),
-          createQuestionData(4, "4.2", "각 설비별 공정별 작업한 Engineer 이력, 작업실명제를 System을 통해 확인 할 수 있는가?"),
-          createQuestionData(5, "5.1", "작업 환경 개선 대한 목표를 정하고, 목표 달성 여부에 대한 결과가 그룹 또는 Team 고과평가와 연계 되어있는가?"),
-          createQuestionData(5, "5.2", "작업 최적화, 유실 감소 등 작업 공수 절감 활동에 대한 결과가 그룹 또는 Team 고과평가와 연계 되어 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        3,
-        "생산 인원 관리",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "생산 Engineer에 대한 인원 조직도가 있는가?"),
-          createQuestionData(1, "1.2", "생산 Engineer의 경력사항에 대해 확인 가능한가?"),
-          createQuestionData(2, "2.1", `Engineer Level 관리 및 인증 Process에 대한 규정 또는 지침에 대해 확인 가능한가?<br>- 필수 조건 : 취득 및 평가 방법/Level 분류 기준/Level별 필기, 실기 응시 자격`),
-          createQuestionData(2, "2.2", "공정 단위 별 Engineer 작업 능력에 대해 Level을 분류하여 관리 중이며, Level 취득 증빙자료를 관리하고 있는가?"),
-          createQuestionData(3, "3.1", "Engineer Level 취득 외 위반 사항 발생 시 Level 자격정지에 대한 Penalty 부여에 대한 규정 또는 지침이 있는가?"),
-          createQuestionData(3, "3.2", "표준 미준수, 안전 보안 수칙 미준수, 3정 5S 활동 미흡 등 Human error로 인한 실패 DB 자료를 관리 하고 있는가?"),
-          createQuestionData(3, "3.3", "공정 단위 별 Engineer의 작업 Skill Up 관련 교육 일정을 계획하며 실행하고 있는가?"),
-          createQuestionData(4, "4.1", "System을 통해 생산 현장에 작업 중인 Engineer 현황과 Level 현황을 실시간 Monitoring 할 수 있게 구축이 되어 있는가?"),
-          createQuestionData(4, "4.2", "System을 통해 Engineer 레벨 현황, 레벨 취득일, 취득 증빙자료 등 작업자 능력 인증 증빙 문서, 기록 등이 관리되고 있는가?"),
-          createQuestionData(4, "4.3", "Level Test 문제를 주기적으로 제, 개정하며 System에 등록 관리되고 있는가?"),
-          createQuestionData(5, "5.1", "Engineer Level 달성 계획을 세워 지속적으로 관리 하며, Engineer Level 달성 성과는 그룹 또는 Team 고과평가와 연계 되어 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        4,
-        "제조 (부대)설비 및 공구 관리",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "생산에 필요한 공구, JIG에 대한 List를 관리하고 있는가?"),
-          createQuestionData(1, "1.2", `생산 현장 확인 시 생산용 공구, JIG는 정량, 정위치, 정리정돈 등 관리상태가 양호한가? [현장 검토]<br>- 정위치, 정량에 대한 눈관리 여부 확인`),
-          createQuestionData(1, "1.3", "생산활동에 투입되는 (부대)설비 관리/ 사용에 대한 관리 규정이 있는가?"),
-          createQuestionData(2, "2.1", "생산용 (부대)설비는 담당자에 의해 주기적으로 관리가 되고 있는가?"),
-          createQuestionData(2, "2.2", `생산용 (부대) 설비는 자산으로 등록되어 있고 자산번호가 부여 되어 자산번호 식별표로 관리 되고 있는가?<br>자산번호 식별표는 생산용 (부대)설비에 부착되어 있는가? [현장 검토]`),
-          createQuestionData(2, "2.3", "생산활동에 투입되는 (부대)설비 관리/ 사용에 대한 작업 표준서를 관리하고 있는가?"),
-          createQuestionData(2, "2.4", `(부대)설비 사용간 실시간으로 확인할 수 있는 위치에 (부대)설비 관리/ 사용에 대한 작업 표준서를 비치하여 관리하고 있는가? [현장 검토]<br>- 작업 Layout 내에 실제 작업 표준서를 비치 후 작업 진행`),
-          createQuestionData(3, "3.1", "생산용 (부대)설비에 고장 발생한 경우 고장 이력과 수리 이력이 관리되고 있는가?"),
-          createQuestionData(3, "3.2", "부대 설비 고장 예방 관리를 위해 생산용 부대 설비 정기 PM을 진행 하고 있는가?"),
-          createQuestionData(3, "3.3", "생산용 (부대)설비, JIG, 공구 사용법에 대한 표준서 또는 Manual 내, 표준서 내용에 작업 순서 및 작업 내용, 안전 보호구, 안전 주의 사항 등에 대한 내용이 포함되어 있는가?"),
-          createQuestionData(4, "4.1", "System을 통해 생산 현장 내 부대 설비 별 고장 이력 등 전체적 설비 이력을 확인 할 수 있는가?"),
-          createQuestionData(4, "4.2", "System을 통해 생산 현장 내 관리 중인 공구, JIG 현황을 확인 할 수 있는가?"),
-          createQuestionData(5, "5.1", "매년 생산용 공구, JIG 등의 개선활동을 진행 중이며 목표 달성 성과는 그룹 또는 Team 고과 평가와 연계 되어 있는가?"),
-          createQuestionData(5, "5.2", "매년 생산용 (부대)설비 자산실사를 통해 자산관리가 되고 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        5,
-        "생산 현장 관리",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "생산 대기 중인 Part와 생산 완료 된 Part 보관장소가 별도로 구분 지정되어 있는가? [현장 검토]"),
-          createQuestionData(1, "1.2", `각 구역 혹은 부대설비 별로 담당자 지정하여 3정5S 점검표를 통한 3정 5S 일상 점검 관리가 되고 있는가?<br>[현장 검토]`),
-          createQuestionData(1, "1.3", `생산 현장 내에 유해물질, 화학물질 보관장소는 생산 장소와 명확히 구분되어 있는가? [현장 검토]<br>(소분용기 외부에 용액 명칭의 Labeling 및 MSDS Label 부착/비치 확인 필수)`),
-          createQuestionData(1, "1.4", "주기적으로 생산 현장의 온/습도를 측정하며 온/습도 관리를 하고 있는가?"),
-          createQuestionData(2, "2.1", `주기적으로 Clean Room 시설 Particle 측정하며 Particle 관리를 하고 있는가?<br>(Clean Room이 없는 경우, 생산 현장 3정 5S 상태 점검으로 대체)`),
-          createQuestionData(2, "2.2", "생산 현장 내 생산 부자재 및 방진용품 관리 Process가 표준이나 지침서로 관리되고 있는가?"),
-          createQuestionData(2, "2.3", "유해물질, 화학물질 관리 Process가 정립되어 있는 규정 혹은 지침서가 있는가?"),
-          createQuestionData(3, "3.1", "생산 현장의 환경 개선 및 안전 개선에 대한 개선 전/ 후 자료가 관리 및 보고 되고 있는가?"),
-          createQuestionData(3, "3.2", "별도의 점검 Sheet로 현장 실무 Engineer 외 관리자에 의한 생산 현장 환경 불시 점검이 이루어 지고 있는가?"),
-          createQuestionData(3, "3.3", `생산 현장 내에 유해물질, 화학물질 (임시) 보관장소엔 국소 배기장치가 설치되어 있는가? [현장 검토]<br>(MSDS 상 국소배기 장치 설치된 곳에서 보관 필요한 물질의 경우 국소 배기 장치 설치 보관 필요, 현장 임시보관함 포함)`),
-          createQuestionData(4, "4.1", "System을 통해 온/습도 및 Particle 등의 생산 현장 환경에 대한 내용을 Monitoring 관리가 가능한가?"),
-          createQuestionData(4, "4.2", "System을 통해 생산 Stage 혹은 생산 전체 진척 현황을 파악할 수 있는가?"),
-          createQuestionData(5, "5.1", "생산 현장의 환경 개선 활동, 위험요인 개선 활동은 그룹 또는 Team 고과 평가와 연계 되어 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        6,
-        "Leadership & Planning",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", `ISO 9001 보유하고 있는가?<br>- 인증서 유효 여부 (인증서 내 유효 기간이 평가일 이후인지 확인)<br>- 국내 KAB / 해외: 해외 인정된 인증을 받은 인증기관에서 발행된 인증서인지 확인`),
-          createQuestionData(1, "1.2", "품질목표는 부서별로 수립되어 있는가?"),
-          createQuestionData(1, "1.3", "내부 심사는 내부적으로 정해진 Rule에 의거 정기적으로 실시되며, 심사 결과는 부적합 항목을 포함하여 상위권자에게 보고되고 있는가?"),
-          createQuestionData(1, "1.4", "ISO 9001 사후 및 갱신심사는 주기적으로 진행 및 결과는 상위권자에게 보고되고 있는가?"),
-          createQuestionData(2, "2.1", "ISO 사후 및 갱신 심사 부적합 항목에 대해서 조치 결과에 대해 기록 관리되고 있는가?"),
-          createQuestionData(2, "2.2", `품질 관리 부서가 별도로 구성되어 있으며, 제조 부서와의 독립성을 유지하고 있는가?<br>(품질 업무를 하는 부서에 제조 인원이 포함되어 있을 경우 점수 부여 불가)`),
-          createQuestionData(2, "2.3", "품질목표에 따른 달성방안이 수립되어 있는가?"),
-          createQuestionData(2, "2.4", "내부 심사 시 발생된 부적합 항목에 대해서는 대책이 모두 수립되어 시정조치가 완료되었는가?"),
-          createQuestionData(3, "3.1", "시스템 평가(내부 심사 등)에 대한 유효성 평가 절차는 수립되어 있는가?"),
-          createQuestionData(3, "3.2", "전년도 내부 심사 부적합 항목에 대한 유효성 평가는 진행 및 기록관리 되고 있는가?"),
-          createQuestionData(3, "3.3", "품질목표 달성방안은 기간별로 (월 or 분기 or 반기) 계획이 수립되어 있는가?"),
-          createQuestionData(3, "3.4", "품질목표는 주기적으로 결과 체크 및 주기에 맞춰 보고되고 있는가?"),
-          createQuestionData(4, "4.1", "주요 품질 목표에 대해서 시스템으로 관리되어 실시간으로 모니터링 가능하도록 관리되고 있는가?"),
-          createQuestionData(4, "4.2", "수립한 품질목표 달성방안 및 목표 대비 미흡한 사항에 대해서는 조치 방안까지 반영되어 상위권자에게 보고되고 있는가?"),
-          createQuestionData(5, "5.1", "품질목표는 매년 동일한 수준이 아닌 개선된 지표로 목표 관리 되고 있으며, 목표에 맞는 달성방안이 지속적으로 수립되어 있는가?")
-        ],
-        true
-      ),
-
-      createSectionData(
-        7,
-        "Non-Conforming Materials Management",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "부적합 관리 프로세스는 보유하고 있는가?"),
-          createQuestionData(1, "1.2", "부적합 발생 시 해당 제품에 대한 식별 / 분리 / 담당자 지정되어 있는가?"),
-          createQuestionData(2, "2.1", "고객 부적합에 대해 개선대책 수립 및 F/B 완료되었는가?"),
-          createQuestionData(2, "2.2", "내부 부적합에 대해 발생 이력 관리되고 있으며, 대책서는 작성되고 있는가?"),
-          createQuestionData(2, "2.3", "협력업체 부적합에 대해 발생 이력 관리되고 있으며, 대책서는 관리되고 있는가?"),
-          createQuestionData(2, "2.4", "부적합품을 그대로 출하할 경우(특채)에 대한 고객 승인 프로세스는 수립되어 있으며, 특채 발행 이력은 관리되고 있는가?"),
-          createQuestionData(3, "3.1", "회의체 or E-Mail 등을 통하여 발생되는 부적합 및 부적합 발생 전체 현황에 대해 내부 공유 활동 진행되고 있는가?"),
-          createQuestionData(3, "3.2", "고객 및 내부 부적합에 대한 유효성 평가 기준 및 프로세스는 수립되었으며, 준수하고 있는가?"),
-          createQuestionData(3, "3.3", "고객 부적합에 대해 부적합의 재발 여부를 확인하고 있는가?<br>또한, 재발에 대한 기준은 수립되어 있는가?"),
-          createQuestionData(3, "3.4", "특채로 출하된 품목이 있을 경우, 내부 대책 수립 및 고객 출하 후 발생되는 문제에 대해 모니터링 후 종결 처리되고 있는가?"),
-          createQuestionData(3, "3.5", "부적합 프로세스에 대해 교육 Curriculum에 추가되어 기준에 맞춰 교육 진행되고 있는가?"),
-          createQuestionData(4, "4.1", "시스템을 통해 부적합 발생 내역 등록부터 조치 요청, 대책 입력 및 유효성 평가까지 관리되고 있는가?"),
-          createQuestionData(4, "4.2", "고객 부적합 중 재발 부적합의 대책 수립 시, 신규 부적합과는 다른 절차로 대책이 수립되고 있는가?<br>또한 해당 부분이 표준 문서에 반영되어 누락되지 않고 운영되고 있는가?"),
-          createQuestionData(4, "4.3", "부적합 관리 지표는 주기적으로 집계 및 경영진과 함께 검토되고 있으며, 목표 대비 높게 집계될 경우 이에 대한 대책안까지 논의가 되고 있는가?"),
-          createQuestionData(5, "5.1", "부적합 관리 지표는 매년 분석 및 개선을 통해 기준 대비 향상된 지표를 보여주고 있으며, 개선된 부적합 관리 지표 달성을 위한 계획은 적절하게 수립되고 있는가?"),
-          createQuestionData(5, "5.2", "부적합은 통합 지표가 아닌 Part별 혹은 고객사별로 세분화하여 목표 수립 및 주기적으로 집계되고 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        8,
-        "Document & Drawing Control System",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "사내 표준(매뉴얼 / 절차서 / 지침서류) 관리 프로세스는 보유하고 있는가?<br>(문서 제정, 개정, 배포, 폐지 등 절차 포함)"),
-          createQuestionData(1, "1.2", "사내 표준별 담당부서는 지정되어 관리되고 있는가?"),
-          createQuestionData(1, "1.3", "도면(사내/고객) 관리 프로세스는 보유하고 있는가?<br>(배포, 회수, 폐기 등 절차 포함)"),
-          createQuestionData(2, "2.1", "사내 표준의 제정, 개정, 배포, 폐지는 정해진 절차에 의거하여 진행되고 있는가?"),
-          createQuestionData(2, "2.2", "표준 문서별(규정 및 지침서, 작업표준서 등) 제정, 개정, 확인 및 폐지 승인권자는 지정 및 준수되고 있는가?"),
-          createQuestionData(2, "2.3", "도면의 배포, 회수, 폐기는 정해진 절차에 의하여 진행되고 있는가?"),
-
-          createQuestionData(
-            2,
-            "2.4",
-            "자체 제작 도면에 대해 승인권자는 지정 및 준수되고 있는가?",
-            ["ODM", "M.ODM", "조립/Harness"]
-          ),
-
-          createQuestionData(3, "3.1", "정해진 절차로 승인된 최신 표준 문서만 접근 및 사용할 수 있도록 관리되고 있는가?"),
-          createQuestionData(3, "3.2", "표준 문서의 개정 시, 담당 부서 외 관련 부서 협의 후 개정 진행되고 있으며, 관련 내용은 모두 기록으로 남기고 있는가?"),
-          createQuestionData(3, "3.3", "도면 변경점 발생 시, 기존 도면은 폐기 혹은 접근할 수 없도록 관리되고 있는가?<br>(고객, 자체 제작 도면, 가공 프로그램 등)"),
-          createQuestionData(4, "4.1", "표준 문서의 관리 절차는 시스템으로 관리되고 있는가?<br>(제정, 개정, 배포, 폐지 등 - 네트워크 공유 폴더의 경우 시스템으로 인정하지 않음)"),
-          createQuestionData(5, "5.1", "표준 문서의 검토 주기는 설정되어 있으며, 주기에 맞게 검토되고 있는가?<br>또한, 검토된 내용은 기록으로 남기고 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        9,
-        "Change Management",
-        ["ODM", "M.ODM"],
-        [
-          createQuestionData(1, "1.1", "변경점 관리 프로세스는 보유하고 있는가?"),
-          createQuestionData(1, "1.2", "변경점 내부 승인권자 및 고객 통보 담당은 지정되어 있는가?"),
-          createQuestionData(1, "1.3", "변경점 통보에 대한 기준은 수립되어 있는가?"),
-          createQuestionData(2, "2.1", "변경점 통보 일정은 고객과 사전 협의된 일정으로 내부 절차서에 명시되어 있으며, 변경점 통보 시 고객과 사전 협의된 일정을 준수하여 통보하고 있는가?"),
-          createQuestionData(2, "2.2", "변경점 관리 대장, 변경점 관리 신고서 양식은 정립되었으며 실제로 운영되고 있는가?"),
-          createQuestionData(3, "3.1", "신고된 변경점에 대해 고객 회신 이력은 관리되고 있는가? (Accept / Reject 포함)"),
-          createQuestionData(3, "3.2", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해 이력관리가 되고 있는가?"),
-          createQuestionData(3, "3.3", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part 진행 시, 변경점에 대한 관련 인원 공유되고 있는가?<br>(변경점 승인 즉시 공유가 아닌 제작 시 확인 가능하도록 공유 여부 확인 필요)"),
-          createQuestionData(3, "3.4", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해 변경점 적용 여부에 대한 검사는 진행되고 있으며, 기록으로 확인 가능한가?"),
-          createQuestionData(3, "3.5", "변경점 관리 프로세스에 대해 교육 Curriculum에 추가되어 기준에 맞춰 교육 진행되고 있는가?"),
-          createQuestionData(4, "4.1", "시스템을 통해 변경점 관리가 진행되고 있는가?<br>(변경 이력, 변경점 적용 시점, 변경 대상 Model 등)"),
-          createQuestionData(4, "4.2", "특정 고객 요청에 의한 변경점일 경우, 해당 변경점이 다른 고객에게 적용되지 않도록 관리되고 있는가?"),
-          createQuestionData(4, "4.3", "생산 시작 전 이전 생산 품목 대비 변경점 발생 여부에 대한 검토는 진행되고 있는가?<br>(Repeat Order일 경우에도 변경점 발생 여부 확인 체크 필요)"),
-          createQuestionData(5, "5.1", "적용된 변경 사항에 대해 보증방안은 수립되어 있는가?<br>(변경점에 대한 Test 진행 여부, Test 항목, 기간 등)")
-        ]
-      ),
-
-      createSectionData(
-        10,
-        "Business Continuity Management System",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "Business 연속성을 유지하기 위한 BCP가 수립되어 있는가?"),
-          createQuestionData(1, "1.2", "Business 연속성을 유지하기 위한 업무 Process가 구축되어 있는가?"),
-          createQuestionData(2, "2.1", "BCP는 전 직원이 인지할 수 있도록 게시 혹은 배포되고 있는가?"),
-          createQuestionData(2, "2.2", "BCP에는 복구 절차, 수행 인원, 필요 자원, 복구 기간 등이 명시되어 있는가?<br>(위 내용은 필수적으로 포함되어야 함)"),
-          createQuestionData(3, "3.1", "BCP는 경영진의 검토 및 승인을 받고 있으며, 검토 주기 설정 및 주기에 맞춰 검토되고 있는가?"),
-          createQuestionData(3, "3.2", "BCP에 대한 연습 절차는 수립되어 있는가? (주기, 유형 등)"),
-          createQuestionData(3, "3.3", "BCP 연습 과정에서 발생된 개선 사항은 BCP에 반영되고 있는가?"),
-          createQuestionData(4, "4.1", "BCP는 Business에 영향을 줄 수 있는 프로세스를 선별하여 수립되었는가?<br>(프로세스는 주관적이 아닌 객관적인 기준에 의거하여 선정되어야 한다.)"),
-          createQuestionData(4, "4.2", "BCP 연습은 최소 1년 1회로 진행되고 있으며, 최소 1건 이상은 회람, 토론 형식이 아닌 실제 모의 훈련으로 진행되고 있는가?"),
-          createQuestionData(5, "5.1", "주요 공급 업체에 대해 공급 업체 정보를 보유 관리하고 있는가?<br>또한 주요 공급 업체의 BCMS 능력 평가 진행하고 있는가?"),
-          createQuestionData(5, "5.2", "BCMS 프로세스 개선 목표 및 달성 방안은 매년 수립되고 있는가?<br>또한 매년 동일 목표가 아닌 새로운 목표를 수립하고 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        11,
-        "Employee Training",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "신규 입사자에 대한 OJT Curriculum은 수립되어 있는가?"),
-          createQuestionData(1, "1.2", "전사 필수 교육에 대한 연간 교육훈련계획서가 수립되어 있는가?"),
-          createQuestionData(1, "1.3", "임직원에 대한 교육 훈련 절차가 수립되어 있는가? (신입, 기존 임직원 포함)"),
-          createQuestionData(2, "2.1", "교육 훈련 후 교육보고서를 통해 실적 관리되고 있는가?"),
-          createQuestionData(2, "2.2", "모든 직무에 대해 직무 수행 내용 및 직무 요건이 정의되어 있는가?"),
-          createQuestionData(2, "2.3", "교육 훈련 현황은 주기별로(최소 반기별) 모니터링 되고 있는가?"),
-          createQuestionData(3, "3.1", "직무별 경력, 업무에 따른 필수 교육 체계도가 수립되어 있으며, 체계에 맞춰 교육이 진행되고 있는가?"),
-          createQuestionData(3, "3.2", "매년 이수해야 하는 교육 훈련에 대한 기준은 수립되어 있는가? 또한 해당 기준에 맞춰 교육이 수립되고 있는가?<br>(법정 필수 교육 외)"),
-          createQuestionData(4, "4.1", "교육 훈련 Process는 시스템으로 관리가 되고 있는가?"),
-          createQuestionData(5, "5.1", "회사 평가(승진, KPI 등)와 교육이 제도적으로 연계가 되어 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        12,
-        "Design, New Product",
-        ["ODM", "M.ODM"],
-        [
-          createQuestionData(1, "1.1", "초도품 설계 및 검증에 대한 문서화된 절차는 보유하고 있는가?"),
-          createQuestionData(2, "2.1", "초도품에 대한 최종 검사 보고서는 작성되고 있는가?"),
-          createQuestionData(2, "2.2", "초도품에 대한 작업 표준서 및 검사 기준서 작성에 대한 절차 보유 및 절차 준수하고 있는가?"),
-          createQuestionData(2, "2.3", "초도품에 대해서 식별 및 이력관리는 진행되고 있는가?"),
-          createQuestionData(2, "2.4", "개발 단계에서 양산 단계로 전환하는 절차에 대한 프로세스가 수립되어 있는가?"),
-          createQuestionData(3, "3.1", "초도품의 설계 혹은 최종 제품이 안전, 보건 및 환경 규제 또는 법적 요구 사항을 완벽하게 준수하는지 확인하는 절차 보유 및 절차 준수하고 있는가?<br>(고객사 요구사항 외)"),
-          createQuestionData(3, "3.2", "초도품의 설계 or 제작 단계에서 고객의 요구사항을 충족하는지 검토하는 절차 보유 및 절차 준수하고 있는가?"),
-          createQuestionData(3, "3.3", "개발 단계에서 양산으로 전환 시, 필요한 필수 문서가 정의되어 있는가?"),
-          createQuestionData(4, "4.1", "초도품 개발 과정에서 확인된 실패 DB에 대해 문서화되고 있는가?<br>또한 해당 실패 DB는 향후 초도품 개발 단계에서 검토되고 있으며 해당 절차는 문서화되어 있는가?"),
-          createQuestionData(4, "4.2", "초도품 개발 Status는 시스템으로 관리되며, 각각의 산출물도 모두 시스템을 통해 등록 관리되고 있는가?"),
-          createQuestionData(5, "5.1", "초도품 개발 전 목표는 명확하게 수치화되어 관리되고 있으며, 양산 전환 전 목표 대비 실적에 대해 관리되고 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        13,
-        "Inspection and Test",
-        ["ALL"],
-        [
-          createQuestionData(1, "1.1", "QC 공정도에 각 공정별 검사 항목과 관리 Spec 및 검사 담당은 설정되어 있는가?"),
-          createQuestionData(1, "1.2", "검사자에 대한 적격성 기준은 수립되어 있으며, 평가 결과에 대해서는 상위권자 승인을 득하여 관리되고 있는가?"),
-          createQuestionData(1, "1.3", "계측기에 대해서는 관리대장 및 이력카드 작성되어 관리되고 있는가?"),
-          createQuestionData(2, "2.1", "수입 / 공정 / 출하 검사 기준서는 작성되어 있는가?"),
-          createQuestionData(2, "2.2", "각 단계별(수입/공정/출하) 검사 실시 및 성적서 작성관리 되고 있는가?"),
-          createQuestionData(2, "2.3", "계측기에 대해 주기적으로 검교정 진행되고 있으며, 교정라벨은 해당 계측기에 부착되어 있는가?"),
-          createQuestionData(2, "2.4", "계측기 담당 부서와 보관 위치는 지정 및 기록 관리되고 있는가?<br>또한, 계측기의 계측기 보관위치는 식별관리 되고 있는가?"),
-          createQuestionData(3, "3.1", "수입 / 공정 / 출하 검사 성적서는 각각 Revision(개정 이력 포함) 관리가 진행되고 있는가?"),
-          createQuestionData(3, "3.2", "중요 공정(CTQ)가 설정되어 있으며, 해당 공정은 작업 표준서, 공정 검사 Check Sheet 등으로 관리되고 있는가?"),
-          createQuestionData(3, "3.3", "검사원에 대한 갱신 기준은 수립되어 있는가? 또한 기준에 맞춰 갱신되고 있는가?"),
-          createQuestionData(3, "3.4", "계측기의 검교정 진행 여부 및 검교정 주기 선정 기준은 문서화되어 관리되고 있는가?"),
-          createQuestionData(4, "4.1", "검사 Data는 시스템으로 관리되고 있는가?<br>또한 시스템에 Spec Out 값 입력 시, 작업자가 인지할 수 있도록 관리되고 있는가?"),
-          createQuestionData(4, "4.2", "계측기 이력 및 관리 대장은 시스템으로 관리되고 있는가?"),
-          createQuestionData(4, "4.3", "특별 관리 대상 계측기에 대해 정의되어 있으며, 정의된 계측기에 대한 관리 방안이 수립되어 있는가?"),
-          createQuestionData(5, "5.1", "검사 프로세스의 건전성을 측정하기 위한 KPI는 수립 및 주기적으로 모니터링 되고 있는가?<br>(ex: Gauge R&R, 공정능력지수 등)"),
-          createQuestionData(5, "5.2", "통계적 품질 관리를 통해 데이터 수집, 분석 및 개선 활동 진행하고 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        14,
-        "재무 현황",
-        ["ALL"],
-        [
-          createAverageQuestionData(1, "매출액 증가율", [
-            ["7% 이상", "A", 5],
-            ["5% 이상 7% 미만", "B", 4],
-            ["3% 이상 5% 미만", "C", 3],
-            ["0% 이상 3% 미만", "D", 1],
-            ["0% 미만", "E", 0]
-          ]),
-          createAverageQuestionData(2, "영업이익률", [
-            ["3% 이상", "A", 5],
-            ["2% 이상 3% 미만", "B", 4],
-            ["1% 이상 2% 미만", "C", 3],
-            ["0.5% 이상 1% 미만", "D", 1],
-            ["0.5% 미만", "E", 0]
-          ]),
-          createAverageQuestionData(3, "자기자본 비율", [
-            ["50% 이상", "A", 5],
-            ["30% 이상 50% 미만", "B", 4],
-            ["15% 이상 30% 미만", "C", 3],
-            ["5% 이상 15% 미만", "D", 1],
-            ["5% 미만", "E", 0]
-          ]),
-          createAverageQuestionData(4, "부채 비율", [
-            ["100% 이하", "A", 5],
-            ["100% 이상 120% 미만", "B", 4],
-            ["120% 이상 150% 미만", "C", 3],
-            ["150% 이상 200% 미만", "D", 1],
-            ["200% 초과", "E", 0]
-          ]),
-          createAverageQuestionData(5, "유동비율", [
-            ["200% 이상", "A", 5],
-            ["150% 이상 200% 미만", "B", 4],
-            ["100% 이상 150% 미만", "C", 3],
-            ["50% 이상 100% 미만", "D", 1],
-            ["50% 초과", "E", 0]
-          ]),
-          createAverageQuestionData(6, "비유동 비율", [
-            ["100% 이하", "A", 5],
-            ["100% 이상 120% 미만", "B", 4],
-            ["120% 이상 150% 미만", "C", 3],
-            ["150% 이상 200% 미만", "D", 1],
-            ["200% 초과", "E", 0]
-          ]),
-          createAverageQuestionData(7, "비유동장기적합률", [
-            ["100% 이하", "A", 5],
-            ["100% 이상 120% 미만", "B", 4],
-            ["120% 이상 150% 미만", "C", 3],
-            ["150% 이상 200% 미만", "D", 1],
-            ["200% 초과", "E", 0]
-          ]),
-          createAverageQuestionData(8, "대외기관 신용평가 등급", [
-            ["매우 우량 (AAA~A-)", "A", 5],
-            ["양호 (BBB+~BB-)", "B", 4],
-            ["보통 (B+~B-)", "C", 3],
-            ["미흡 (CCC+~D)", "D", 1],
-            ["불량 (CC~D) 혹은 평가 없음", "E", 0]
-          ])
-        ],
-        false,
-        "average"
-      ),
-
-      createSectionData(
-        15,
-        "구매 관리",
-        ["OEM", "ODM", "M.ODM"],
-        [
-          createQuestionData(1, "1.1", "구매 업무 프로세스를 보유하고 있는가?"),
-          createQuestionData(2, "2.1", "구매 업무 프로세스에 맞추어 업무를 수행하고 있는가?"),
-          createQuestionData(2, "2.2", "구매품(원재료, 표준품, 부속품 등) 가격 결정 프로세스를 보유하고 있는가?"),
-          createQuestionData(3, "3.1", "가격 결정 프로세스에 맞추어 업무를 수행하고 있는가?"),
-          createQuestionData(3, "3.2", "구매 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
-          createQuestionData(3, "3.3", "구매품(원재료, 표준품, 부속품 등)의 통상 수급 기간을 품목 특성에 따라 관리하고 있는가?"),
-          createQuestionData(3, "3.4", "구매 관련 교육을 정기적으로 수강하고 있는가?"),
-          createQuestionData(4, "4.1", "견적 요청은 시스템을 통해 진행되는가?"),
-          createQuestionData(4, "4.2", "협력업체는 요청 받은 견적을 시스템을 통해 입력하는가?"),
-          createQuestionData(4, "4.3", "협력업체에서 입력한 견적은 시스템을 통해 관리되고 있는가?"),
-          createQuestionData(4, "4.4", "시스템을 통해 구매 발주를 진행하고 있는가?"),
-          createQuestionData(4, "4.5", "시스템을 통한 기준정보 관리를 하고 있는가?"),
-          createQuestionData(4, "4.6", "연간 구매 계획을 수립하고 있는가?"),
-          createQuestionData(5, "5.1", "연간 구매 계획은 연간 생산 계획과 연동되며, 해당 수립된 계획에 따라 업무를 수행하고 있는가?"),
-          createQuestionData(5, "5.2", "BCP (Business Continuity Planning : 비즈니스 지속성 계획) 관점에서 구매품의<br>공급망 안정성이 확보되어 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        16,
-        "협력업체 관리",
-        ["OEM", "ODM", "M.ODM"],
-        [
-          createQuestionData(1, "1.1", "협력업체 관리 프로세스를 보유하고 있는가?"),
-          createQuestionData(2, "2.1", "계약을 진행해야 하는 협력업체와 체결해야 하는 계약서가 정의되어 있는가?"),
-          createQuestionData(2, "2.2", "협력업체 관리 프로세스에 신규 협력업체를 선정하기 위한 절차가 별도로 명시되어 있으며,<br>절차에 따라 업무 수행이 가능한 수준인가?"),
-          createQuestionData(2, "2.3", "협력업체 관리 프로세스에 기존 거래 협력업체를 관리 및 평가할 수 있는 절차가 별도로 명시되어 있으며,<br>절차에 따라 업무 수행이 가능한 수준인가?"),
-          createQuestionData(3, "3.1", "계약을 진행해야 하는 협력업체와 필요한 계약에 대해 빠짐없이 체결하고 있는가?"),
-          createQuestionData(3, "3.2", "신규 협력업체는 내부 기준에 따라 평가 및 선정을 하고 있는가?"),
-          createQuestionData(3, "3.3", "신규 협력업체를 선정하기 위한 평가 시트는 공급 받는 자재의 특성 혹은 협력업체의 특성에 따라 분리 및 세분화 되어 있는가?"),
-          createQuestionData(3, "3.4", "신규 협력업체를 선정하기 위한 평가 시트는 경영 현황, 제조 공정, 품질 관리, 자재 관리 등 각 항목별로 평가 항목이 구분되어 있는가?"),
-          createQuestionData(3, "3.5", "기존 거래하고 있는 협력업체 정기 평가 주기의 기준이 수립되어 있는가?"),
-          createQuestionData(3, "3.6", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 공급 받는 자재의 특성 혹은 협력업체의 특성에 따라 분리 및 세분화 되어 있는가?"),
-          createQuestionData(3, "3.7", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 경영 현황, 제조 공정, 품질 관리, 자재 관리 등 각 항목별로 평가 항목이 구분되어 있는가?"),
-          createQuestionData(3, "3.8", "기존 거래하고 있는 협력업체에 대해 정기 평가를 수립된 기준에 따라 정기적으로 시행하고 있는가?"),
-          createQuestionData(4, "4.1", "계약을 진행해야 하는 협력업체와 계약을 체결하고, 계약 관련 사항을 지속적으로 갱신 및 관리하고 있는가?"),
-          createQuestionData(4, "4.2", "신규 협력업체를 선정하기 위한 평가 시트의 평가 항목은 객관적인 평가가 가능한 기준이 정립되어 있는가?"),
-          createQuestionData(4, "4.3", "신규 협력업체를 선정하기 위한 평가 및 선정 이후, 결과에 대해 통지하고 있는가?"),
-          createQuestionData(4, "4.4", "신규 협력업체를 선정하기 위한 평가 이후, 결과에 대해 시스템에 등록하여 관리하고 있는가?"),
-          createQuestionData(4, "4.5", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 객관적인 평가가 가능한 기준이 정립되어 있는가?"),
-          createQuestionData(4, "4.6", "기존 협력업체를 평가한 이후, 결과에 대해 통지하고 부적합 사항에 대한 시정조치를 요구하고 있는가?"),
-          createQuestionData(4, "4.7", "기존 협력업체를 평가한 이후, 결과에 대해 시스템에 등록하여 관리하고 있는가?"),
-          createQuestionData(5, "5.1", "신규 협력업체를 선정하기 위한 평가 및 선정 이후, 결과에 대해 내부적으로 보고하고 관리하고 있는가?"),
-          createQuestionData(5, "5.2", "기존 협력업체 평가 결과에 대해 내부적으로 보고 하고 개선을 위한 활동을 하고 있으며, 매년 관리 지표는 개선되고 있는가?"),
-          createQuestionData(5, "5.3", "기존 협력업체 평가 결과는 추후 구매 계획에 반영되며, 구매 계획 수립의 근거자료로 활용하고 있는가?")
-        ]
-      ),
-
-      createSectionData(
-        17,
-        "영업 관리 - OEM",
-        ["OEM"],
-        [
-          createQuestionData(1, "1.1", "고객사 제품 납기 관리를 위한 프로세스를 보유하고 있는가?"),
-          createQuestionData(1, "1.2", "고객사 제품 납기 관리를 위한 각 부서별 역할이 정의되어 있는가?"),
-          createQuestionData(1, "1.3", "고객사에서 요청하는 납기를 잘 준수하고 있는가?"),
-          createQuestionData(2, "2.1", "납기 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
-          createQuestionData(2, "2.2", "고객사 납기 관리를 위한 지표가 수립되어 있는가?"),
-          createQuestionData(2, "2.3", "고객사에서 요청하는 계약이 모두 체결되어 있는가?"),
-          createQuestionData(3, "3.1", "납기 관리 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
-          createQuestionData(3, "3.2", "고객사에서 요청하는 납기가 변경될 시, 즉시 대응 할 수 있는 프로세스가 있는가?"),
-          createQuestionData(3, "3.3", "고객사와 체결한 계약서에 대해서 적절히 보관 및 관리되고 있는가?"),
-          createQuestionData(4, "4.1", "시스템을 통한 제품 생산 일정 관리를 하고 있는가?"),
-          createQuestionData(4, "4.2", "고객사에서 요청 하는 납기가 변경될 시, 시스템을 통한 고객사 제품 생산 일정 변경 및 제품 납품 일정 조율이 가능한가?"),
-          createQuestionData(5, "5.1", "고객사 납기 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
-        ],
-        false,
-        "level",
-        "17-oem"
-      ),
-
-      createSectionData(
-        17,
-        "영업 관리 - ODM, M.ODM",
-        ["ODM", "M.ODM"],
-        [
-          createQuestionData(1, "1.1", "고객사 제품 납기 관리를 위한 프로세스를 보유하고 있는가?"),
-          createQuestionData(1, "1.2", "고객사 제품 납기 관리를 위한 각 부서별 역할이 정의되어 있는가?"),
-          createQuestionData(1, "1.3", "고객사에서 요청하는 납기를 잘 준수하고 있는가?"),
-          createQuestionData(1, "1.4", "EOL 관리 프로세스를 보유하고 있는가?"),
-          createQuestionData(2, "2.1", "납기 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
-          createQuestionData(2, "2.2", "고객사 납기 관리를 위한 지표가 수립되어 있는가?"),
-          createQuestionData(2, "2.3", "고객사에서 요청하는 계약이 모두 체결되어 있는가?"),
-          createQuestionData(2, "2.4", "EOL 관리 대상 품목이 정의되어 있는가?"),
-          createQuestionData(3, "3.1", "납기 관리 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
-          createQuestionData(3, "3.2", "고객사에서 요청하는 납기가 변경될 시, 즉시 대응 할 수 있는 프로세스가 있는가?"),
-          createQuestionData(3, "3.3", "고객사와 체결한 계약서에 대해서 적절히 보관 및 관리되고 있는가?"),
-          createQuestionData(3, "3.4", "EOL 관리 대상 품목에 대해, 단종 6개월 전에 고객사에 통지하고 있는가?"),
-          createQuestionData(3, "3.5", "EOL 대상 품목은 주기적으로 점검하고 있으며, 관리되고 있는가?"),
-          createQuestionData(4, "4.1", "시스템을 통한 제품 생산 일정 관리를 하고 있는가?"),
-          createQuestionData(4, "4.2", "고객사에서 요청 하는 납기가 변경될 시, 시스템을 통한 고객사 제품 생산 일정 변경 및 제품 납품 일정 조율이 가능한가?"),
-          createQuestionData(5, "5.1", "고객사 납기 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
-        ],
-        false,
-        "level",
-        "17-odm"
-      ),
-
-      createSectionData(
-        18,
-        "자재 관리",
-        ["OEM", "ODM", "M.ODM"],
-        [
-          createQuestionData(1, "1.1", "재고 관리 프로세스를 보유하고 있는가?"),
-          createQuestionData(1, "1.2", "제품 재고 보관 구역이 별도로 설정되어 있는가?"),
-          createQuestionData(1, "1.3", "재고는 제품별 식별이 가능하도록 보관되고 있는가?"),
-          createQuestionData(2, "2.1", "재고 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
-          createQuestionData(2, "2.2", "재고 관리를 위해 입고, 출고 업무에 대한 역할이 정의되어 있고, 실행 매뉴얼이 있는가?"),
-          createQuestionData(2, "2.3", "제품을 보관하기 위한 보관 구역에 적정한 온도, 습도로 관리되고 있는가?"),
-          createQuestionData(2, "2.4", "별도로 설정되어 있는 제품 재고 보관 구역에 제품을 Pallet / Rack 등을 이용하여 보관하고 있는가?"),
-          createQuestionData(2, "2.5", "선입선출 구조로 재고를 관리하고 있는가?"),
-          createQuestionData(3, "3.1", "전체 재고에 대해 주기적으로 파악하고 관리하고 있는가?"),
-          createQuestionData(3, "3.2", "전체 재고 중 장기재고 혹은 체화재고에 대해 파악하고 있는가?"),
-          createQuestionData(3, "3.3", "전체 재고 중 장기재고 혹은 체화재고에 대해 별도의 보관 구역을 설정하여 관리하고 있는가?"),
-          createQuestionData(3, "3.4", "재고 관리를 위한 지표가 있는가?"),
-          createQuestionData(4, "4.1", "시스템을 통한 재고 현황 확인을 하고 있는가?"),
-          createQuestionData(4, "4.2", "시스템을 통한 자재 입고 관리를 하고 있는가?"),
-          createQuestionData(4, "4.3", "시스템을 통한 자재 출고 관리를 하고 있는가?"),
-          createQuestionData(5, "5.1", "재고 관리 지표는 주기적으로 갱신 혹은 확인되고 있으며, 유관 부서와 함께 검토되고 있는가?"),
-          createQuestionData(5, "5.2", "재고 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
-        ]
-      )
-    ];
-
-    function materialGroupLabel(groups) {
-      return groups.includes("ALL")
-        ? "All"
-        : groups.join(", ");
-    }
-
-    function safeKey(key) {
-      return String(key).replace(/[^a-zA-Z0-9_-]/g, "-");
-    }
-
-    function createSelfAuditControl(section) {
-      const key = safeKey(section.sectionKey);
-
-      if (section.scoringType === "average") {
-        return `
-          <input
-            class="average-self-input"
-            id="section${key}SelfAuditScore"
-            type="number"
-            min="0"
-            max="5"
-            step="0.01"
-            placeholder="예: 4.25"
-          >
-        `;
-      }
-
-      const values = ["", "0.0", "1.0", "2.0", "3.0", "4.0", "5.0"];
-
-      return `
-        <select
-          class="self-audit-select"
-          id="section${key}SelfAuditScore"
-        >
-          ${values.map(value => `
-            <option value="${value}">
-              ${value === "" ? "선택 안 함" : value}
-            </option>
-          `).join("")}
-        </select>
-      `;
-    }
-
-    function createEvaluationOption(name, value, checked = false) {
-      const suffixMap = {
-        "미평가": "none",
-        "적합": "pass",
-        "부적합": "fail",
-        "권고": "recommend"
-      };
-
-      const id = `${name}-${suffixMap[value]}`;
-
-      return `
-        <div class="result-option">
-          <input
-            type="radio"
-            id="${id}"
-            name="${name}"
-            value="${value}"
-            ${checked ? "checked" : ""}
-          >
-          <label for="${id}">${value}</label>
-        </div>
-      `;
-    }
-
-    function createEvaluationOptions(section, questionNumber) {
-      const safeQuestionNumber = String(questionNumber).replace(/[^a-zA-Z0-9]/g, "");
-      const key = safeKey(section.sectionKey);
-      const name = `section${key}Question${safeQuestionNumber}`;
-
-      return `
-        <div class="result-options">
-          ${createEvaluationOption(name, "미평가", true)}
-          ${createEvaluationOption(name, "적합")}
-          ${createEvaluationOption(name, "부적합")}
-          ${createEvaluationOption(name, "권고")}
-        </div>
-      `;
-    }
-
-    function createLevelQuestionRow(section, question) {
-      return `
-        <tr
-          data-level="${question.level}"
-          data-question-number="${question.number}"
-          data-applicable="true"
-        >
-          <td class="level-cell">${question.level}</td>
-          <td class="question-cell">${question.number}</td>
-          <td class="evaluation-cell">${question.content}</td>
-          <td class="result-cell">
-            ${createEvaluationOptions(section, question.number)}
-          </td>
-          <td class="comment-cell">
-            <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-          </td>
-        </tr>
-      `;
-    }
-
-    function createAverageCriteria(criteria) {
-      return `
-        <div class="average-criteria">
-          ${criteria.map(([condition, grade, score]) => `
-            <div class="average-criteria-line">
-              <span>${condition}</span>
-              <strong>${grade}(${score})</strong>
-            </div>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    function createAverageQuestionRow(section, question) {
-      const key = safeKey(section.sectionKey);
-      const rowKey = `section${key}Average${question.number}`;
-
-      return `
-        <tr
-          data-question-number="${question.number}"
-          data-applicable="true"
-        >
-          <td class="question-cell">${question.number}</td>
-          <td class="evaluation-cell"><strong>${question.content}</strong></td>
-          <td>${createAverageCriteria(question.criteria)}</td>
-          <td class="result-cell">
-            <select class="average-grade-select" id="${rowKey}Grade">
-              <option value="">선택 안 함</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-              <option value="E">E</option>
-            </select>
-          </td>
-          <td class="average-score-cell" id="${rowKey}Score">-</td>
-          <td class="comment-cell">
-            <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
-          </td>
-        </tr>
-      `;
-    }
-
-    function createSectionHtml(section) {
-      const key = safeKey(section.sectionKey);
-      const totalQuestions = section.questions.length;
-      const isAverage = section.scoringType === "average";
-
-      const tableHeader = isAverage
-        ? `
-          <tr>
-            <th>Question Number</th>
-            <th>Contents</th>
-            <th>Evaluation Contents</th>
-            <th>Evaluation Grade</th>
-            <th>Evaluation Score</th>
-            <th>PSK Notes / Comments</th>
-          </tr>
-        `
-        : `
-          <tr>
-            <th>Scoring Level</th>
-            <th>Question Number</th>
-            <th>Evaluation Contents</th>
-            <th>Evaluation Result</th>
-            <th>PSK Notes / Comments</th>
-          </tr>
-        `;
-
-      const rows = section.questions.map(question =>
-        isAverage
-          ? createAverageQuestionRow(section, question)
-          : createLevelQuestionRow(section, question)
-      ).join("");
-
-      const scoringLabel = isAverage ? "에버리지제도" : "레벨제도";
-      const summaryText = isAverage
-        ? `총 ${totalQuestions}개 평가항목 · ${scoringLabel}`
-        : `Level 1부터 Level 5까지 총 ${totalQuestions}개 평가항목 · ${scoringLabel}`;
-
-      const scoreRule = isAverage
-        ? `
-          <strong>Audit Score 계산 기준 · 에버리지제도</strong><br>
-          각 항목의 평가 Grade를 A=5점 / B=4점 / C=3점 / D=1점 / E=0점으로 환산하고,
-          평가 완료된 항목의 평균을 Audit Score로 계산합니다.<br>
-          Section 14 Self-Audit Score는 협력업체 자체평가 평균점수를 직접 입력합니다.
-        `
-        : `
-          <strong>Audit Score 계산 기준 · 레벨제도</strong><br>
-          부적합이 발생한 가장 낮은 Level의 직전 Level을 Audit Score로 계산합니다.
-          예: Level 3 항목에서 부적합 발생 → Audit Score 2.0.<br>
-          권고는 Audit Score를 차감하지 않으며 별도 분석 대상으로 집계합니다.
-        `;
-
-      return `
-        <div
-          class="audit-accordion"
-          id="section${key}Wrapper"
-          data-section-key="${key}"
-          data-section-number="${section.sectionNumber}"
-          data-scoring-type="${section.scoringType}"
-          data-applicable="true"
-        >
-          <button
-            class="accordion-header ${section.open ? "open" : ""}"
-            id="section${key}Header"
-            type="button"
-          >
-            <div class="accordion-title">
-              <div class="accordion-title-row">
-                <strong>Section ${section.sectionNumber} · ${section.title}</strong>
-                <span class="section-material-badge">
-                  Material Group : ${materialGroupLabel(section.materialGroups)}
-                </span>
-              </div>
-              <span id="section${key}QuestionSummary">${summaryText}</span>
-            </div>
-            <div class="accordion-arrow">⌃</div>
-          </button>
-
-          <div
-            class="accordion-content ${section.open ? "open" : ""}"
-            id="section${key}Content"
-          >
-            <div class="section-summary">
-              <div class="summary-card self-audit-card">
-                <span>Section ${section.sectionNumber} Self-Audit Score</span>
-                ${createSelfAuditControl(section)}
-              </div>
-
-              <div class="summary-card score-card">
-                <span>Section ${section.sectionNumber} Audit Score</span>
-                <strong id="section${key}AuditScore">${isAverage ? "-" : "5.0"}</strong>
-              </div>
-
-              ${isAverage ? `
-                <div class="summary-card">
-                  <span>평가 완료</span>
-                  <strong id="section${key}CompletedCount">0 / ${totalQuestions}</strong>
-                </div>
-                <div class="summary-card">
-                  <span>계산 방식</span>
-                  <strong style="font-size:18px;">AVERAGE</strong>
-                </div>
-                <div class="summary-card">
-                  <span>Grade</span>
-                  <strong style="font-size:16px;">A/B/C/D/E</strong>
-                </div>
-              ` : `
-                <div class="summary-card">
-                  <span>부적합</span>
-                  <strong id="section${key}FailCount">0</strong>
-                </div>
-                <div class="summary-card">
-                  <span>권고</span>
-                  <strong id="section${key}RecommendCount">0</strong>
-                </div>
-                <div class="summary-card">
-                  <span>평가 완료</span>
-                  <strong id="section${key}CompletedCount">0 / ${totalQuestions}</strong>
-                </div>
-              `}
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>${tableHeader}</thead>
-                <tbody id="section${key}Body">${rows}</tbody>
-              </table>
-            </div>
-
-            <div class="score-rule">${scoreRule}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    const productionSections = auditSections.filter(section =>
-      section.sectionNumber >= 1 && section.sectionNumber <= 5
-    );
-
-    const qualitySections = auditSections.filter(section =>
-      section.sectionNumber >= 6 && section.sectionNumber <= 13
-    );
-
-    const purchaseSections = auditSections.filter(section =>
-      section.sectionNumber >= 14 && section.sectionNumber <= 18
-    );
-
-    document.getElementById("productionAuditSections").innerHTML =
-      productionSections.map(createSectionHtml).join("");
-
-    document.getElementById("qualityAuditSections").innerHTML =
-      qualitySections.map(createSectionHtml).join("");
-
-    document.getElementById("purchaseAuditSections").innerHTML =
-      purchaseSections.map(createSectionHtml).join("");
-
-    function getSelectedMaterialGroups() {
-      return Array.from(
-        document.querySelectorAll('input[name="materialGroup"]:checked')
-      ).map(input => input.value);
-    }
-
-    function isMaterialApplicable(allowedGroups, selectedGroups) {
-      if (selectedGroups.length === 0) return true;
-      if (allowedGroups.includes("ALL")) return true;
-      return allowedGroups.some(group => selectedGroups.includes(group));
-    }
-
-    function updateLevelSectionResult(section) {
-      const key = safeKey(section.sectionKey);
-      const wrapper = document.getElementById(`section${key}Wrapper`);
-
-      if (!wrapper || wrapper.dataset.applicable === "false") return;
-
-      const body = document.getElementById(`section${key}Body`);
-      const rows = Array.from(body.querySelectorAll("tr")).filter(row =>
-        row.dataset.applicable !== "false"
-      );
-
-      let lowestFailLevel = null;
-      let failCount = 0;
-      let recommendCount = 0;
-      let completedCount = 0;
-
-      rows.forEach(row => {
-        const level = Number(row.dataset.level);
-        const selected = row.querySelector('input[type="radio"]:checked');
-        const result = selected ? selected.value : "미평가";
-
-        row.classList.remove("status-pass", "status-fail", "status-recommend");
-
-        if (result !== "미평가") completedCount += 1;
-        if (result === "적합") row.classList.add("status-pass");
-
-        if (result === "부적합") {
-          row.classList.add("status-fail");
-          failCount += 1;
-          if (lowestFailLevel === null || level < lowestFailLevel) {
-            lowestFailLevel = level;
-          }
-        }
-
-        if (result === "권고") {
-          row.classList.add("status-recommend");
-          recommendCount += 1;
-        }
-      });
-
-      const auditScore = lowestFailLevel === null ? 5 : lowestFailLevel - 1;
-
-      document.getElementById(`section${key}AuditScore`).textContent =
-        auditScore.toFixed(1);
-      document.getElementById(`section${key}FailCount`).textContent = failCount;
-      document.getElementById(`section${key}RecommendCount`).textContent = recommendCount;
-      document.getElementById(`section${key}CompletedCount`).textContent =
-        `${completedCount} / ${rows.length}`;
-
-      const summary = document.getElementById(`section${key}QuestionSummary`);
-      if (summary) {
-        summary.textContent =
-          `Level 1부터 Level 5까지 총 ${rows.length}개 평가항목 · 레벨제도`;
-      }
-    }
-
-    function updateAverageSectionResult(section) {
-      const key = safeKey(section.sectionKey);
-      const wrapper = document.getElementById(`section${key}Wrapper`);
-
-      if (!wrapper || wrapper.dataset.applicable === "false") return;
-
-      const gradeScoreMap = { A: 5, B: 4, C: 3, D: 1, E: 0 };
-      let totalScore = 0;
-      let completedCount = 0;
-
-      section.questions.forEach(question => {
-        const rowKey = `section${key}Average${question.number}`;
-        const select = document.getElementById(`${rowKey}Grade`);
-        const scoreCell = document.getElementById(`${rowKey}Score`);
-        const row = select.closest("tr");
-        const grade = select.value;
-
-        row.classList.remove(
-          "average-result-a",
-          "average-result-b",
-          "average-result-c",
-          "average-result-d",
-          "average-result-e"
-        );
-
-        if (grade && gradeScoreMap[grade] !== undefined) {
-          const score = gradeScoreMap[grade];
-          totalScore += score;
-          completedCount += 1;
-          scoreCell.textContent = score.toFixed(1);
-          row.classList.add(`average-result-${grade.toLowerCase()}`);
-        } else {
-          scoreCell.textContent = "-";
-        }
-      });
-
-      const auditScore = completedCount > 0
-        ? totalScore / completedCount
-        : null;
-
-      document.getElementById(`section${key}AuditScore`).textContent =
-        auditScore === null ? "-" : auditScore.toFixed(2);
-
-      document.getElementById(`section${key}CompletedCount`).textContent =
-        `${completedCount} / ${section.questions.length}`;
-    }
-
-    function updateSectionResult(section) {
-      if (section.scoringType === "average") {
-        updateAverageSectionResult(section);
-      } else {
-        updateLevelSectionResult(section);
-      }
-    }
-
-    function applyMaterialGroupRules() {
-      const selectedGroups = getSelectedMaterialGroups();
-
-      auditSections.forEach(section => {
-        const key = safeKey(section.sectionKey);
-        const wrapper = document.getElementById(`section${key}Wrapper`);
-        const sectionApplicable = isMaterialApplicable(
-          section.materialGroups,
-          selectedGroups
-        );
-
-        wrapper.dataset.applicable = sectionApplicable ? "true" : "false";
-        wrapper.style.display = sectionApplicable ? "" : "none";
-
-        if (!sectionApplicable) return;
-
-        const body = document.getElementById(`section${key}Body`);
-
-        section.questions.forEach(question => {
-          const row = Array.from(body.querySelectorAll("tr")).find(item =>
-            item.dataset.questionNumber === String(question.number)
-          );
-
-          if (!row) return;
-
-          const questionApplicable = isMaterialApplicable(
-            question.materialGroups,
-            selectedGroups
-          );
-
-          row.dataset.applicable = questionApplicable ? "true" : "false";
-          row.style.display = questionApplicable ? "" : "none";
-        });
-
-        updateSectionResult(section);
-      });
-    }
-
-    auditSections.forEach(section => {
-      const key = safeKey(section.sectionKey);
-      const header = document.getElementById(`section${key}Header`);
-      const content = document.getElementById(`section${key}Content`);
-      const body = document.getElementById(`section${key}Body`);
-
-      header.addEventListener("click", () => {
-        header.classList.toggle("open");
-        content.classList.toggle("open");
-      });
-
-      body.addEventListener("change", event => {
-        if (
-          event.target.matches('input[type="radio"]') ||
-          event.target.matches(".average-grade-select")
-        ) {
-          updateSectionResult(section);
-        }
-      });
-
-      updateSectionResult(section);
-    });
-
-    document
-      .querySelectorAll('input[name="materialGroup"]')
-      .forEach(checkbox => {
-        checkbox.addEventListener("change", applyMaterialGroupRules);
-      });
-
-    applyMaterialGroupRules();
-  </script>
+<header>
+<div class="header-inner">
+<span class="header-label">PSK</span>
+<h1>SRE Analysis System</h1>
+<p>[A.I Report] Audit Result Summary &amp; Analysis</p>
+</div>
+</header>
+<main>
+<div class="page-guide">
+<strong>BP社 기본정보 및 생산/품질/구매/보안 심사 결과를 입력해 주세요.</strong><br>
+BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비교하여
+해당되는 심사항목만 자동으로 표시합니다.
+</div>
+<section class="card">
+<div class="section-heading">
+<div class="section-number">01</div>
+<div>
+<h2>BP社 Profile</h2>
+<p>협력업체 및 심사 기본정보</p>
+</div>
+</div>
+<div class="profile-grid">
+<div class="form-group">
+<label for="companyName">Company Name</label>
+<input id="companyName" type="text" placeholder="회사명을 입력하세요">
+</div>
+<div class="form-group">
+<label for="sales">Y2025 Sales</label>
+<input id="sales" type="text" placeholder="Y2025 매출액을 입력하세요">
+</div>
+<div class="form-group full">
+<label for="address">Business Address</label>
+<input id="address" type="text" placeholder="사업장 주소를 입력하세요">
+</div>
+<div class="form-group full">
+<label for="certification">Certification</label>
+<input
+id="certification"
+type="text"
+placeholder="예: ISO 9001, ISO 14001, IATF 16949"
+>
+</div>
+<div class="form-group">
+<label for="auditDate">Audit Date</label>
+<input id="auditDate" type="date">
+</div>
+<div class="form-group">
+<label for="mainProduct">Main Product / Business</label>
+<input
+id="mainProduct"
+type="text"
+placeholder="주요 생산품목 또는 사업 내용을 입력하세요"
+>
+</div>
+<div class="form-group full">
+<div class="material-group-box">
+<span class="material-group-title">Material Group</span>
+<div class="material-options">
+<div class="material-option">
+<input id="materialOem" name="materialGroup" type="checkbox" value="OEM">
+<label for="materialOem">OEM</label>
+</div>
+<div class="material-option">
+<input id="materialOdm" name="materialGroup" type="checkbox" value="ODM">
+<label for="materialOdm">ODM</label>
+</div>
+<div class="material-option">
+<input id="materialModm" name="materialGroup" type="checkbox" value="M.ODM">
+<label for="materialModm">M.ODM</label>
+</div>
+<div class="material-option">
+<input
+id="materialAssemblyHarness"
+name="materialGroup"
+type="checkbox"
+value="조립/Harness"
+>
+<label for="materialAssemblyHarness">조립/Harness</label>
+</div>
+<div class="material-option">
+<input
+id="materialCleaning"
+name="materialGroup"
+type="checkbox"
+value="세정"
+>
+<label for="materialCleaning">세정</label>
+</div>
+</div>
+</div>
+</div>
+<div class="auditor-divider">
+<h3>Department Auditors</h3>
+<p>부서별 심사원 정보를 입력해 주세요.</p>
+</div>
+<div class="form-group">
+<label for="productionAuditor">Production Auditor</label>
+<input id="productionAuditor" type="text" placeholder="Production Auditor Name">
+</div>
+<div class="form-group">
+<label for="qualityAuditor">Quality Auditor</label>
+<input id="qualityAuditor" type="text" placeholder="Quality Auditor Name">
+</div>
+<div class="form-group">
+<label for="purchaseAuditor">Purchase Auditor</label>
+<input id="purchaseAuditor" type="text" placeholder="Purchase Auditor Name">
+</div>
+<div class="form-group">
+<label for="securityAuditor">Security Auditor</label>
+<input id="securityAuditor" type="text" placeholder="Security Auditor Name">
+</div>
+<div class="form-group">
+<label for="systemAuditor">System Auditor</label>
+<input id="systemAuditor" type="text" placeholder="System Auditor Name">
+</div>
+<div class="form-group">
+<label for="complianceAuditor">Compliance &amp; Ethics Auditor</label>
+<input
+id="complianceAuditor"
+type="text"
+placeholder="Compliance & Ethics Auditor Name"
+>
+</div>
+</div>
+</section>
+<section class="card">
+<div class="section-heading">
+<div class="section-number">02</div>
+<div>
+<h2>Production Audit Sections</h2>
+<p>Section 1부터 Section 5까지의 생산부서 심사 체크시트</p>
+</div>
+</div>
+<div id="productionAuditSections"></div>
+</section>
+<section class="card">
+<div class="section-heading">
+<div class="section-number">03</div>
+<div>
+<h2>Quality Audit Sections</h2>
+<p>Section 6부터 Section 13까지의 품질부서 심사 체크시트</p>
+</div>
+</div>
+<div id="qualityAuditSections"></div>
+</section>
+<section class="card">
+<div class="section-heading">
+<div class="section-number">04</div>
+<div>
+<h2>Purchase Audit Sections</h2>
+<p>Section 14부터 Section 18까지의 구매부서 심사 체크시트</p>
+</div>
+</div>
+<div id="purchaseAuditSections"></div>
+</section>
+<section class="card">
+<div class="section-heading">
+<div class="section-number">05</div>
+<div>
+<h2>Security Audit Sections</h2>
+<p>Section 21부터 Section 25까지의 보안부서 심사 체크시트</p>
+</div>
+</div>
+<div id="securityAuditSections"></div>
+</section>
+</main>
+<footer>
+SRE Analysis System · PSK Audit Prototype
+</footer>
+<script>
+const createSectionData = (
+sectionNumber,
+title,
+materialGroups,
+questions,
+open = false,
+scoringType = "level",
+sectionKey = String(sectionNumber)
+) => ({
+sectionNumber,
+title,
+materialGroups,
+questions,
+open,
+scoringType,
+sectionKey
+});
+const createQuestionData = (
+level,
+number,
+content,
+materialGroups = ["ALL"],
+serverTypes = ["ALL"]
+) => ({
+level,
+number,
+content,
+materialGroups,
+serverTypes
+});
+const createAverageQuestionData = (
+number,
+content,
+criteria,
+materialGroups = ["ALL"]
+) => ({
+number,
+content,
+criteria,
+materialGroups
+});
+const auditSections = [
+createSectionData(
+1,
+"생산 일정 관리",
+["ALL"],
+[
+createQuestionData(1, "1.1", `생산 계획표로 생산 일정을 관리 하고 있는가?<br>(제품 별 생산 계획표 내에 생산 Start, End 일정 관리, 생산 계획 선정 기준)`),
+createQuestionData(1, "1.2", "생산 작업에 대한 작업 공정도(흐름도)가 있는가?"),
+createQuestionData(2, "2.1", "생산 계획표에서 일차별로 제품 별 생산 진척 현황을 확인 할 수 있는가?"),
+createQuestionData(2, "2.2", `제품 별 작업 공정도 상 작업 공정별 작업 공수 내용이 포함 되어 있는가?<br>(작업 공수 관리 기준: 공수측정 대상 엔지니어 Level 기준 정립 여부)<br>*작업 공수 : 작업 하는데 실제 작업 시 소요되는 작업 시간`),
+createQuestionData(2, "2.3", `제품 별 대체 공정 혹은 대체 설비 운영에 대한 내용을 확인할 수 있는 문서가 있는가?<br>(생산 라인 Non-stop 지속 가능에 대한 관리 방안)`),
+createQuestionData(2, "2.4", "Engineer 교육 진행 시 작업 공정도를 통해 전체적인 작업 흐름에 대해 교육이 되고 있는가?"),
+createQuestionData(3, "3.1", `제품 별 생산 표준 Capa. 또는 설비 가동율 분석이 되어 있는가?<br>(LOT/월/분기/년)`),
+createQuestionData(3, "3.2", "생산 진행 시 각 단위 작업별 작업자 작업 이력이 관리가 되고 있는가? (작업 실명제 증빙)"),
+createQuestionData(3, "3.3", "긴급 발주(출하 요청) 품목에 대한 생산 Process가 있으며, 긴급 발주(출하 요청) 품목의 생산 일정이 관리가 되고 있는가?"),
+createQuestionData(3, "3.4", `제품 별 최대 생산 Capa. 혹은 최대 생산량을 위한 설비 운영량을 확인할 수 있는가?<br>(최대 생산 Capa.를 고려한 생산계획 일정 수립의 근거자료 확인)<br>(월/분기/년 Forecasting 기준 일정관리)`),
+createQuestionData(4, "4.1", `생산 Capa.는 주기적으로 분석 하며, Capa. Up 활동을 진행하고 있는가?<br>(인원 관리/설비 및 시설 투자/유실 및 작업 공수 최적화/생산 부자재, JIG, 공구관리 등 4M 에 해당하는 모든 항목에 대한 Capa. Up 활동 이력 첨부 必)`),
+createQuestionData(4, "4.2", "System을 통해 당일 생산 실적에 대해서 등록 할 수 있고, 당일 생산 진척율을 확인 할 수 있는 환경이 구축되어 있는가?"),
+createQuestionData(4, "4.3", "생산 Capa.Up 활동에 대한 활동 이력들은 시스템을 통해 실시간으로 진행 상태를 확인 할 수 있는 환경이 구축되어 관리 되고 있는가?"),
+createQuestionData(5, "5.1", "생산 실적은 주기적으로 집계 되며, 경영진과 함께 검토 되고 있는가?"),
+createQuestionData(5, "5.2", "생산 Capa.Up 활동에 대한 목표를 정하고, Capa. Up 목표 달성 여부에 대한 결과가 그룹 또는 Team 고과평가와 연계되어 있는가?")
+],
+true
+),
+createSectionData(
+2,
+"생산 작업 관리",
+["ALL"],
+[
+createQuestionData(1, "1.1", `공정 별 단위 작업의 작업 표준서가 있는가?<br>(작업 공정도 기준)`),
+createQuestionData(1, "1.2", "작업 표준서 변경점 발생 시 개정을 진행 하고 있는가?"),
+createQuestionData(2, "2.1", `작업 표준서 양식, 작성 방법에 대해서 정의되어 있는가?<br>(필수 내용: 작업 공구 및 부자재/Part List/작업 순서 및 작업 내용/안전주의사항/안전보호구)`),
+createQuestionData(2, "2.2", `제정 된 작업 표준서에는 작업 공정에 필요한 내용이 포함되어 있는가?<br>(필수 내용: 작업 공구 및 부자재/Part List/작업 순서 및 작업 내용/안전주의사항/안전보호구/개정부분표시)`),
+createQuestionData(2, "2.3", `생산 현장에 작업표준서가 작업인원이 실시간으로 확인 가능한 위치에 비치 관리되고 있는가? [현장 검토]<br>- 작업 Layout 내에 실제 작업 표준서를 비치 후 작업 진행`),
+createQuestionData(3, "3.1", "작업 표준서 내용, 변경된 작업 방법 등 작업표준서에 대해서 Engineer 교육 진행 중인가?"),
+createQuestionData(3, "3.2", "작업 공정 별 수립한 안전 관리 대책을 작업 엔지니어 대상으로 주기적인 교육이 진행중이고, 작업 엔지니어 별 교육 이수 여부를 증빙할 자료가 있는가?"),
+createQuestionData(3, "3.3", "감독자를 중심으로 작업현장에서 작업자에게 당일 작업 List, 작업 표준에 대해 공유 하며, 작업 간 발생 할 수 있는 위험요인과 안전대책을 공유하는 활동을 하고 있는가? (일상작업 공유 활동)"),
+createQuestionData(4, "4.1", "공정 별로 작업 내용에 대한 작업 표준서를 System을 통해 확인 할 수 있는가?"),
+createQuestionData(4, "4.2", "각 설비별 공정별 작업한 Engineer 이력, 작업실명제를 System을 통해 확인 할 수 있는가?"),
+createQuestionData(5, "5.1", "작업 환경 개선 대한 목표를 정하고, 목표 달성 여부에 대한 결과가 그룹 또는 Team 고과평가와 연계 되어 있는가?"),
+createQuestionData(5, "5.2", "작업 최적화, 유실 감소 등 작업 공수 절감 활동에 대한 결과가 그룹 또는 Team 고과평가와 연계 되어 있는가?")
+]
+),
+createSectionData(
+3,
+"생산 인원 관리",
+["ALL"],
+[
+createQuestionData(1, "1.1", "생산 Engineer에 대한 인원 조직도가 있는가?"),
+createQuestionData(1, "1.2", "생산 Engineer의 경력사항에 대해 확인 가능한가?"),
+createQuestionData(2, "2.1", `Engineer Level 관리 및 인증 Process에 대한 규정 또는 지침에 대해 확인 가능한가?<br>- 필수 조건 : 취득 및 평가 방법/Level 분류 기준/Level별 필기, 실기 응시 자격`),
+createQuestionData(2, "2.2", "공정 단위 별 Engineer 작업 능력에 대해 Level을 분류하여 관리 중이며, Level 취득 증빙자료를 관리하고 있는가?"),
+createQuestionData(3, "3.1", "Engineer Level 취득 외 위반 사항 발생 시 Level 자격정지에 대한 Penalty 부여에 대한 규정 또는 지침이 있는가?"),
+createQuestionData(3, "3.2", "표준 미준수, 안전 보안 수칙 미준수, 3정 5S 활동 미흡 등 Human error로 인한 실패 DB 자료를 관리 하고 있는가?"),
+createQuestionData(3, "3.3", "공정 단위 별 Engineer의 작업 Skill Up 관련 교육 일정을 계획하며 실행하고 있는가?"),
+createQuestionData(4, "4.1", "System을 통해 생산 현장에 작업 중인 Engineer 현황과 Level 현황을 실시간 Monitoring 할 수 있게 구축이 되어 있는가?"),
+createQuestionData(4, "4.2", "System을 통해 Engineer 레벨 현황, 레벨 취득일, 취득 증빙자료 등 작업자 능력 인증 증빙 문서, 기록 등이 관리되고 있는가?"),
+createQuestionData(4, "4.3", "Level Test 문제를 주기적으로 제, 개정하며 System에 등록 관리되고 있는가?"),
+createQuestionData(5, "5.1", "Engineer Level 달성 계획을 세워 지속적으로 관리 하며, Engineer Level 달성 성과는 그룹 또는 Team 고과평가와 연계 되어 있는가?")
+]
+),
+createSectionData(
+4,
+"제조 (부대)설비 및 공구 관리",
+["ALL"],
+[
+createQuestionData(1, "1.1", "생산에 필요한 공구, JIG에 대한 List를 관리하고 있는가?"),
+createQuestionData(1, "1.2", `생산 현장 확인 시 생산용 공구, JIG는 정량, 정위치, 정리정돈 등 관리상태가 양호한가? [현장 검토]<br>- 정위치, 정량에 대한 눈관리 여부 확인`),
+createQuestionData(1, "1.3", "생산활동에 투입되는 (부대)설비 관리/ 사용에 대한 관리 규정이 있는가?"),
+createQuestionData(2, "2.1", "생산용 (부대)설비는 담당자에 의해 주기적으로 관리가 되고 있는가?"),
+createQuestionData(2, "2.2", `생산용 (부대) 설비는 자산으로 등록되어 있고 자산번호가 부여 되어 자산번호 식별표로 관리 되고 있는가?<br>자산번호 식별표는 생산용 (부대)설비에 부착되어 있는가? [현장 검토]`),
+createQuestionData(2, "2.3", "생산활동에 투입되는 (부대)설비 관리/ 사용에 대한 작업 표준서를 관리하고 있는가?"),
+createQuestionData(2, "2.4", `(부대)설비 사용간 실시간으로 확인할 수 있는 위치에 (부대)설비 관리/ 사용에 대한 작업 표준서를 비치하여 관리하고 있는가? [현장 검토]<br>- 작업 Layout 내에 실제 작업 표준서를 비치 후 작업 진행`),
+createQuestionData(3, "3.1", "생산용 (부대)설비에 고장 발생한 경우 고장 이력과 수리 이력이 관리되고 있는가?"),
+createQuestionData(3, "3.2", "부대 설비 고장 예방 관리를 위해 생산용 부대 설비 정기 PM을 진행 하고 있는가?"),
+createQuestionData(3, "3.3", "생산용 (부대)설비, JIG, 공구 사용법에 대한 표준서 또는 Manual 내, 표준서 내용에 작업 순서 및 작업 내용, 안전 보호구, 안전 주의 사항 등에 대한 내용이 포함되어 있는가?"),
+createQuestionData(4, "4.1", "System을 통해 생산 현장 내 부대 설비 별 고장 이력 등 전체적 설비 이력을 확인 할 수 있는가?"),
+createQuestionData(4, "4.2", "System을 통해 생산 현장 내 관리 중인 공구, JIG 현황을 확인 할 수 있는가?"),
+createQuestionData(5, "5.1", "매년 생산용 공구, JIG 등의 개선활동을 진행 중이며 목표 달성 성과는 그룹 또는 Team 고과 평가와 연계 되어 있는가?"),
+createQuestionData(5, "5.2", "매년 생산용 (부대)설비 자산실사를 통해 자산관리가 되고 있는가?")
+]
+),
+createSectionData(
+5,
+"생산 현장 관리",
+["ALL"],
+[
+createQuestionData(1, "1.1", "생산 대기 중인 Part와 생산 완료 된 Part 보관장소가 별도로 구분 지정되어 있는가? [현장 검토]"),
+createQuestionData(1, "1.2", `각 구역 혹은 부대설비 별로 담당자 지정하여 3정5S 점검표를 통한 3정 5S 일상 점검 관리가 되고 있는가?<br>[현장 검토]`),
+createQuestionData(1, "1.3", `생산 현장 내에 유해물질, 화학물질 보관장소는 생산 장소와 명확히 구분되어 있는가? [현장 검토]<br>(소분용기 외부에 용액 명칭의 Labeling 및 MSDS Label 부착/비치 확인 필수)`),
+createQuestionData(1, "1.4", "주기적으로 생산 현장의 온/습도를 측정하며 온/습도 관리를 하고 있는가?"),
+createQuestionData(2, "2.1", `주기적으로 Clean Room 시설 Particle 측정하며 Particle 관리를 하고 있는가?<br>(Clean Room이 없는 경우, 생산 현장 3정 5S 상태 점검으로 대체)`),
+createQuestionData(2, "2.2", "생산 현장 내 생산 부자재 및 방진용품 관리 Process가 표준이나 지침서로 관리되고 있는가?"),
+createQuestionData(2, "2.3", "유해물질, 화학물질 관리 Process가 정립되어 있는 규정 혹은 지침서가 있는가?"),
+createQuestionData(3, "3.1", "생산 현장의 환경 개선 및 안전 개선에 대한 개선 전/ 후 자료가 관리 및 보고 되고 있는가?"),
+createQuestionData(3, "3.2", "별도의 점검 Sheet로 현장 실무 Engineer 외 관리자에 의한 생산 현장 환경 불시 점검이 이루어 지고 있는가?"),
+createQuestionData(3, "3.3", `생산 현장 내에 유해물질, 화학물질 (임시) 보관장소엔 국소 배기장치가 설치되어 있는가? [현장 검토]<br>(MSDS 상 국소배기 장치 설치된 곳에서 보관 필요한 물질의 경우 국소 배기 장치 설치 보관 필요, 현장 임시보관함 포함)`),
+createQuestionData(4, "4.1", "System을 통해 온/습도 및 Particle 등의 생산 현장 환경에 대한 내용을 Monitoring 관리가 가능한가?"),
+createQuestionData(4, "4.2", "System을 통해 생산 Stage 혹은 생산 전체 진척 현황을 파악할 수 있는가?"),
+createQuestionData(5, "5.1", "생산 현장의 환경 개선 활동, 위험요인 개선 활동은 그룹 또는 Team 고과 평가와 연계 되어 있는가?")
+]
+),
+createSectionData(
+6,
+"Leadership & Planning",
+["ALL"],
+[
+createQuestionData(1, "1.1", `ISO 9001 보유하고 있는가?<br>- 인증서 유효 여부 (인증서 내 유효 기간이 평가일 이후인지 확인)<br>- 국내 KAB / 해외: 해외 인정된 인증을 받은 인증기관에서 발행된 인증서인지 확인`),
+createQuestionData(1, "1.2", "품질목표는 부서별로 수립되어 있는가?"),
+createQuestionData(1, "1.3", "내부 심사는 내부적으로 정해진 Rule에 의거 정기적으로 실시되며, 심사 결과는 부적합 항목을 포함하여 상위권자에게 보고되고 있는가?"),
+createQuestionData(1, "1.4", "ISO 9001 사후 및 갱신심사는 주기적으로 진행 및 결과는 상위권자에게 보고되고 있는가?"),
+createQuestionData(2, "2.1", "ISO 사후 및 갱신 심사 부적합 항목에 대해서 조치 결과에 대해 기록 관리되고 있는가?"),
+createQuestionData(2, "2.2", `품질 관리 부서가 별도로 구성되어 있으며, 제조 부서와의 독립성을 유지하고 있는가?<br>(품질 업무를 하는 부서에 제조 인원이 포함되어 있을 경우 점수 부여 불가)`),
+createQuestionData(2, "2.3", "품질목표에 따른 달성방안이 수립되어 있는가?"),
+createQuestionData(2, "2.4", "내부 심사 시 발생된 부적합 항목에 대해서는 대책이 모두 수립되어 시정조치가 완료되었는가?"),
+createQuestionData(3, "3.1", "시스템 평가(내부 심사 등)에 대한 유효성 평가 절차는 수립되어 있는가?"),
+createQuestionData(3, "3.2", "전년도 내부 심사 부적합 항목에 대한 유효성 평가는 진행 및 기록관리 되고 있는가?"),
+createQuestionData(3, "3.3", "품질목표 달성방안은 기간별로 (월 or 분기 or 반기) 계획이 수립되어 있는가?"),
+createQuestionData(3, "3.4", "품질목표는 주기적으로 결과 체크 및 주기에 맞춰 보고되고 있는가?"),
+createQuestionData(4, "4.1", "주요 품질 목표에 대해서 시스템으로 관리되어 실시간으로 모니터링 가능하도록 관리되고 있는가?"),
+createQuestionData(4, "4.2", "수립한 품질목표 달성방안 및 목표 대비 미흡한 사항에 대해서는 조치 방안까지 반영되어 상위권자에게 보고되고 있는가?"),
+createQuestionData(5, "5.1", "품질목표는 매년 동일한 수준이 아닌 개선된 지표로 목표 관리 되고 있으며, 목표에 맞는 달성방안이 지속적으로 수립되어 있는가?")
+],
+true
+),
+createSectionData(
+7,
+"Non-Conforming Materials Management",
+["ALL"],
+[
+createQuestionData(1, "1.1", "부적합 관리 프로세스는 보유하고 있는가?"),
+createQuestionData(1, "1.2", "부적합 발생 시 해당 제품에 대한 식별 / 분리 / 담당자 지정되어 있는가?"),
+createQuestionData(2, "2.1", "고객 부적합에 대해 개선대책 수립 및 F/B 완료되었는가?"),
+createQuestionData(2, "2.2", "내부 부적합에 대해 발생 이력 관리되고 있으며, 대책서는 작성되고 있는가?"),
+createQuestionData(2, "2.3", "협력업체 부적합에 대해 발생 이력 관리되고 있으며, 대책서는 관리되고 있는가?"),
+createQuestionData(2, "2.4", "부적합품을 그대로 출하할 경우(특채)에 대한 고객 승인 프로세스는 수립되어 있으며, 특채 발행 이력은 관리되고 있는가?"),
+createQuestionData(3, "3.1", "회의체 or E-Mail 등을 통하여 발생되는 부적합 및 부적합 발생 전체 현황에 대해 내부 공유 활동 진행되고 있는가?"),
+createQuestionData(3, "3.2", "고객 및 내부 부적합에 대한 유효성 평가 기준 및 프로세스는 수립되었으며, 준수하고 있는가?"),
+createQuestionData(3, "3.3", "고객 부적합에 대해 부적합의 재발 여부를 확인하고 있는가?<br>또한, 재발에 대한 기준은 수립되어 있는가?"),
+createQuestionData(3, "3.4", "특채로 출하된 품목이 있을 경우, 내부 대책 수립 및 고객 출하 후 발생되는 문제에 대해 모니터링 후 종결 처리되고 있는가?"),
+createQuestionData(3, "3.5", "부적합 프로세스에 대해 교육 Curriculum에 추가되어 기준에 맞춰 교육 진행되고 있는가?"),
+createQuestionData(4, "4.1", "시스템을 통해 부적합 발생 내역 등록부터 조치 요청, 대책 입력 및 유효성 평가까지 관리되고 있는가?"),
+createQuestionData(4, "4.2", "고객 부적합 중 재발 부적합의 대책 수립 시, 신규 부적합과는 다른 절차로 대책이 수립되고 있는가?<br>또한 해당 부분이 표준 문서에 반영되어 누락되지 않고 운영되고 있는가?"),
+createQuestionData(4, "4.3", "부적합 관리 지표는 주기적으로 집계 및 경영진과 함께 검토되고 있으며, 목표 대비 높게 집계될 경우 이에 대한 대책안까지 논의가 되고 있는가?"),
+createQuestionData(5, "5.1", "부적합 관리 지표는 매년 분석 및 개선을 통해 기준 대비 향상된 지표를 보여주고 있으며, 개선된 부적합 관리 지표 달성을 위한 계획은 적절하게 수립되고 있는가?"),
+createQuestionData(5, "5.2", "부적합은 통합 지표가 아닌 Part별 혹은 고객사별로 세분화하여 목표 수립 및 주기적으로 집계되고 있는가?")
+]
+),
+createSectionData(
+8,
+"Document & Drawing Control System",
+["ALL"],
+[
+createQuestionData(1, "1.1", "사내 표준(매뉴얼 / 절차서 / 지침서류) 관리 프로세스는 보유하고 있는가?<br>(문서 제정, 개정, 배포, 폐지 등 절차 포함)"),
+createQuestionData(1, "1.2", "사내 표준별 담당부서는 지정되어 관리되고 있는가?"),
+createQuestionData(1, "1.3", "도면(사내/고객) 관리 프로세스는 보유하고 있는가?<br>(배포, 회수, 폐기 등 절차 포함)"),
+createQuestionData(2, "2.1", "사내 표준의 제정, 개정, 배포, 폐지는 정해진 절차에 의거하여 진행되고 있는가?"),
+createQuestionData(2, "2.2", "표준 문서별(규정 및 지침서, 작업표준서 등) 제정, 개정, 확인 및 폐지 승인권자는 지정 및 준수되고 있는가?"),
+createQuestionData(2, "2.3", "도면의 배포, 회수, 폐기는 정해진 절차에 의하여 진행되고 있는가?"),
+createQuestionData(
+2,
+"2.4",
+"자체 제작 도면에 대해 승인권자는 지정 및 준수되고 있는가?",
+["ODM", "M.ODM", "조립/Harness"]
+),
+createQuestionData(3, "3.1", "정해진 절차로 승인된 최신 표준 문서만 접근 및 사용할 수 있도록 관리되고 있는가?"),
+createQuestionData(3, "3.2", "표준 문서의 개정 시, 담당 부서 외 관련 부서 협의 후 개정 진행되고 있으며, 관련 내용은 모두 기록으로 남기고 있는가?"),
+createQuestionData(3, "3.3", "도면 변경점 발생 시, 기존 도면은 폐기 혹은 접근할 수 없도록 관리되고 있는가?<br>(고객, 자체 제작 도면, 가공 프로그램 등)"),
+createQuestionData(4, "4.1", "표준 문서의 관리 절차는 시스템으로 관리되고 있는가?<br>(제정, 개정, 배포, 폐지 등 - 네트워크 공유 폴더의 경우 시스템으로 인정하지 않음)"),
+createQuestionData(5, "5.1", "표준 문서의 검토 주기는 설정되어 있으며, 주기에 맞게 검토되고 있는가?<br>또한, 검토된 내용은 기록으로 남기고 있는가?")
+]
+),
+createSectionData(
+9,
+"Change Management",
+["ODM", "M.ODM"],
+[
+createQuestionData(1, "1.1", "변경점 관리 프로세스는 보유하고 있는가?"),
+createQuestionData(1, "1.2", "변경점 내부 승인권자 및 고객 통보 담당은 지정되어 있는가?"),
+createQuestionData(1, "1.3", "변경점 통보에 대한 기준은 수립되어 있는가?"),
+createQuestionData(2, "2.1", "변경점 통보 일정은 고객과 사전 협의된 일정으로 내부 절차서에 명시되어 있으며, 변경점 통보 시 고객과 사전 협의된 일정을 준수하여 통보하고 있는가?"),
+createQuestionData(2, "2.2", "변경점 관리 대장, 변경점 관리 신고서 양식은 정립되었으며 실제로 운영되고 있는가?"),
+createQuestionData(3, "3.1", "신고된 변경점에 대해 고객 회신 이력은 관리되고 있는가? (Accept / Reject 포함)"),
+createQuestionData(3, "3.2", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해 이력관리가 되고 있는가?"),
+createQuestionData(3, "3.3", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part 진행 시, 변경점에 대한 관련 인원 공유되고 있는가?<br>(변경점 승인 즉시 공유가 아닌 제작 시 확인 가능하도록 공유 여부 확인 필요)"),
+createQuestionData(3, "3.4", "고객 승인 후 변경점이 적용되는 첫 번째 제작 Part에 대해 변경점 적용 여부에 대한 검사는 진행되고 있으며, 기록으로 확인 가능한가?"),
+createQuestionData(3, "3.5", "변경점 관리 프로세스에 대해 교육 Curriculum에 추가되어 기준에 맞춰 교육 진행되고 있는가?"),
+createQuestionData(4, "4.1", "시스템을 통해 변경점 관리가 진행되고 있는가?<br>(변경 이력, 변경점 적용 시점, 변경 대상 Model 등)"),
+createQuestionData(4, "4.2", "특정 고객 요청에 의한 변경점일 경우, 해당 변경점이 다른 고객에게 적용되지 않도록 관리되고 있는가?"),
+createQuestionData(4, "4.3", "생산 시작 전 이전 생산 품목 대비 변경점 발생 여부에 대한 검토는 진행되고 있는가?<br>(Repeat Order일 경우에도 변경점 발생 여부 확인 체크 필요)"),
+createQuestionData(5, "5.1", "적용된 변경 사항에 대해 보증방안은 수립되어 있는가?<br>(변경점에 대한 Test 진행 여부, Test 항목, 기간 등)")
+]
+),
+createSectionData(
+10,
+"Business Continuity Management System",
+["ALL"],
+[
+createQuestionData(1, "1.1", "Business 연속성을 유지하기 위한 BCP가 수립되어 있는가?"),
+createQuestionData(1, "1.2", "Business 연속성을 유지하기 위한 업무 Process가 구축되어 있는가?"),
+createQuestionData(2, "2.1", "BCP는 전 직원이 인지할 수 있도록 게시 혹은 배포되고 있는가?"),
+createQuestionData(2, "2.2", "BCP에는 복구 절차, 수행 인원, 필요 자원, 복구 기간 등이 명시되어 있는가?<br>(위 내용은 필수적으로 포함되어야 함)"),
+createQuestionData(3, "3.1", "BCP는 경영진의 검토 및 승인을 받고 있으며, 검토 주기 설정 및 주기에 맞춰 검토되고 있는가?"),
+createQuestionData(3, "3.2", "BCP에 대한 연습 절차는 수립되어 있는가? (주기, 유형 등)"),
+createQuestionData(3, "3.3", "BCP 연습 과정에서 발생된 개선 사항은 BCP에 반영되고 있는가?"),
+createQuestionData(4, "4.1", "BCP는 Business에 영향을 줄 수 있는 프로세스를 선별하여 수립되었는가?<br>(프로세스는 주관적이 아닌 객관적인 기준에 의거하여 선정되어야 한다.)"),
+createQuestionData(4, "4.2", "BCP 연습은 최소 1년 1회로 진행되고 있으며, 최소 1건 이상은 회람, 토론 형식이 아닌 실제 모의 훈련으로 진행되고 있는가?"),
+createQuestionData(5, "5.1", "주요 공급 업체에 대해 공급 업체 정보를 보유 관리하고 있는가?<br>또한 주요 공급 업체의 BCMS 능력 평가 진행하고 있는가?"),
+createQuestionData(5, "5.2", "BCMS 프로세스 개선 목표 및 달성 방안은 매년 수립되고 있는가?<br>또한 매년 동일 목표가 아닌 새로운 목표를 수립하고 있는가?")
+]
+),
+createSectionData(
+11,
+"Employee Training",
+["ALL"],
+[
+createQuestionData(1, "1.1", "신규 입사자에 대한 OJT Curriculum은 수립되어 있는가?"),
+createQuestionData(1, "1.2", "전사 필수 교육에 대한 연간 교육훈련계획서가 수립되어 있는가?"),
+createQuestionData(1, "1.3", "임직원에 대한 교육 훈련 절차가 수립되어 있는가? (신입, 기존 임직원 포함)"),
+createQuestionData(2, "2.1", "교육 훈련 후 교육보고서를 통해 실적 관리되고 있는가?"),
+createQuestionData(2, "2.2", "모든 직무에 대해 직무 수행 내용 및 직무 요건이 정의되어 있는가?"),
+createQuestionData(2, "2.3", "교육 훈련 현황은 주기별로(최소 반기별) 모니터링 되고 있는가?"),
+createQuestionData(3, "3.1", "직무별 경력, 업무에 따른 필수 교육 체계도가 수립되어 있으며, 체계에 맞춰 교육이 진행되고 있는가?"),
+createQuestionData(3, "3.2", "매년 이수해야 하는 교육 훈련에 대한 기준은 수립되어 있는가? 또한 해당 기준에 맞춰 교육이 수립되고 있는가?<br>(법정 필수 교육 외)"),
+createQuestionData(4, "4.1", "교육 훈련 Process는 시스템으로 관리가 되고 있는가?"),
+createQuestionData(5, "5.1", "회사 평가(승진, KPI 등)와 교육이 제도적으로 연계가 되어 있는가?")
+]
+),
+createSectionData(
+12,
+"Design, New Product",
+["ODM", "M.ODM"],
+[
+createQuestionData(1, "1.1", "초도품 설계 및 검증에 대한 문서화된 절차는 보유하고 있는가?"),
+createQuestionData(2, "2.1", "초도품에 대한 최종 검사 보고서는 작성되고 있는가?"),
+createQuestionData(2, "2.2", "초도품에 대한 작업 표준서 및 검사 기준서 작성에 대한 절차 보유 및 절차 준수하고 있는가?"),
+createQuestionData(2, "2.3", "초도품에 대해서 식별 및 이력관리는 진행되고 있는가?"),
+createQuestionData(2, "2.4", "개발 단계에서 양산 단계로 전환하는 절차에 대한 프로세스가 수립되어 있는가?"),
+createQuestionData(3, "3.1", "초도품의 설계 혹은 최종 제품이 안전, 보건 및 환경 규제 또는 법적 요구 사항을 완벽하게 준수하는지 확인하는 절차 보유 및 절차 준수하고 있는가?<br>(고객사 요구사항 외)"),
+createQuestionData(3, "3.2", "초도품의 설계 or 제작 단계에서 고객의 요구사항을 충족하는지 검토하는 절차 보유 및 절차 준수하고 있는가?"),
+createQuestionData(3, "3.3", "개발 단계에서 양산으로 전환 시, 필요한 필수 문서가 정의되어 있는가?"),
+createQuestionData(4, "4.1", "초도품 개발 과정에서 확인된 실패 DB에 대해 문서화되고 있는가?<br>또한 해당 실패 DB는 향후 초도품 개발 단계에서 검토되고 있으며 해당 절차는 문서화되어 있는가?"),
+createQuestionData(4, "4.2", "초도품 개발 Status는 시스템으로 관리되며, 각각의 산출물도 모두 시스템을 통해 등록 관리되고 있는가?"),
+createQuestionData(5, "5.1", "초도품 개발 전 목표는 명확하게 수치화되어 관리되고 있으며, 양산 전환 전 목표 대비 실적에 대해 관리되고 있는가?")
+]
+),
+createSectionData(
+13,
+"Inspection and Test",
+["ALL"],
+[
+createQuestionData(1, "1.1", "QC 공정도에 각 공정별 검사 항목과 관리 Spec 및 검사 담당은 설정되어 있는가?"),
+createQuestionData(1, "1.2", "검사자에 대한 적격성 기준은 수립되어 있으며, 평가 결과에 대해서는 상위권자 승인을 득하여 관리되고 있는가?"),
+createQuestionData(1, "1.3", "계측기에 대해서는 관리대장 및 이력카드 작성되어 관리되고 있는가?"),
+createQuestionData(2, "2.1", "수입 / 공정 / 출하 검사 기준서는 작성되어 있는가?"),
+createQuestionData(2, "2.2", "각 단계별(수입/공정/출하) 검사 실시 및 성적서 작성관리 되고 있는가?"),
+createQuestionData(2, "2.3", "계측기에 대해 주기적으로 검교정 진행되고 있으며, 교정라벨은 해당 계측기에 부착되어 있는가?"),
+createQuestionData(2, "2.4", "계측기 담당 부서와 보관 위치는 지정 및 기록 관리되고 있는가?<br>또한, 계측기의 계측기 보관위치는 식별관리 되고 있는가?"),
+createQuestionData(3, "3.1", "수입 / 공정 / 출하 검사 성적서는 각각 Revision(개정 이력 포함) 관리가 진행되고 있는가?"),
+createQuestionData(3, "3.2", "중요 공정(CTQ)가 설정되어 있으며, 해당 공정은 작업 표준서, 공정 검사 Check Sheet 등으로 관리되고 있는가?"),
+createQuestionData(3, "3.3", "검사원에 대한 갱신 기준은 수립되어 있는가? 또한 기준에 맞춰 갱신되고 있는가?"),
+createQuestionData(3, "3.4", "계측기의 검교정 진행 여부 및 검교정 주기 선정 기준은 문서화되어 관리되고 있는가?"),
+createQuestionData(4, "4.1", "검사 Data는 시스템으로 관리되고 있는가?<br>또한 시스템에 Spec Out 값 입력 시, 작업자가 인지할 수 있도록 관리되고 있는가?"),
+createQuestionData(4, "4.2", "계측기 이력 및 관리 대장은 시스템으로 관리되고 있는가?"),
+createQuestionData(4, "4.3", "특별 관리 대상 계측기에 대해 정의되어 있으며, 정의된 계측기에 대한 관리 방안이 수립되어 있는가?"),
+createQuestionData(5, "5.1", "검사 프로세스의 건전성을 측정하기 위한 KPI는 수립 및 주기적으로 모니터링 되고 있는가?<br>(ex: Gauge R&R, 공정능력지수 등)"),
+createQuestionData(5, "5.2", "통계적 품질 관리를 통해 데이터 수집, 분석 및 개선 활동 진행하고 있는가?")
+]
+),
+createSectionData(
+14,
+"재무 현황",
+["ALL"],
+[
+createAverageQuestionData(1, "매출액 증가율", [
+["7% 이상", "A", 5],
+["5% 이상 7% 미만", "B", 4],
+["3% 이상 5% 미만", "C", 3],
+["0% 이상 3% 미만", "D", 1],
+["0% 미만", "E", 0]
+]),
+createAverageQuestionData(2, "영업이익률", [
+["3% 이상", "A", 5],
+["2% 이상 3% 미만", "B", 4],
+["1% 이상 2% 미만", "C", 3],
+["0.5% 이상 1% 미만", "D", 1],
+["0.5% 미만", "E", 0]
+]),
+createAverageQuestionData(3, "자기자본 비율", [
+["50% 이상", "A", 5],
+["30% 이상 50% 미만", "B", 4],
+["15% 이상 30% 미만", "C", 3],
+["5% 이상 15% 미만", "D", 1],
+["5% 미만", "E", 0]
+]),
+createAverageQuestionData(4, "부채 비율", [
+["100% 이하", "A", 5],
+["100% 이상 120% 미만", "B", 4],
+["120% 이상 150% 미만", "C", 3],
+["150% 이상 200% 미만", "D", 1],
+["200% 초과", "E", 0]
+]),
+createAverageQuestionData(5, "유동비율", [
+["200% 이상", "A", 5],
+["150% 이상 200% 미만", "B", 4],
+["100% 이상 150% 미만", "C", 3],
+["50% 이상 100% 미만", "D", 1],
+["50% 초과", "E", 0]
+]),
+createAverageQuestionData(6, "비유동 비율", [
+["100% 이하", "A", 5],
+["100% 이상 120% 미만", "B", 4],
+["120% 이상 150% 미만", "C", 3],
+["150% 이상 200% 미만", "D", 1],
+["200% 초과", "E", 0]
+]),
+createAverageQuestionData(7, "비유동장기적합률", [
+["100% 이하", "A", 5],
+["100% 이상 120% 미만", "B", 4],
+["120% 이상 150% 미만", "C", 3],
+["150% 이상 200% 미만", "D", 1],
+["200% 초과", "E", 0]
+]),
+createAverageQuestionData(8, "대외기관 신용평가 등급", [
+["매우 우량 (AAA~A-)", "A", 5],
+["양호 (BBB+~BB-)", "B", 4],
+["보통 (B+~B-)", "C", 3],
+["미흡 (CCC+~D)", "D", 1],
+["불량 (CC~D) 혹은 평가 없음", "E", 0]
+])
+],
+false,
+"average"
+),
+createSectionData(
+15,
+"구매 관리",
+["OEM", "ODM", "M.ODM"],
+[
+createQuestionData(1, "1.1", "구매 업무 프로세스를 보유하고 있는가?"),
+createQuestionData(2, "2.1", "구매 업무 프로세스에 맞추어 업무를 수행하고 있는가?"),
+createQuestionData(2, "2.2", "구매품(원재료, 표준품, 부속품 등) 가격 결정 프로세스를 보유하고 있는가?"),
+createQuestionData(3, "3.1", "가격 결정 프로세스에 맞추어 업무를 수행하고 있는가?"),
+createQuestionData(3, "3.2", "구매 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
+createQuestionData(3, "3.3", "구매품(원재료, 표준품, 부속품 등)의 통상 수급 기간을 품목 특성에 따라 관리하고 있는가?"),
+createQuestionData(3, "3.4", "구매 관련 교육을 정기적으로 수강하고 있는가?"),
+createQuestionData(4, "4.1", "견적 요청은 시스템을 통해 진행되는가?"),
+createQuestionData(4, "4.2", "협력업체는 요청 받은 견적을 시스템을 통해 입력하는가?"),
+createQuestionData(4, "4.3", "협력업체에서 입력한 견적은 시스템을 통해 관리되고 있는가?"),
+createQuestionData(4, "4.4", "시스템을 통해 구매 발주를 진행하고 있는가?"),
+createQuestionData(4, "4.5", "시스템을 통한 기준정보 관리를 하고 있는가?"),
+createQuestionData(4, "4.6", "연간 구매 계획을 수립하고 있는가?"),
+createQuestionData(5, "5.1", "연간 구매 계획은 연간 생산 계획과 연동되며, 해당 수립된 계획에 따라 업무를 수행하고 있는가?"),
+createQuestionData(5, "5.2", "BCP (Business Continuity Planning : 비즈니스 지속성 계획) 관점에서 구매품의<br>공급망 안정성이 확보되어 있는가?")
+]
+),
+createSectionData(
+16,
+"협력업체 관리",
+["OEM", "ODM", "M.ODM"],
+[
+createQuestionData(1, "1.1", "협력업체 관리 프로세스를 보유하고 있는가?"),
+createQuestionData(2, "2.1", "계약을 진행해야 하는 협력업체와 체결해야 하는 계약서가 정의되어 있는가?"),
+createQuestionData(2, "2.2", "협력업체 관리 프로세스에 신규 협력업체를 선정하기 위한 절차가 별도로 명시되어 있으며,<br>절차에 따라 업무 수행이 가능한 수준인가?"),
+createQuestionData(2, "2.3", "협력업체 관리 프로세스에 기존 거래 협력업체를 관리 및 평가할 수 있는 절차가 별도로 명시되어 있으며,<br>절차에 따라 업무 수행이 가능한 수준인가?"),
+createQuestionData(3, "3.1", "계약을 진행해야 하는 협력업체와 필요한 계약에 대해 빠짐없이 체결하고 있는가?"),
+createQuestionData(3, "3.2", "신규 협력업체는 내부 기준에 따라 평가 및 선정을 하고 있는가?"),
+createQuestionData(3, "3.3", "신규 협력업체를 선정하기 위한 평가 시트는 공급 받는 자재의 특성 혹은 협력업체의 특성에 따라 분리 및 세분화 되어 있는가?"),
+createQuestionData(3, "3.4", "신규 협력업체를 선정하기 위한 평가 시트는 경영 현황, 제조 공정, 품질 관리, 자재 관리 등 각 항목별로 평가 항목이 구분되어 있는가?"),
+createQuestionData(3, "3.5", "기존 거래하고 있는 협력업체 정기 평가 주기의 기준이 수립되어 있는가?"),
+createQuestionData(3, "3.6", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 공급 받는 자재의 특성 혹은 협력업체의 특성에 따라 분리 및 세분화 되어 있는가?"),
+createQuestionData(3, "3.7", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 경영 현황, 제조 공정, 품질 관리, 자재 관리 등 각 항목별로 평가 항목이 구분되어 있는가?"),
+createQuestionData(3, "3.8", "기존 거래하고 있는 협력업체에 대해 정기 평가를 수립된 기준에 따라 정기적으로 시행하고 있는가?"),
+createQuestionData(4, "4.1", "계약을 진행해야 하는 협력업체와 계약을 체결하고, 계약 관련 사항을 지속적으로 갱신 및 관리하고 있는가?"),
+createQuestionData(4, "4.2", "신규 협력업체를 선정하기 위한 평가 시트의 평가 항목은 객관적인 평가가 가능한 기준이 정립되어 있는가?"),
+createQuestionData(4, "4.3", "신규 협력업체를 선정하기 위한 평가 및 선정 이후, 결과에 대해 통지하고 있는가?"),
+createQuestionData(4, "4.4", "신규 협력업체를 선정하기 위한 평가 이후, 결과에 대해 시스템에 등록하여 관리하고 있는가?"),
+createQuestionData(4, "4.5", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 객관적인 평가가 가능한 기준이 정립되어 있는가?"),
+createQuestionData(4, "4.6", "기존 협력업체를 평가한 이후, 결과에 대해 통지하고 부적합 사항에 대한 시정조치를 요구하고 있는가?"),
+createQuestionData(4, "4.7", "기존 협력업체를 평가한 이후, 결과에 대해 시스템에 등록하여 관리하고 있는가?"),
+createQuestionData(5, "5.1", "신규 협력업체를 선정하기 위한 평가 및 선정 이후, 결과에 대해 내부적으로 보고하고 관리하고 있는가?"),
+createQuestionData(5, "5.2", "기존 협력업체 평가 결과에 대해 내부적으로 보고 하고 개선을 위한 활동을 하고 있으며, 매년 관리 지표는 개선되고 있는가?"),
+createQuestionData(5, "5.3", "기존 협력업체 평가 결과는 추후 구매 계획에 반영되며, 구매 계획 수립의 근거자료로 활용하고 있는가?")
+]
+),
+createSectionData(
+17,
+"영업 관리 - OEM",
+["OEM"],
+[
+createQuestionData(1, "1.1", "고객사 제품 납기 관리를 위한 프로세스를 보유하고 있는가?"),
+createQuestionData(1, "1.2", "고객사 제품 납기 관리를 위한 각 부서별 역할이 정의되어 있는가?"),
+createQuestionData(1, "1.3", "고객사에서 요청하는 납기를 잘 준수하고 있는가?"),
+createQuestionData(2, "2.1", "납기 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
+createQuestionData(2, "2.2", "고객사 납기 관리를 위한 지표가 수립되어 있는가?"),
+createQuestionData(2, "2.3", "고객사에서 요청하는 계약이 모두 체결되어 있는가?"),
+createQuestionData(3, "3.1", "납기 관리 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
+createQuestionData(3, "3.2", "고객사에서 요청하는 납기가 변경될 시, 즉시 대응 할 수 있는 프로세스가 있는가?"),
+createQuestionData(3, "3.3", "고객사와 체결한 계약서에 대해서 적절히 보관 및 관리되고 있는가?"),
+createQuestionData(4, "4.1", "시스템을 통한 제품 생산 일정 관리를 하고 있는가?"),
+createQuestionData(4, "4.2", "고객사에서 요청 하는 납기가 변경될 시, 시스템을 통한 고객사 제품 생산 일정 변경 및 제품 납품 일정 조율이 가능한가?"),
+createQuestionData(5, "5.1", "고객사 납기 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
+],
+false,
+"level",
+"17-oem"
+),
+createSectionData(
+17,
+"영업 관리 - ODM, M.ODM",
+["ODM", "M.ODM"],
+[
+createQuestionData(1, "1.1", "고객사 제품 납기 관리를 위한 프로세스를 보유하고 있는가?"),
+createQuestionData(1, "1.2", "고객사 제품 납기 관리를 위한 각 부서별 역할이 정의되어 있는가?"),
+createQuestionData(1, "1.3", "고객사에서 요청하는 납기를 잘 준수하고 있는가?"),
+createQuestionData(1, "1.4", "EOL 관리 프로세스를 보유하고 있는가?"),
+createQuestionData(2, "2.1", "납기 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
+createQuestionData(2, "2.2", "고객사 납기 관리를 위한 지표가 수립되어 있는가?"),
+createQuestionData(2, "2.3", "고객사에서 요청하는 계약이 모두 체결되어 있는가?"),
+createQuestionData(2, "2.4", "EOL 관리 대상 품목이 정의되어 있는가?"),
+createQuestionData(3, "3.1", "납기 관리 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
+createQuestionData(3, "3.2", "고객사에서 요청하는 납기가 변경될 시, 즉시 대응 할 수 있는 프로세스가 있는가?"),
+createQuestionData(3, "3.3", "고객사와 체결한 계약서에 대해서 적절히 보관 및 관리되고 있는가?"),
+createQuestionData(3, "3.4", "EOL 관리 대상 품목에 대해, 단종 6개월 전에 고객사에 통지하고 있는가?"),
+createQuestionData(3, "3.5", "EOL 대상 품목은 주기적으로 점검하고 있으며, 관리되고 있는가?"),
+createQuestionData(4, "4.1", "시스템을 통한 제품 생산 일정 관리를 하고 있는가?"),
+createQuestionData(4, "4.2", "고객사에서 요청 하는 납기가 변경될 시, 시스템을 통한 고객사 제품 생산 일정 변경 및 제품 납품 일정 조율이 가능한가?"),
+createQuestionData(5, "5.1", "고객사 납기 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
+],
+false,
+"level",
+"17-odm"
+),
+createSectionData(
+18,
+"자재 관리",
+["OEM", "ODM", "M.ODM"],
+[
+createQuestionData(1, "1.1", "재고 관리 프로세스를 보유하고 있는가?"),
+createQuestionData(1, "1.2", "제품 재고 보관 구역이 별도로 설정되어 있는가?"),
+createQuestionData(1, "1.3", "재고는 제품별 식별이 가능하도록 보관되고 있는가?"),
+createQuestionData(2, "2.1", "재고 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
+createQuestionData(2, "2.2", "재고 관리를 위해 입고, 출고 업무에 대한 역할이 정의되어 있고, 실행 매뉴얼이 있는가?"),
+createQuestionData(2, "2.3", "제품을 보관하기 위한 보관 구역에 적정한 온도, 습도로 관리되고 있는가?"),
+createQuestionData(2, "2.4", "별도로 설정되어 있는 제품 재고 보관 구역에 제품을 Pallet / Rack 등을 이용하여 보관하고 있는가?"),
+createQuestionData(2, "2.5", "선입선출 구조로 재고를 관리하고 있는가?"),
+createQuestionData(3, "3.1", "전체 재고에 대해 주기적으로 파악하고 관리하고 있는가?"),
+createQuestionData(3, "3.2", "전체 재고 중 장기재고 혹은 체화재고에 대해 파악하고 있는가?"),
+createQuestionData(3, "3.3", "전체 재고 중 장기재고 혹은 체화재고에 대해 별도의 보관 구역을 설정하여 관리하고 있는가?"),
+createQuestionData(3, "3.4", "재고 관리를 위한 지표가 있는가?"),
+createQuestionData(4, "4.1", "시스템을 통한 재고 현황 확인을 하고 있는가?"),
+createQuestionData(4, "4.2", "시스템을 통한 자재 입고 관리를 하고 있는가?"),
+createQuestionData(4, "4.3", "시스템을 통한 자재 출고 관리를 하고 있는가?"),
+createQuestionData(5, "5.1", "재고 관리 지표는 주기적으로 갱신 혹은 확인되고 있으며, 유관 부서와 함께 검토되고 있는가?"),
+createQuestionData(5, "5.2", "재고 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
+]
+),
+createSectionData(
+21,
+"정보보호리더십",
+["ALL"],
+[
+createQuestionData(1, "1.1", `조직의 정보보호를 총괄하는 정보보호최고책임자(CISO)를 공식적으로 지정하고 있으며 정보보호 관련 책임과 권한이 문서화되어 있는가`),
+createQuestionData(1, "1.2", `정보보호최고책임자는 전사 정보보호 전략 수립, 정보보호 감사 등을 수행하는가`),
+createQuestionData(2, "2.1", `정보보호에 관한 정보 제공이 이루어지는가?<br>- 정보보호조직(또는 담당자)은 임직원에게 주기적으로 정보보호 관련 정보를 제공(보안 관련 공지, 메일) 하고 있다.`),
+createQuestionData(2, "2.2", `정보보호 관련 담당자와 이해 관련 부서 간의 정보보호 관련 사항에 대해 주기적인 의사소통(주기적인 보안 관련 회의) 활동을 수행하고 있는가`),
+createQuestionData(3, "3.1", `국내외 관련규정을 검토하여 정보보호 운영방침(또는 정책, 지침 등)을 정하고 모든 구성원에게 공표하는가?(3개 이상)<br><br>1. 정보보호 운영방침을 문서화하고 있으며, 경영진의 준수의지 사항을 포함하고 있다.<br>2. 정보보호 운영방침은 최고경영자 서명과 시행일을 명기하여 공표하고 모든 구성원이 쉽게 접할 수 있는 방식으로 공개하고 있다.<br>3. 보안 관련 규정은 연 1회 이상 개정 및 리뷰가 이행되고 있다.<br>4. 문서화된 인사규정 등에 정보보호 영향 침해 위반에 따른 상벌규정을 명시 및 시행하고 있다.`),
+createQuestionData(4, "4.1", `최고경영자(CEO)에게 정보보호활동이나 주요 정보보호 사안 보고를 정기적으로 수행하고 있는가`),
+createQuestionData(4, "4.2", `정보보호최고책임자는 다음 사항을 명확히 인지하고 있으며 정보보호 관련 실질적인 업무를 수행하고 있는가<br>- 조직의 정보보호 목표 및 주요 보호대상 문서화<br>- IT/보안 관련 전년도 예산집행 내역 및 당해연도 예산내역`),
+createQuestionData(5, "5.1", `정보보호 또는 정보기술 분야의 학력 또는 정보보호 전문자격을 갖추고 2년 이상 정보보호 분야 업무를 수행한 경력을 보유한 사람을 정보보호최고책임자로 지정하고 있는가?<br>- 자격 : CISSP, CISA, 정보보안기사, ISMS 심사원, PIMS 심사원, PIPL 심사원 또는 이에 상응하는 자격<br>- 학력 : 정보보호 또는 정보기술 분야의 학사 이상 또는 이에 상응하는 경력<br>※ 석사의 경우 1년, 박사의 경우 2년을 해당 분야의 경력으로 인정함`)
+]
+),
+createSectionData(
+22,
+"정보보호자원 관리",
+["ALL"],
+[
+createQuestionData(1, "1.1", `정보보호 활동의 계획 수립 및 수행 등의 정보보호 업무를 수행하는 담당자를 지정하고 역할 및 책임을 문서화되어 있는가`),
+createQuestionData(1, "1.2", `정보보호 담당자는 전문성 강화를 위해 매년 일정 시간 이상의 정보보호 전문 교육 또는 세미나에 참여하고 있는가`),
+createQuestionData(2, "2.1", `정보보호 활동 등을 포함한 정보보호 예산을 수립하여 문서화하고 최고경영자가 이를 승인하고 있는가(Section 21 4.2 연결항목)`),
+createQuestionData(3, "3.1", `정보보호최고책임자는 연간 정보보호 계획을 수립하고 이행 여부를 정기적으로 점검하는가?<br><br>1. 연간 정보보호 활동에 대한 목표 및 세부적인 추진계획을 최고경영자가 승인하였는가<br>2. 예산 수립 외의 보안 정책 적용과 관련한 변경 내용이 포함되어 있는가<br>3. 이행 여부에 대한 문서화된 정보가 있는가`),
+createQuestionData(4, "4.1", `정보보호최고책임자는 정보보호 활동에 대한 정기적인 내부감사를 수행하는가?<br>1. 정보보호최고책임자 주관으로 최소 연 1회 이상 내부감사를 수행하고 있다.<br>2. 정보보호 감사 계획을 수립하고 있다.<br>3. 정보보호 감사 결과는 보고서로 작성하여 최고경영자에게 보고하였으며 이해 관련 부서에 전달되어 시정조치가 요구사항대로 이행되고 있다.`),
+createQuestionData(5, "5.1", `정보보호최고책임자는 정보보호 활동에 대한 정기적인 외부감사를 수행하는가?<br>1. 정보보호최고책임자 주관으로 최소 연 1회 이상 외부감사를 수행하고 있다.<br>2. 정보보호 감사 계획을 수립하고 있다.<br>3. 정보보호 감사 결과는 보고서로 작성하여 최고경영자에게 보고하였으며 이해 관련 부서에 전달되어 시정조치가 요구사항대로 이행되고 있다.<br>4. 정보보호 감사는 전문성, 독립성을 갖춘 조직이 수행하고 있다.<br>- 전문성 : 해당 분야 관련 경력 또는 자격을 가진 혹은 외부 전문가<br>- 독립성 : 점검 대상 부서 또는 담당자와 관련이 없는 제3자`)
+]
+),
+createSectionData(
+23,
+"관리적 보호활동",
+["ALL"],
+[
+createQuestionData(1, "1.1", `영업비밀, 개인정보 등의 관련 법률사항, 회사 정보보호 원칙 및 위반 시 징계 등의 내용을 포함하는 정보보호 서약서를 수립하여 입사 시 징구하고 있는가`),
+createQuestionData(1, "1.2", `퇴사 시 정보보호 서약에 대한 내용을 환기시키거나 별도의 정보보호 서약서를 징구하고 있는가<br>- 정보보호 서약 내용 환기<br>- 별도의 서약서 징구`),
+createQuestionData(1, "1.3", `퇴사, 휴직 또는 직무이동 시 사무실 출입 권한, 시스템 접근 권한 등을 확인하여 해당 권한을 지체 없이(최소 5일 이내) 회수하고 있는가`),
+createQuestionData(2, "2.1", `연간 정보보호 활동계획 혹은 전사 교육계획에 보안교육계획이 수립되어 있고 이행하고 있으며, 대상/시간/방법/내용이 포함되어 있는가`),
+createQuestionData(2, "2.2", `정보보호 교육 참여율과 교육내용이 포함된 교육 결과보고서를 작성하여 정보보호 최고책임자에게 보고하고 있는가`),
+createQuestionData(3, "3.1", `정보시스템 등의 전체 정보자산의 보안등급 식별 기준을 수립하고 있는가`),
+createQuestionData(3, "3.2", `정보시스템 자산 목록 및 구성 현황을 문서 또는 시스템의 형태로 항상 최신의 내용으로 관리하고 있는가(최소 연 1회 이상 점검)<br>- 정보자산 목록 : 자산분류, 자산명, 용도, IP 주소, 물리적 위치, 관리 담당자를 반드시 포함<br>- 구성 현황 : 네트워크 구성을 포함한 정보시스템 구성도`),
+createQuestionData(4, "4.1", `정보기기의 변경사항(패치, 장애처리, 보안점검 이력, 용도변경 등)에 대한 기록을 유지 관리하고 있는가`),
+createQuestionData(5, "5.1", `IT업무를 위탁하거나 정보자산에 접근을 허용한 외부자에 대하여 계약 시 보안 요구사항을 명시하고 보안 관리감독이 이루어지는가?<br><b>(모두 만족 시 완료)</b><br><br>1. 정보기술 관련 업무 또는 개인정보 관련 업무를 위탁하거나 정보시스템, 보호구역 등에 접근을 허용한 외부자에 대하여 정보보호서약서를 징구하는 등 외부자 보안을 위한 활동을 수행하고 있다.<br>2. IT업무 또는 정보자산에 접근하는 업무를 외부자에 위탁 시 계약서 또는 협약서 상에 다음과 같은 보안 준수사항을 반영하고 있다.<br>(위탁업무 목적과 범위, 재위탁 금지, 기술적인 보호조치 의무, 주기적인 관리감독 권한, 손해배상, 관련 법률 요구사항, 기타 필요하다고 판단되는 보안준수사항)<br>3. 위탁업무를 수행하는 외부자가 계약 만료 또는 업무 종료 시 제공받은 정보자산의 반납, 중요정보 파기, 업무 수행 시 알게 된 정보의 비밀 유지 등을 이행하는지 점검하고 있다.<br>4. 개인정보보호 등의 관련 법률 요구사항을 고려하여 업무 위탁 규모, 중요도 등에 따른 관리 주체, 관리 방법 등을 포함하는 외부자 보안관리 정책을 수립, 시행하고 있다.`)
+]
+),
+createSectionData(
+24,
+"물리적 보호활동",
+["ALL"],
+[
+createQuestionData(1, "1.1", `정보시스템이 운영되는 장소를 보호구역으로 지정하며, 표시가 되어 있는가`),
+createQuestionData(1, "1.2", `정보시스템이 운영되는 해당 구역의 출입통제 설비를 갖추는가<br>(ex : 출입카드 단말기, CCTV, 스피드 게이트 등)`),
+createQuestionData(2, "2.1", `정보시스템이 운영되는 장소의 출입 및 활동은 영상정보처리기기(CCTV)를 통해 기록되고, 모니터링이 상시 가능한 수준으로 관리되고 있는가`),
+createQuestionData(2, "2.2", `정보시스템이 운영되는 장소는 권한이 있는 자만 출입할 수 있도록 출입통제가 이루어지고 있으며 출입 내역을 기록하고 있는가`),
+createQuestionData(2, "2.3", `정보시스템이 운영되는 장소의 방문자 관리 절차를 수립 및 이행하고 있는가<br>- 방문자 출입 시 사전 등록 관리 / 방문자 출입 시 기록 관리<br>- 담당직원 상시 동행<br>- 접견구역 별도 마련`),
+createQuestionData(3, "3.1", `출입통제, 문서관리 등 보안 준수여부를 확인하기 위하여 정기적인 사무실 보안점검을 수행하고 있는가`),
+createQuestionData(3, "3.2", `사무실 내에 문서 파기를 위한 파쇄기, 중요 문서 보관을 위한 시건 장치가 있는 캐비닛 등이 구비되어 있는가`),
+createQuestionData(3, "3.3", `중요 문서를 대량으로 보관하는 문서고 및 보안 필요성이 높은 중요 사무실은 출입이 허용된 인원만 출입할 수 있도록 통제하고 있는가`),
+createQuestionData(4, "4.1 (자체서버)", `복합기 or 파일 공유 등을 위한 공용 사무기기는 비인가자가 접근할 수 없도록 통제하고 있는가`, ["ALL"], ["ON_PREMISE"]),
+createQuestionData(4, "4.2 (자체서버)", `정보시스템이 운영되는 장소에서 노트북, 서버, 저장매체, 스마트기기 등의 반출입 관리 절차를 마련하고 내역을 관리하고 있는가<br>- 서버 등의 자산 반출입 통제<br>- 노트북, HDD, 이동식 저장매체 반출입 통제<br>- 스마트기기 반입통제`, ["ALL"], ["ON_PREMISE"]),
+createQuestionData(5, "5.1 (자체서버)", `정보시스템이 안정적인 환경에서 동작할 수 있도록 적절한 온도와 습도를 유지시키는 항온항습기 또는 에어컨을 설치 / 무정전전원장치, 비상발전기 등을 설치하고 관리하고 있는가`, ["ALL"], ["ON_PREMISE"]),
+createQuestionData(5, "5.2 (자체서버)", `정보시스템이 운영되는 장소의 시스템 및 인력을 화재로부터 보호하기 위해 필요한 설비를 갖추고 관리하고 있는가<br>- 화재 감지 센서 설치<br>- 가스 소화 장비 설치<br>- 분기별 소방 전문가 점검`, ["ALL"], ["ON_PREMISE"]),
+createQuestionData(4, "4.1 (클라우드)", `클라우드 서비스 이용 시 서비스 유형에 따른 보안 위험을 평가하여 비인가 접근, 설정 오류 등을 방지할 수 있도록 보안 구성 및 설정 기준, 보안 설정 변경 및 승인 절차, 안전한 접속 방법, 권한 체계 등 보안 통제 정책을 수립·이행하고 있는가?`, ["ALL"], ["CLOUD"]),
+createQuestionData(4, "4.2 (클라우드)", `클라우드 서비스 관리자 권한은 역할에 따라 최소화하여 부여하고 관리자 권한에 대한 비인가된 접근, 권한 오남용 등을 방지할 수 있도록 강화된 인증, 암호화, 접근통제, 감사 기록 등 보호대책을 적용하고 있는가?<br>- 불필요한 계정 삭제 / 최신 보안 패치 / ROOT 계정 원격 접속 제한 / 접속 IP 제한 / Session Timeout 설정 / Default 계정 및 패스워드 변경 / 원격에서 DB 접속 제한 / 계정별 시스템 권한 확인(모두 확인 필수)`, ["ALL"], ["CLOUD"]),
+createQuestionData(5, "5.1 (클라우드)", `<b>[계약서 및 모니터링]</b><br>- 클라우드 서비스 제공자와 정보보호 및 개인정보보호에 대한 책임과 역할을 명확히 정의하고 이를 계약서(SLA 등)에 반영하고 있는가?<br>- 클라우드 서비스의 보안 설정 변경, 운영 현황 등을 모니터링하고 그 적정성을 정기적으로 검토하고 있는가?`, ["ALL"], ["CLOUD"])
+]
+),
+createSectionData(
+25,
+"기술적 보호활동",
+["ALL"],
+[
+createQuestionData(1, "1.1", `업무 목적으로 사용하는 모바일 기기(노트북, 스마트폰, 스마트패드 등)에 대한 별도 보안 지침을 마련하고 있는가`),
+createQuestionData(1, "1.2", `업무용 PC에 백신 설치 및 업데이트 설정, 로그인 패스워드, 운영체제 보안 패치 등의 PC 보안 취약점을 주기적으로 점검하거나, 점검 가능한 중앙 관리 솔루션을 보유하고 있다.`),
+createQuestionData(2, "2.1", `정보시스템, 보안시스템 등 기록해야 할 로그를 일정 기간 이상 보존하고 있는가`),
+createQuestionData(2, "2.2", `백업 및 복구 절차를 수립하고 있으며 백업 대상 시스템과 백업 대상 데이터를 정하여 정기적인 백업을 수행하고 있는가`),
+createQuestionData(2, "2.3", `중요 백업 데이터를 비인가자의 접근으로부터 차단하고 외부 환경적인 위험으로부터 보호하기 위하여 내화금고 등에 안전하게 보관하고 있는가(백업 솔루션 운영 시 백업 서버 및 백업 로그 확인 필수)`),
+createQuestionData(2, "2.4", `업무 연속성을 위한 조직, 역할, 대응절차, 비상연락체계 등을 문서화하고 최신으로 유지하고 있는가`),
+createQuestionData(2, "2.5", `업무 연속성을 위한 모의훈련을 실시하고 훈련결과와 문제점에 대한 개선방안 및 조치결과를 정보보호최고책임자에게 보고하고 있는가`),
+createQuestionData(3, "3.1", `방화벽, IPS/IDS, UTM 등 침해사고 방지를 위한 보안 솔루션을 1개 이상 운영 관리하고 있는가`),
+createQuestionData(3, "3.2", `정보보호 사고 유형에 따른 적합한 대응방안을 마련하고 있고, 관련 솔루션을 운영 관리하고 있는가<br>(지능형 지속공격(APT 공격), DDoS대응체계(DDoS대피소 이용 등), 개인정보 유출, 그 외 신규 공격 기법)`),
+createQuestionData(3, "3.3", `1. 휴대용 저장매체 보안 통제와 관리하고 있는가<br>2. 중요정보의 정보 유출을 차단, 탐지할 수 있는 보안시스템 운영 관리하고 있는가<br>(2개 이상)`),
+createQuestionData(4, "4.1", `취약점 점검 주기, 점검 대상, 수행주체, 점검 항목, 수행방법 등을 포함한 취약점 점검계획을 수립하고 있는가<br>- 점검 대상 : 서비스와 관련된 네트워크, 서버, 데이터베이스 등의 정보시스템과 웹서버, WAS, 웹사이트 등의 응용프로그램을 모두 포함`),
+createQuestionData(4, "4.2", `정보보호 취약점 점검은 전문성을 갖춘 인력이 수행하고 있는가`),
+createQuestionData(4, "4.3", `조직이 관리하고 있는 전체 정보시스템 및 서비스에 대한 연간 정보보호 취약점 점검을 수행하고 그 결과를 정보보호최고책임자에게 보고하고 있는가`),
+createQuestionData(4, "4.4", `유무선 네트워크 접근 통제를 운영하고 있는가(NAC, 무선보안솔루션)`),
+createQuestionData(5, "5.1", `정보시스템 및 어플리케이션에 대한 접근통제를 강화하기 위하여 접속 단말 지정, 원격접근 통제, 사용자인증 강화 등의 대책을 적용하는가?(4개 이상)<br><br>1. 정보시스템 및 어플리케이션에 대한 관리자 및 사용자 접근 시 복잡도, 길이 등을 고려한 안전한 비밀번호를 사용하며 주기적으로 비밀번호를 변경하고 있다.<br>※ 안전한 비밀번호 : 영문 대문자, 영문 소문자, 숫자, 특수문자 중 3종류 문자 조합 시 8자리 이상, 2종류 조합 시 10자리 이상의 길이로 구성<br>2. 정보시스템/어플리케이션의 식별 및 인증, 원격접근 등에 대한 보안정책 또는 지침이 수립되어 있다.<br>3. 정보시스템/어플리케이션 보안정책 또는 지침에 따른 준수사항(접근권한, 장기간 미사용, 퇴직/휴직/직무변경 등 포함)을 정기적으로 점검하고 있다.<br>4. 개인정보 등 중요정보를 대량으로 취급하는 정보시스템/어플리케이션에 대한 접근 가능 권한은 관련 법률 준수사항을 고려하여 별도의 인가 절차를 거친 관리자에게만 부여하고 있다.(접속 단말을 위한 PC를 지정, 1인 1계정 사용)`),
+createQuestionData(5, "5.2", `시스템 및 서비스의 운영(변경, 인수, 성능, 장애해결 등)의 절차를 명시적으로 수립하여 이행하고 있는가<br>원격작업에 대한 대책을 마련하고 통제를 수행하고 있는가`),
+createQuestionData(5, "5.3", `정보보호 시스템 유형별로 관리자 지정, 최신 정책 업데이트, 이벤트 모니터링의 절차를 수립하여 현황을 관리하고 있는가<br>- 최신 패턴 또는 SW 업데이트 현황을 파악하여 최신성을 유지<br>- 이벤트 모니터링 절차 수립<br>- 정보시스템 관리자의 행위 모니터링`)
+]
+)
+
+];
+function materialGroupLabel(groups) {
+return groups.includes("ALL")
+? "All"
+: groups.join(", ");
+}
+function safeKey(key) {
+return String(key).replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+function createSelfAuditControl(section) {
+const key = safeKey(section.sectionKey);
+if (section.scoringType === "average") {
+return `
+<input
+class="average-self-input"
+id="section${key}SelfAuditScore"
+type="number"
+min="0"
+max="5"
+step="0.01"
+placeholder="예: 4.25"
+>
+`;
+}
+const values = ["", "0.0", "1.0", "2.0", "3.0", "4.0", "5.0"];
+return `
+<select
+class="self-audit-select"
+id="section${key}SelfAuditScore"
+>
+${values.map(value => `
+<option value="${value}">
+${value === "" ? "선택 안 함" : value}
+</option>
+`).join("")}
+</select>
+`;
+}
+function createEvaluationOption(name, value, checked = false) {
+const suffixMap = {
+"미평가": "none",
+"적합": "pass",
+"부적합": "fail",
+"권고": "recommend"
+};
+const id = `${name}-${suffixMap[value]}`;
+return `
+<div class="result-option">
+<input
+type="radio"
+id="${id}"
+name="${name}"
+value="${value}"
+${checked ? "checked" : ""}
+>
+<label for="${id}">${value}</label>
+</div>
+`;
+}
+function createEvaluationOptions(section, question) {
+const safeQuestionNumber = String(question.number).replace(/[^a-zA-Z0-9]/g, "");
+const serverSuffix = question.serverTypes && !question.serverTypes.includes("ALL")
+? "-" + question.serverTypes.join("-")
+: "";
+const key = safeKey(section.sectionKey);
+const name = `section${key}Question${safeQuestionNumber}${serverSuffix}`;
+return `
+<div class="result-options">
+${createEvaluationOption(name, "미평가", true)}
+${createEvaluationOption(name, "적합")}
+${createEvaluationOption(name, "부적합")}
+${createEvaluationOption(name, "권고")}
+</div>
+`;
+}
+function createLevelQuestionRow(section, question) {
+return `
+<tr
+data-level="${question.level}"
+data-question-number="${question.number}"
+data-server-types="${(question.serverTypes || ["ALL"]).join(",")}"
+data-applicable="true"
+>
+<td class="level-cell">${question.level}</td>
+<td class="question-cell">${question.number}</td>
+<td class="evaluation-cell">${question.content}</td>
+<td class="result-cell">
+${createEvaluationOptions(section, question)}
+</td>
+<td class="comment-cell">
+<textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
+</td>
+</tr>
+`;
+}
+function createAverageCriteria(criteria) {
+return `
+<div class="average-criteria">
+${criteria.map(([condition, grade, score]) => `
+<div class="average-criteria-line">
+<span>${condition}</span>
+<strong>${grade}(${score})</strong>
+</div>
+`).join("")}
+</div>
+`;
+}
+function createAverageQuestionRow(section, question) {
+const key = safeKey(section.sectionKey);
+const rowKey = `section${key}Average${question.number}`;
+return `
+<tr
+data-question-number="${question.number}"
+data-applicable="true"
+>
+<td class="question-cell">${question.number}</td>
+<td class="evaluation-cell"><strong>${question.content}</strong></td>
+<td>${createAverageCriteria(question.criteria)}</td>
+<td class="result-cell">
+<select class="average-grade-select" id="${rowKey}Grade">
+<option value="">선택 안 함</option>
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+<option value="E">E</option>
+</select>
+</td>
+<td class="average-score-cell" id="${rowKey}Score">-</td>
+<td class="comment-cell">
+<textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
+</td>
+</tr>
+`;
+}
+function createServerTypeSelectorRow() {
+return `
+<tr class="server-type-divider">
+<td colspan="5">
+<div class="server-type-selector">
+<span class="server-type-selector-title">Server Type · 중복 선택 가능</span>
+<div class="server-type-options">
+<div class="server-type-option">
+<input id="section24ServerOnPremise" name="section24ServerType" type="checkbox" value="ON_PREMISE">
+<label for="section24ServerOnPremise">사내 자체 서버</label>
+</div>
+<div class="server-type-option">
+<input id="section24ServerCloud" name="section24ServerType" type="checkbox" value="CLOUD">
+<label for="section24ServerCloud">클라우드 서비스</label>
+</div>
+</div>
+</div>
+</td>
+</tr>
+`;
+}
+function createSectionHtml(section) {
+const key = safeKey(section.sectionKey);
+const totalQuestions = section.questions.length;
+const isAverage = section.scoringType === "average";
+const tableHeader = isAverage
+? `
+<tr>
+<th>Question Number</th>
+<th>Contents</th>
+<th>Evaluation Contents</th>
+<th>Evaluation Grade</th>
+<th>Evaluation Score</th>
+<th>PSK Notes / Comments</th>
+</tr>
+`
+: `
+<tr>
+<th>Scoring Level</th>
+<th>Question Number</th>
+<th>Evaluation Contents</th>
+<th>Evaluation Result</th>
+<th>PSK Notes / Comments</th>
+</tr>
+`;
+let rows = section.questions.map(question =>
+isAverage
+? createAverageQuestionRow(section, question)
+: createLevelQuestionRow(section, question)
+).join("");
+
+if (section.sectionKey === "24") {
+const marker = section.questions.find(question => question.number === "3.3");
+if (marker) {
+const markerRow = createLevelQuestionRow(section, marker);
+rows = rows.replace(markerRow, markerRow + createServerTypeSelectorRow());
+}
+}
+const scoringLabel = isAverage ? "에버리지제도" : "레벨제도";
+const summaryText = isAverage
+? `총 ${totalQuestions}개 평가항목 · ${scoringLabel}`
+: `Level 1부터 Level 5까지 총 ${totalQuestions}개 평가항목 · ${scoringLabel}`;
+const scoreRule = isAverage
+? `
+<strong>Audit Score 계산 기준 · 에버리지제도</strong><br>
+각 항목의 평가 Grade를 A=5점 / B=4점 / C=3점 / D=1점 / E=0점으로 환산하고,
+평가 완료된 항목의 평균을 Audit Score로 계산합니다.<br>
+Section 14 Self-Audit Score는 협력업체 자체평가 평균점수를 직접 입력합니다.
+`
+: `
+<strong>Audit Score 계산 기준 · 레벨제도</strong><br>
+부적합이 발생한 가장 낮은 Level의 직전 Level을 Audit Score로 계산합니다.
+예: Level 3 항목에서 부적합 발생 → Audit Score 2.0.<br>
+권고는 Audit Score를 차감하지 않으며 별도 분석 대상으로 집계합니다.
+`;
+return `
+<div
+class="audit-accordion"
+id="section${key}Wrapper"
+data-section-key="${key}"
+data-section-number="${section.sectionNumber}"
+data-scoring-type="${section.scoringType}"
+data-applicable="true"
+>
+<button
+class="accordion-header ${section.open ? "open" : ""}"
+id="section${key}Header"
+type="button"
+>
+<div class="accordion-title">
+<div class="accordion-title-row">
+<strong>Section ${section.sectionNumber} · ${section.title}</strong>
+<span class="section-material-badge">
+Material Group : ${materialGroupLabel(section.materialGroups)}
+</span>
+</div>
+<span id="section${key}QuestionSummary">${summaryText}</span>
+</div>
+<div class="accordion-arrow">⌃</div>
+</button>
+<div
+class="accordion-content ${section.open ? "open" : ""}"
+id="section${key}Content"
+>
+<div class="section-summary">
+<div class="summary-card self-audit-card">
+<span>Section ${section.sectionNumber} Self-Audit Score</span>
+${createSelfAuditControl(section)}
+</div>
+<div class="summary-card score-card">
+<span>Section ${section.sectionNumber} Audit Score</span>
+<strong id="section${key}AuditScore">${isAverage ? "-" : "5.0"}</strong>
+</div>
+${isAverage ? `
+<div class="summary-card">
+<span>평가 완료</span>
+<strong id="section${key}CompletedCount">0 / ${totalQuestions}</strong>
+</div>
+<div class="summary-card">
+<span>계산 방식</span>
+<strong style="font-size:18px;">AVERAGE</strong>
+</div>
+<div class="summary-card">
+<span>Grade</span>
+<strong style="font-size:16px;">A/B/C/D/E</strong>
+</div>
+` : `
+<div class="summary-card">
+<span>부적합</span>
+<strong id="section${key}FailCount">0</strong>
+</div>
+<div class="summary-card">
+<span>권고</span>
+<strong id="section${key}RecommendCount">0</strong>
+</div>
+<div class="summary-card">
+<span>평가 완료</span>
+<strong id="section${key}CompletedCount">0 / ${totalQuestions}</strong>
+</div>
+`}
+</div>
+<div class="table-wrap">
+<table>
+<thead>${tableHeader}</thead>
+<tbody id="section${key}Body">${rows}</tbody>
+</table>
+</div>
+<div class="score-rule">${scoreRule}</div>
+</div>
+</div>
+`;
+}
+const productionSections = auditSections.filter(section =>
+section.sectionNumber >= 1 && section.sectionNumber <= 5
+);
+const qualitySections = auditSections.filter(section =>
+section.sectionNumber >= 6 && section.sectionNumber <= 13
+);
+const purchaseSections = auditSections.filter(section =>
+section.sectionNumber >= 14 && section.sectionNumber <= 18
+);
+const securitySections = auditSections.filter(section =>
+section.sectionNumber >= 21 && section.sectionNumber <= 25
+);
+document.getElementById("productionAuditSections").innerHTML =
+productionSections.map(createSectionHtml).join("");
+document.getElementById("qualityAuditSections").innerHTML =
+qualitySections.map(createSectionHtml).join("");
+document.getElementById("purchaseAuditSections").innerHTML =
+purchaseSections.map(createSectionHtml).join("");
+document.getElementById("securityAuditSections").innerHTML =
+securitySections.map(createSectionHtml).join("");
+function getSelectedMaterialGroups() {
+return Array.from(
+document.querySelectorAll('input[name="materialGroup"]:checked')
+).map(input => input.value);
+}
+function isMaterialApplicable(allowedGroups, selectedGroups) {
+if (selectedGroups.length === 0) return true;
+if (allowedGroups.includes("ALL")) return true;
+return allowedGroups.some(group => selectedGroups.includes(group));
+}
+function getSelectedServerTypes() {
+return Array.from(
+document.querySelectorAll('input[name="section24ServerType"]:checked')
+).map(input => input.value);
+}
+function applyServerTypeRules(section) {
+if (section.sectionKey !== "24") return;
+const selectedServerTypes = getSelectedServerTypes();
+const key = safeKey(section.sectionKey);
+const body = document.getElementById(`section${key}Body`);
+section.questions.forEach(question => {
+const row = Array.from(body.querySelectorAll("tr")).find(item =>
+item.dataset.questionNumber === String(question.number)
+);
+if (!row) return;
+const serverTypes = question.serverTypes || ["ALL"];
+const applicable =
+serverTypes.includes("ALL") ||
+serverTypes.some(type => selectedServerTypes.includes(type));
+row.dataset.applicable = applicable ? "true" : "false";
+row.style.display = applicable ? "" : "none";
+});
+}
+function updateLevelSectionResult(section) {
+const key = safeKey(section.sectionKey);
+const wrapper = document.getElementById(`section${key}Wrapper`);
+if (!wrapper || wrapper.dataset.applicable === "false") return;
+const body = document.getElementById(`section${key}Body`);
+const rows = Array.from(body.querySelectorAll("tr")).filter(row =>
+row.dataset.applicable !== "false"
+);
+let lowestFailLevel = null;
+let failCount = 0;
+let recommendCount = 0;
+let completedCount = 0;
+rows.forEach(row => {
+const level = Number(row.dataset.level);
+const selected = row.querySelector('input[type="radio"]:checked');
+const result = selected ? selected.value : "미평가";
+row.classList.remove("status-pass", "status-fail", "status-recommend");
+if (result !== "미평가") completedCount += 1;
+if (result === "적합") row.classList.add("status-pass");
+if (result === "부적합") {
+row.classList.add("status-fail");
+failCount += 1;
+if (lowestFailLevel === null || level < lowestFailLevel) {
+lowestFailLevel = level;
+}
+}
+if (result === "권고") {
+row.classList.add("status-recommend");
+recommendCount += 1;
+}
+});
+const auditScore = lowestFailLevel === null ? 5 : lowestFailLevel - 1;
+document.getElementById(`section${key}AuditScore`).textContent =
+auditScore.toFixed(1);
+document.getElementById(`section${key}FailCount`).textContent = failCount;
+document.getElementById(`section${key}RecommendCount`).textContent = recommendCount;
+document.getElementById(`section${key}CompletedCount`).textContent =
+`${completedCount} / ${rows.length}`;
+const summary = document.getElementById(`section${key}QuestionSummary`);
+if (summary) {
+summary.textContent =
+`Level 1부터 Level 5까지 총 ${rows.length}개 평가항목 · 레벨제도`;
+}
+}
+function updateAverageSectionResult(section) {
+const key = safeKey(section.sectionKey);
+const wrapper = document.getElementById(`section${key}Wrapper`);
+if (!wrapper || wrapper.dataset.applicable === "false") return;
+const gradeScoreMap = { A: 5, B: 4, C: 3, D: 1, E: 0 };
+let totalScore = 0;
+let completedCount = 0;
+section.questions.forEach(question => {
+const rowKey = `section${key}Average${question.number}`;
+const select = document.getElementById(`${rowKey}Grade`);
+const scoreCell = document.getElementById(`${rowKey}Score`);
+const row = select.closest("tr");
+const grade = select.value;
+row.classList.remove(
+"average-result-a",
+"average-result-b",
+"average-result-c",
+"average-result-d",
+"average-result-e"
+);
+if (grade && gradeScoreMap[grade] !== undefined) {
+const score = gradeScoreMap[grade];
+totalScore += score;
+completedCount += 1;
+scoreCell.textContent = score.toFixed(1);
+row.classList.add(`average-result-${grade.toLowerCase()}`);
+} else {
+scoreCell.textContent = "-";
+}
+});
+const auditScore = completedCount > 0
+? totalScore / completedCount
+: null;
+document.getElementById(`section${key}AuditScore`).textContent =
+auditScore === null ? "-" : auditScore.toFixed(2);
+document.getElementById(`section${key}CompletedCount`).textContent =
+`${completedCount} / ${section.questions.length}`;
+}
+function updateSectionResult(section) {
+if (section.scoringType === "average") {
+updateAverageSectionResult(section);
+} else {
+updateLevelSectionResult(section);
+}
+}
+function applyMaterialGroupRules() {
+const selectedGroups = getSelectedMaterialGroups();
+auditSections.forEach(section => {
+const key = safeKey(section.sectionKey);
+const wrapper = document.getElementById(`section${key}Wrapper`);
+const sectionApplicable = isMaterialApplicable(
+section.materialGroups,
+selectedGroups
+);
+wrapper.dataset.applicable = sectionApplicable ? "true" : "false";
+wrapper.style.display = sectionApplicable ? "" : "none";
+if (!sectionApplicable) return;
+const body = document.getElementById(`section${key}Body`);
+section.questions.forEach(question => {
+const row = Array.from(body.querySelectorAll("tr")).find(item =>
+item.dataset.questionNumber === String(question.number)
+);
+if (!row) return;
+const questionApplicable = isMaterialApplicable(
+question.materialGroups,
+selectedGroups
+);
+row.dataset.applicable = questionApplicable ? "true" : "false";
+row.style.display = questionApplicable ? "" : "none";
+});
+applyServerTypeRules(section);
+updateSectionResult(section);
+});
+}
+auditSections.forEach(section => {
+const key = safeKey(section.sectionKey);
+const header = document.getElementById(`section${key}Header`);
+const content = document.getElementById(`section${key}Content`);
+const body = document.getElementById(`section${key}Body`);
+header.addEventListener("click", () => {
+header.classList.toggle("open");
+content.classList.toggle("open");
+});
+body.addEventListener("change", event => {
+if (
+event.target.matches('input[type="radio"]') ||
+event.target.matches(".average-grade-select")
+) {
+updateSectionResult(section);
+}
+});
+updateSectionResult(section);
+});
+document
+.querySelectorAll('input[name="section24ServerType"]')
+.forEach(checkbox => {
+checkbox.addEventListener("change", () => {
+const section24 = auditSections.find(section => section.sectionKey === "24");
+applyServerTypeRules(section24);
+updateSectionResult(section24);
+});
+});
+document
+.querySelectorAll('input[name="materialGroup"]')
+.forEach(checkbox => {
+checkbox.addEventListener("change", applyMaterialGroupRules);
+});
+applyMaterialGroupRules();
+</script>
 </body>
 </html>
