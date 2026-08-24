@@ -542,6 +542,56 @@
       line-height: 1.7;
     }
 
+
+    .average-self-input {
+      height: 43px;
+      padding: 8px 11px;
+      border-color: #9fbbd5;
+      color: var(--self-audit);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .average-grade-select {
+      min-width: 90px;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .average-score-cell {
+      width: 110px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .average-criteria {
+      min-width: 360px;
+      line-height: 1.7;
+    }
+
+    .average-criteria-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 2px 0;
+      border-bottom: 1px dotted #aab4be;
+    }
+
+    .average-criteria-line:last-child {
+      border-bottom: 0;
+    }
+
+    .average-result-a td { background-color: rgba(47, 125, 74, 0.045); }
+    .average-result-b td { background-color: rgba(49, 95, 140, 0.04); }
+    .average-result-c td { background-color: rgba(178, 122, 20, 0.04); }
+    .average-result-d td { background-color: rgba(180, 67, 67, 0.04); }
+    .average-result-e td { background-color: rgba(180, 67, 67, 0.075); }
+
     footer {
       padding: 22px;
       color: var(--muted);
@@ -593,7 +643,7 @@
 
   <main>
     <div class="page-guide">
-      <strong>BP社 기본정보 및 생산/품질심사 결과를 입력해 주세요.</strong><br>
+      <strong>BP社 기본정보 및 생산/품질/구매 심사 결과를 입력해 주세요.</strong><br>
       BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비교하여
       해당되는 심사항목만 자동으로 표시합니다.
     </div>
@@ -756,6 +806,19 @@
 
       <div id="qualityAuditSections"></div>
     </section>
+
+    <section class="card">
+      <div class="section-heading">
+        <div class="section-number">04</div>
+
+        <div>
+          <h2>Purchase Audit Sections</h2>
+          <p>Section 14부터 Section 18까지의 구매부서 심사 체크시트</p>
+        </div>
+      </div>
+
+      <div id="purchaseAuditSections"></div>
+    </section>
   </main>
 
   <footer>
@@ -768,13 +831,17 @@
       title,
       materialGroups,
       questions,
-      open = false
+      open = false,
+      scoringType = "level",
+      sectionKey = String(sectionNumber)
     ) => ({
       sectionNumber,
       title,
       materialGroups,
       questions,
-      open
+      open,
+      scoringType,
+      sectionKey
     });
 
     const createQuestionData = (
@@ -786,6 +853,18 @@
       level,
       number,
       content,
+      materialGroups
+    });
+
+    const createAverageQuestionData = (
+      number,
+      content,
+      criteria,
+      materialGroups = ["ALL"]
+    ) => ({
+      number,
+      content,
+      criteria,
       materialGroups
     });
 
@@ -1071,6 +1150,200 @@
           createQuestionData(5, "5.1", "검사 프로세스의 건전성을 측정하기 위한 KPI는 수립 및 주기적으로 모니터링 되고 있는가?<br>(ex: Gauge R&R, 공정능력지수 등)"),
           createQuestionData(5, "5.2", "통계적 품질 관리를 통해 데이터 수집, 분석 및 개선 활동 진행하고 있는가?")
         ]
+      ),
+
+      createSectionData(
+        14,
+        "재무 현황",
+        ["ALL"],
+        [
+          createAverageQuestionData(1, "매출액 증가율", [
+            ["7% 이상", "A", 5],
+            ["5% 이상 7% 미만", "B", 4],
+            ["3% 이상 5% 미만", "C", 3],
+            ["0% 이상 3% 미만", "D", 1],
+            ["0% 미만", "E", 0]
+          ]),
+          createAverageQuestionData(2, "영업이익률", [
+            ["3% 이상", "A", 5],
+            ["2% 이상 3% 미만", "B", 4],
+            ["1% 이상 2% 미만", "C", 3],
+            ["0.5% 이상 1% 미만", "D", 1],
+            ["0.5% 미만", "E", 0]
+          ]),
+          createAverageQuestionData(3, "자기자본 비율", [
+            ["50% 이상", "A", 5],
+            ["30% 이상 50% 미만", "B", 4],
+            ["15% 이상 30% 미만", "C", 3],
+            ["5% 이상 15% 미만", "D", 1],
+            ["5% 미만", "E", 0]
+          ]),
+          createAverageQuestionData(4, "부채 비율", [
+            ["100% 이하", "A", 5],
+            ["100% 이상 120% 미만", "B", 4],
+            ["120% 이상 150% 미만", "C", 3],
+            ["150% 이상 200% 미만", "D", 1],
+            ["200% 초과", "E", 0]
+          ]),
+          createAverageQuestionData(5, "유동비율", [
+            ["200% 이상", "A", 5],
+            ["150% 이상 200% 미만", "B", 4],
+            ["100% 이상 150% 미만", "C", 3],
+            ["50% 이상 100% 미만", "D", 1],
+            ["50% 초과", "E", 0]
+          ]),
+          createAverageQuestionData(6, "비유동 비율", [
+            ["100% 이하", "A", 5],
+            ["100% 이상 120% 미만", "B", 4],
+            ["120% 이상 150% 미만", "C", 3],
+            ["150% 이상 200% 미만", "D", 1],
+            ["200% 초과", "E", 0]
+          ]),
+          createAverageQuestionData(7, "비유동장기적합률", [
+            ["100% 이하", "A", 5],
+            ["100% 이상 120% 미만", "B", 4],
+            ["120% 이상 150% 미만", "C", 3],
+            ["150% 이상 200% 미만", "D", 1],
+            ["200% 초과", "E", 0]
+          ]),
+          createAverageQuestionData(8, "대외기관 신용평가 등급", [
+            ["매우 우량 (AAA~A-)", "A", 5],
+            ["양호 (BBB+~BB-)", "B", 4],
+            ["보통 (B+~B-)", "C", 3],
+            ["미흡 (CCC+~D)", "D", 1],
+            ["불량 (CC~D) 혹은 평가 없음", "E", 0]
+          ])
+        ],
+        false,
+        "average"
+      ),
+
+      createSectionData(
+        15,
+        "구매 관리",
+        ["OEM", "ODM", "M.ODM"],
+        [
+          createQuestionData(1, "1.1", "구매 업무 프로세스를 보유하고 있는가?"),
+          createQuestionData(2, "2.1", "구매 업무 프로세스에 맞추어 업무를 수행하고 있는가?"),
+          createQuestionData(2, "2.2", "구매품(원재료, 표준품, 부속품 등) 가격 결정 프로세스를 보유하고 있는가?"),
+          createQuestionData(3, "3.1", "가격 결정 프로세스에 맞추어 업무를 수행하고 있는가?"),
+          createQuestionData(3, "3.2", "구매 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
+          createQuestionData(3, "3.3", "구매품(원재료, 표준품, 부속품 등)의 통상 수급 기간을 품목 특성에 따라 관리하고 있는가?"),
+          createQuestionData(3, "3.4", "구매 관련 교육을 정기적으로 수강하고 있는가?"),
+          createQuestionData(4, "4.1", "견적 요청은 시스템을 통해 진행되는가?"),
+          createQuestionData(4, "4.2", "협력업체는 요청 받은 견적을 시스템을 통해 입력하는가?"),
+          createQuestionData(4, "4.3", "협력업체에서 입력한 견적은 시스템을 통해 관리되고 있는가?"),
+          createQuestionData(4, "4.4", "시스템을 통해 구매 발주를 진행하고 있는가?"),
+          createQuestionData(4, "4.5", "시스템을 통한 기준정보 관리를 하고 있는가?"),
+          createQuestionData(4, "4.6", "연간 구매 계획을 수립하고 있는가?"),
+          createQuestionData(5, "5.1", "연간 구매 계획은 연간 생산 계획과 연동되며, 해당 수립된 계획에 따라 업무를 수행하고 있는가?"),
+          createQuestionData(5, "5.2", "BCP (Business Continuity Planning : 비즈니스 지속성 계획) 관점에서 구매품의<br>공급망 안정성이 확보되어 있는가?")
+        ]
+      ),
+
+      createSectionData(
+        16,
+        "협력업체 관리",
+        ["OEM", "ODM", "M.ODM"],
+        [
+          createQuestionData(1, "1.1", "협력업체 관리 프로세스를 보유하고 있는가?"),
+          createQuestionData(2, "2.1", "계약을 진행해야 하는 협력업체와 체결해야 하는 계약서가 정의되어 있는가?"),
+          createQuestionData(2, "2.2", "협력업체 관리 프로세스에 신규 협력업체를 선정하기 위한 절차가 별도로 명시되어 있으며,<br>절차에 따라 업무 수행이 가능한 수준인가?"),
+          createQuestionData(2, "2.3", "협력업체 관리 프로세스에 기존 거래 협력업체를 관리 및 평가할 수 있는 절차가 별도로 명시되어 있으며,<br>절차에 따라 업무 수행이 가능한 수준인가?"),
+          createQuestionData(3, "3.1", "계약을 진행해야 하는 협력업체와 필요한 계약에 대해 빠짐없이 체결하고 있는가?"),
+          createQuestionData(3, "3.2", "신규 협력업체는 내부 기준에 따라 평가 및 선정을 하고 있는가?"),
+          createQuestionData(3, "3.3", "신규 협력업체를 선정하기 위한 평가 시트는 공급 받는 자재의 특성 혹은 협력업체의 특성에 따라 분리 및 세분화 되어 있는가?"),
+          createQuestionData(3, "3.4", "신규 협력업체를 선정하기 위한 평가 시트는 경영 현황, 제조 공정, 품질 관리, 자재 관리 등 각 항목별로 평가 항목이 구분되어 있는가?"),
+          createQuestionData(3, "3.5", "기존 거래하고 있는 협력업체 정기 평가 주기의 기준이 수립되어 있는가?"),
+          createQuestionData(3, "3.6", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 공급 받는 자재의 특성 혹은 협력업체의 특성에 따라 분리 및 세분화 되어 있는가?"),
+          createQuestionData(3, "3.7", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 경영 현황, 제조 공정, 품질 관리, 자재 관리 등 각 항목별로 평가 항목이 구분되어 있는가?"),
+          createQuestionData(3, "3.8", "기존 거래하고 있는 협력업체에 대해 정기 평가를 수립된 기준에 따라 정기적으로 시행하고 있는가?"),
+          createQuestionData(4, "4.1", "계약을 진행해야 하는 협력업체와 계약을 체결하고, 계약 관련 사항을 지속적으로 갱신 및 관리하고 있는가?"),
+          createQuestionData(4, "4.2", "신규 협력업체를 선정하기 위한 평가 시트의 평가 항목은 객관적인 평가가 가능한 기준이 정립되어 있는가?"),
+          createQuestionData(4, "4.3", "신규 협력업체를 선정하기 위한 평가 및 선정 이후, 결과에 대해 통지하고 있는가?"),
+          createQuestionData(4, "4.4", "신규 협력업체를 선정하기 위한 평가 이후, 결과에 대해 시스템에 등록하여 관리하고 있는가?"),
+          createQuestionData(4, "4.5", "기존 거래하고 있는 협력업체를 평가 및 관리하기 위한 시트는 객관적인 평가가 가능한 기준이 정립되어 있는가?"),
+          createQuestionData(4, "4.6", "기존 협력업체를 평가한 이후, 결과에 대해 통지하고 부적합 사항에 대한 시정조치를 요구하고 있는가?"),
+          createQuestionData(4, "4.7", "기존 협력업체를 평가한 이후, 결과에 대해 시스템에 등록하여 관리하고 있는가?"),
+          createQuestionData(5, "5.1", "신규 협력업체를 선정하기 위한 평가 및 선정 이후, 결과에 대해 내부적으로 보고하고 관리하고 있는가?"),
+          createQuestionData(5, "5.2", "기존 협력업체 평가 결과에 대해 내부적으로 보고 하고 개선을 위한 활동을 하고 있으며, 매년 관리 지표는 개선되고 있는가?"),
+          createQuestionData(5, "5.3", "기존 협력업체 평가 결과는 추후 구매 계획에 반영되며, 구매 계획 수립의 근거자료로 활용하고 있는가?")
+        ]
+      ),
+
+      createSectionData(
+        17,
+        "영업 관리 - OEM",
+        ["OEM"],
+        [
+          createQuestionData(1, "1.1", "고객사 제품 납기 관리를 위한 프로세스를 보유하고 있는가?"),
+          createQuestionData(1, "1.2", "고객사 제품 납기 관리를 위한 각 부서별 역할이 정의되어 있는가?"),
+          createQuestionData(1, "1.3", "고객사에서 요청하는 납기를 잘 준수하고 있는가?"),
+          createQuestionData(2, "2.1", "납기 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
+          createQuestionData(2, "2.2", "고객사 납기 관리를 위한 지표가 수립되어 있는가?"),
+          createQuestionData(2, "2.3", "고객사에서 요청하는 계약이 모두 체결되어 있는가?"),
+          createQuestionData(3, "3.1", "납기 관리 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
+          createQuestionData(3, "3.2", "고객사에서 요청하는 납기가 변경될 시, 즉시 대응 할 수 있는 프로세스가 있는가?"),
+          createQuestionData(3, "3.3", "고객사와 체결한 계약서에 대해서 적절히 보관 및 관리되고 있는가?"),
+          createQuestionData(4, "4.1", "시스템을 통한 제품 생산 일정 관리를 하고 있는가?"),
+          createQuestionData(4, "4.2", "고객사에서 요청 하는 납기가 변경될 시, 시스템을 통한 고객사 제품 생산 일정 변경 및 제품 납품 일정 조율이 가능한가?"),
+          createQuestionData(5, "5.1", "고객사 납기 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
+        ],
+        false,
+        "level",
+        "17-oem"
+      ),
+
+      createSectionData(
+        17,
+        "영업 관리 - ODM, M.ODM",
+        ["ODM", "M.ODM"],
+        [
+          createQuestionData(1, "1.1", "고객사 제품 납기 관리를 위한 프로세스를 보유하고 있는가?"),
+          createQuestionData(1, "1.2", "고객사 제품 납기 관리를 위한 각 부서별 역할이 정의되어 있는가?"),
+          createQuestionData(1, "1.3", "고객사에서 요청하는 납기를 잘 준수하고 있는가?"),
+          createQuestionData(1, "1.4", "EOL 관리 프로세스를 보유하고 있는가?"),
+          createQuestionData(2, "2.1", "납기 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
+          createQuestionData(2, "2.2", "고객사 납기 관리를 위한 지표가 수립되어 있는가?"),
+          createQuestionData(2, "2.3", "고객사에서 요청하는 계약이 모두 체결되어 있는가?"),
+          createQuestionData(2, "2.4", "EOL 관리 대상 품목이 정의되어 있는가?"),
+          createQuestionData(3, "3.1", "납기 관리 업무 규정은 업무 절차 및 방법과 업무 수행자를 명확히 정의하고 있으며,<br>업무 절차에 따라 업무 수행이 가능한 수준인가?"),
+          createQuestionData(3, "3.2", "고객사에서 요청하는 납기가 변경될 시, 즉시 대응 할 수 있는 프로세스가 있는가?"),
+          createQuestionData(3, "3.3", "고객사와 체결한 계약서에 대해서 적절히 보관 및 관리되고 있는가?"),
+          createQuestionData(3, "3.4", "EOL 관리 대상 품목에 대해, 단종 6개월 전에 고객사에 통지하고 있는가?"),
+          createQuestionData(3, "3.5", "EOL 대상 품목은 주기적으로 점검하고 있으며, 관리되고 있는가?"),
+          createQuestionData(4, "4.1", "시스템을 통한 제품 생산 일정 관리를 하고 있는가?"),
+          createQuestionData(4, "4.2", "고객사에서 요청 하는 납기가 변경될 시, 시스템을 통한 고객사 제품 생산 일정 변경 및 제품 납품 일정 조율이 가능한가?"),
+          createQuestionData(5, "5.1", "고객사 납기 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
+        ],
+        false,
+        "level",
+        "17-odm"
+      ),
+
+      createSectionData(
+        18,
+        "자재 관리",
+        ["OEM", "ODM", "M.ODM"],
+        [
+          createQuestionData(1, "1.1", "재고 관리 프로세스를 보유하고 있는가?"),
+          createQuestionData(1, "1.2", "제품 재고 보관 구역이 별도로 설정되어 있는가?"),
+          createQuestionData(1, "1.3", "재고는 제품별 식별이 가능하도록 보관되고 있는가?"),
+          createQuestionData(2, "2.1", "재고 관리 프로세스에 맞추어 업무를 수행하고 있는가?"),
+          createQuestionData(2, "2.2", "재고 관리를 위해 입고, 출고 업무에 대한 역할이 정의되어 있고, 실행 매뉴얼이 있는가?"),
+          createQuestionData(2, "2.3", "제품을 보관하기 위한 보관 구역에 적정한 온도, 습도로 관리되고 있는가?"),
+          createQuestionData(2, "2.4", "별도로 설정되어 있는 제품 재고 보관 구역에 제품을 Pallet / Rack 등을 이용하여 보관하고 있는가?"),
+          createQuestionData(2, "2.5", "선입선출 구조로 재고를 관리하고 있는가?"),
+          createQuestionData(3, "3.1", "전체 재고에 대해 주기적으로 파악하고 관리하고 있는가?"),
+          createQuestionData(3, "3.2", "전체 재고 중 장기재고 혹은 체화재고에 대해 파악하고 있는가?"),
+          createQuestionData(3, "3.3", "전체 재고 중 장기재고 혹은 체화재고에 대해 별도의 보관 구역을 설정하여 관리하고 있는가?"),
+          createQuestionData(3, "3.4", "재고 관리를 위한 지표가 있는가?"),
+          createQuestionData(4, "4.1", "시스템을 통한 재고 현황 확인을 하고 있는가?"),
+          createQuestionData(4, "4.2", "시스템을 통한 자재 입고 관리를 하고 있는가?"),
+          createQuestionData(4, "4.3", "시스템을 통한 자재 출고 관리를 하고 있는가?"),
+          createQuestionData(5, "5.1", "재고 관리 지표는 주기적으로 갱신 혹은 확인되고 있으며, 유관 부서와 함께 검토되고 있는가?"),
+          createQuestionData(5, "5.2", "재고 관리 지표는 매년 분석 및 개선을 통해 개선된 지표를 보여주고 있는가?")
+        ]
       )
     ];
 
@@ -1080,21 +1353,33 @@
         : groups.join(", ");
     }
 
-    function createSelfAuditOptions(sectionNumber) {
-      const values = [
-        "",
-        "0.0",
-        "1.0",
-        "2.0",
-        "3.0",
-        "4.0",
-        "5.0"
-      ];
+    function safeKey(key) {
+      return String(key).replace(/[^a-zA-Z0-9_-]/g, "-");
+    }
+
+    function createSelfAuditControl(section) {
+      const key = safeKey(section.sectionKey);
+
+      if (section.scoringType === "average") {
+        return `
+          <input
+            class="average-self-input"
+            id="section${key}SelfAuditScore"
+            type="number"
+            min="0"
+            max="5"
+            step="0.01"
+            placeholder="예: 4.25"
+          >
+        `;
+      }
+
+      const values = ["", "0.0", "1.0", "2.0", "3.0", "4.0", "5.0"];
 
       return `
         <select
           class="self-audit-select"
-          id="section${sectionNumber}SelfAuditScore"
+          id="section${key}SelfAuditScore"
         >
           ${values.map(value => `
             <option value="${value}">
@@ -1124,19 +1409,15 @@
             value="${value}"
             ${checked ? "checked" : ""}
           >
-          <label for="${id}">
-            ${value}
-          </label>
+          <label for="${id}">${value}</label>
         </div>
       `;
     }
 
-    function createEvaluationOptions(sectionNumber, questionNumber) {
-      const safeQuestionNumber =
-        questionNumber.replace(".", "");
-
-      const name =
-        `section${sectionNumber}Question${safeQuestionNumber}`;
+    function createEvaluationOptions(section, questionNumber) {
+      const safeQuestionNumber = String(questionNumber).replace(/[^a-zA-Z0-9]/g, "");
+      const key = safeKey(section.sectionKey);
+      const name = `section${key}Question${safeQuestionNumber}`;
 
       return `
         <div class="result-options">
@@ -1148,239 +1429,246 @@
       `;
     }
 
-    function createQuestionRow(sectionNumber, question) {
+    function createLevelQuestionRow(section, question) {
       return `
         <tr
           data-level="${question.level}"
           data-question-number="${question.number}"
           data-applicable="true"
         >
-          <td class="level-cell">
-            ${question.level}
-          </td>
-
-          <td class="question-cell">
-            ${question.number}
-          </td>
-
-          <td class="evaluation-cell">
-            ${question.content}
-          </td>
-
+          <td class="level-cell">${question.level}</td>
+          <td class="question-cell">${question.number}</td>
+          <td class="evaluation-cell">${question.content}</td>
           <td class="result-cell">
-            ${createEvaluationOptions(
-              sectionNumber,
-              question.number
-            )}
+            ${createEvaluationOptions(section, question.number)}
           </td>
-
           <td class="comment-cell">
-            <textarea
-              class="comment-input"
-              placeholder="PSK Notes / Comments 입력"
-            ></textarea>
+            <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
+          </td>
+        </tr>
+      `;
+    }
+
+    function createAverageCriteria(criteria) {
+      return `
+        <div class="average-criteria">
+          ${criteria.map(([condition, grade, score]) => `
+            <div class="average-criteria-line">
+              <span>${condition}</span>
+              <strong>${grade}(${score})</strong>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function createAverageQuestionRow(section, question) {
+      const key = safeKey(section.sectionKey);
+      const rowKey = `section${key}Average${question.number}`;
+
+      return `
+        <tr
+          data-question-number="${question.number}"
+          data-applicable="true"
+        >
+          <td class="question-cell">${question.number}</td>
+          <td class="evaluation-cell"><strong>${question.content}</strong></td>
+          <td>${createAverageCriteria(question.criteria)}</td>
+          <td class="result-cell">
+            <select class="average-grade-select" id="${rowKey}Grade">
+              <option value="">선택 안 함</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+            </select>
+          </td>
+          <td class="average-score-cell" id="${rowKey}Score">-</td>
+          <td class="comment-cell">
+            <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
           </td>
         </tr>
       `;
     }
 
     function createSectionHtml(section) {
-      const sectionNumber =
-        section.sectionNumber;
+      const key = safeKey(section.sectionKey);
+      const totalQuestions = section.questions.length;
+      const isAverage = section.scoringType === "average";
 
-      const totalQuestions =
-        section.questions.length;
+      const tableHeader = isAverage
+        ? `
+          <tr>
+            <th>Question Number</th>
+            <th>Contents</th>
+            <th>Evaluation Contents</th>
+            <th>Evaluation Grade</th>
+            <th>Evaluation Score</th>
+            <th>PSK Notes / Comments</th>
+          </tr>
+        `
+        : `
+          <tr>
+            <th>Scoring Level</th>
+            <th>Question Number</th>
+            <th>Evaluation Contents</th>
+            <th>Evaluation Result</th>
+            <th>PSK Notes / Comments</th>
+          </tr>
+        `;
+
+      const rows = section.questions.map(question =>
+        isAverage
+          ? createAverageQuestionRow(section, question)
+          : createLevelQuestionRow(section, question)
+      ).join("");
+
+      const scoringLabel = isAverage ? "에버리지제도" : "레벨제도";
+      const summaryText = isAverage
+        ? `총 ${totalQuestions}개 평가항목 · ${scoringLabel}`
+        : `Level 1부터 Level 5까지 총 ${totalQuestions}개 평가항목 · ${scoringLabel}`;
+
+      const scoreRule = isAverage
+        ? `
+          <strong>Audit Score 계산 기준 · 에버리지제도</strong><br>
+          각 항목의 평가 Grade를 A=5점 / B=4점 / C=3점 / D=1점 / E=0점으로 환산하고,
+          평가 완료된 항목의 평균을 Audit Score로 계산합니다.<br>
+          Section 14 Self-Audit Score는 협력업체 자체평가 평균점수를 직접 입력합니다.
+        `
+        : `
+          <strong>Audit Score 계산 기준 · 레벨제도</strong><br>
+          부적합이 발생한 가장 낮은 Level의 직전 Level을 Audit Score로 계산합니다.
+          예: Level 3 항목에서 부적합 발생 → Audit Score 2.0.<br>
+          권고는 Audit Score를 차감하지 않으며 별도 분석 대상으로 집계합니다.
+        `;
 
       return `
         <div
           class="audit-accordion"
-          id="section${sectionNumber}Wrapper"
-          data-section-number="${sectionNumber}"
+          id="section${key}Wrapper"
+          data-section-key="${key}"
+          data-section-number="${section.sectionNumber}"
+          data-scoring-type="${section.scoringType}"
           data-applicable="true"
         >
           <button
             class="accordion-header ${section.open ? "open" : ""}"
-            id="section${sectionNumber}Header"
+            id="section${key}Header"
             type="button"
           >
             <div class="accordion-title">
               <div class="accordion-title-row">
-                <strong>
-                  Section ${sectionNumber} · ${section.title}
-                </strong>
-
+                <strong>Section ${section.sectionNumber} · ${section.title}</strong>
                 <span class="section-material-badge">
                   Material Group : ${materialGroupLabel(section.materialGroups)}
                 </span>
               </div>
-
-              <span id="section${sectionNumber}QuestionSummary">
-                Level 1부터 Level 5까지 총
-                ${totalQuestions}개 평가항목
-              </span>
+              <span id="section${key}QuestionSummary">${summaryText}</span>
             </div>
-
-            <div class="accordion-arrow">
-              ⌃
-            </div>
+            <div class="accordion-arrow">⌃</div>
           </button>
 
           <div
             class="accordion-content ${section.open ? "open" : ""}"
-            id="section${sectionNumber}Content"
+            id="section${key}Content"
           >
             <div class="section-summary">
               <div class="summary-card self-audit-card">
-                <span>
-                  Section ${sectionNumber} Self-Audit Score
-                </span>
-
-                ${createSelfAuditOptions(sectionNumber)}
+                <span>Section ${section.sectionNumber} Self-Audit Score</span>
+                ${createSelfAuditControl(section)}
               </div>
 
               <div class="summary-card score-card">
-                <span>
-                  Section ${sectionNumber} Audit Score
-                </span>
-
-                <strong
-                  id="section${sectionNumber}AuditScore"
-                >
-                  5.0
-                </strong>
+                <span>Section ${section.sectionNumber} Audit Score</span>
+                <strong id="section${key}AuditScore">${isAverage ? "-" : "5.0"}</strong>
               </div>
 
-              <div class="summary-card">
-                <span>부적합</span>
-                <strong id="section${sectionNumber}FailCount">0</strong>
-              </div>
-
-              <div class="summary-card">
-                <span>권고</span>
-                <strong id="section${sectionNumber}RecommendCount">0</strong>
-              </div>
-
-              <div class="summary-card">
-                <span>평가 완료</span>
-                <strong id="section${sectionNumber}CompletedCount">
-                  0 / ${totalQuestions}
-                </strong>
-              </div>
+              ${isAverage ? `
+                <div class="summary-card">
+                  <span>평가 완료</span>
+                  <strong id="section${key}CompletedCount">0 / ${totalQuestions}</strong>
+                </div>
+                <div class="summary-card">
+                  <span>계산 방식</span>
+                  <strong style="font-size:18px;">AVERAGE</strong>
+                </div>
+                <div class="summary-card">
+                  <span>Grade</span>
+                  <strong style="font-size:16px;">A/B/C/D/E</strong>
+                </div>
+              ` : `
+                <div class="summary-card">
+                  <span>부적합</span>
+                  <strong id="section${key}FailCount">0</strong>
+                </div>
+                <div class="summary-card">
+                  <span>권고</span>
+                  <strong id="section${key}RecommendCount">0</strong>
+                </div>
+                <div class="summary-card">
+                  <span>평가 완료</span>
+                  <strong id="section${key}CompletedCount">0 / ${totalQuestions}</strong>
+                </div>
+              `}
             </div>
 
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th>Scoring Level</th>
-                    <th>Question Number</th>
-                    <th>Evaluation Contents</th>
-                    <th>Evaluation Result</th>
-                    <th>PSK Notes / Comments</th>
-                  </tr>
-                </thead>
-
-                <tbody id="section${sectionNumber}Body">
-                  ${section.questions
-                    .map(question =>
-                      createQuestionRow(
-                        sectionNumber,
-                        question
-                      )
-                    )
-                    .join("")}
-                </tbody>
+                <thead>${tableHeader}</thead>
+                <tbody id="section${key}Body">${rows}</tbody>
               </table>
             </div>
 
-            <div class="score-rule">
-              <strong>Audit Score 계산 기준</strong><br>
-
-              부적합이 발생한 가장 낮은 Level의 직전 Level을
-              Audit Score로 계산합니다.
-
-              예: Level 3 항목에서 부적합 발생
-              → Audit Score 2.0.
-
-              권고는 Audit Score를 차감하지 않으며
-              별도 분석 대상으로 집계합니다.
-            </div>
+            <div class="score-rule">${scoreRule}</div>
           </div>
         </div>
       `;
     }
 
-    const productionSections =
-      auditSections.filter(section =>
-        section.sectionNumber >= 1 &&
-        section.sectionNumber <= 5
-      );
+    const productionSections = auditSections.filter(section =>
+      section.sectionNumber >= 1 && section.sectionNumber <= 5
+    );
 
-    const qualitySections =
-      auditSections.filter(section =>
-        section.sectionNumber >= 6 &&
-        section.sectionNumber <= 13
-      );
+    const qualitySections = auditSections.filter(section =>
+      section.sectionNumber >= 6 && section.sectionNumber <= 13
+    );
+
+    const purchaseSections = auditSections.filter(section =>
+      section.sectionNumber >= 14 && section.sectionNumber <= 18
+    );
 
     document.getElementById("productionAuditSections").innerHTML =
-      productionSections
-        .map(createSectionHtml)
-        .join("");
+      productionSections.map(createSectionHtml).join("");
 
     document.getElementById("qualityAuditSections").innerHTML =
-      qualitySections
-        .map(createSectionHtml)
-        .join("");
+      qualitySections.map(createSectionHtml).join("");
+
+    document.getElementById("purchaseAuditSections").innerHTML =
+      purchaseSections.map(createSectionHtml).join("");
 
     function getSelectedMaterialGroups() {
       return Array.from(
-        document.querySelectorAll(
-          'input[name="materialGroup"]:checked'
-        )
+        document.querySelectorAll('input[name="materialGroup"]:checked')
       ).map(input => input.value);
     }
 
-    function isMaterialApplicable(
-      allowedGroups,
-      selectedGroups
-    ) {
-      if (selectedGroups.length === 0) {
-        return true;
-      }
-
-      if (allowedGroups.includes("ALL")) {
-        return true;
-      }
-
-      return allowedGroups.some(group =>
-        selectedGroups.includes(group)
-      );
+    function isMaterialApplicable(allowedGroups, selectedGroups) {
+      if (selectedGroups.length === 0) return true;
+      if (allowedGroups.includes("ALL")) return true;
+      return allowedGroups.some(group => selectedGroups.includes(group));
     }
 
-    function updateSectionResult(sectionNumber) {
-      const wrapper =
-        document.getElementById(
-          `section${sectionNumber}Wrapper`
-        );
+    function updateLevelSectionResult(section) {
+      const key = safeKey(section.sectionKey);
+      const wrapper = document.getElementById(`section${key}Wrapper`);
 
-      if (
-        !wrapper ||
-        wrapper.dataset.applicable === "false"
-      ) {
-        return;
-      }
+      if (!wrapper || wrapper.dataset.applicable === "false") return;
 
-      const body =
-        document.getElementById(
-          `section${sectionNumber}Body`
-        );
-
-      const rows =
-        Array.from(
-          body.querySelectorAll("tr")
-        ).filter(row =>
-          row.dataset.applicable !== "false"
-        );
+      const body = document.getElementById(`section${key}Body`);
+      const rows = Array.from(body.querySelectorAll("tr")).filter(row =>
+        row.dataset.applicable !== "false"
+      );
 
       let lowestFailLevel = null;
       let failCount = 0;
@@ -1388,230 +1676,165 @@
       let completedCount = 0;
 
       rows.forEach(row => {
-        const level =
-          Number(row.dataset.level);
+        const level = Number(row.dataset.level);
+        const selected = row.querySelector('input[type="radio"]:checked');
+        const result = selected ? selected.value : "미평가";
 
-        const selected =
-          row.querySelector(
-            'input[type="radio"]:checked'
-          );
+        row.classList.remove("status-pass", "status-fail", "status-recommend");
 
-        const result =
-          selected
-            ? selected.value
-            : "미평가";
-
-        row.classList.remove(
-          "status-pass",
-          "status-fail",
-          "status-recommend"
-        );
-
-        if (result !== "미평가") {
-          completedCount += 1;
-        }
-
-        if (result === "적합") {
-          row.classList.add(
-            "status-pass"
-          );
-        }
+        if (result !== "미평가") completedCount += 1;
+        if (result === "적합") row.classList.add("status-pass");
 
         if (result === "부적합") {
-          row.classList.add(
-            "status-fail"
-          );
-
+          row.classList.add("status-fail");
           failCount += 1;
-
-          if (
-            lowestFailLevel === null ||
-            level < lowestFailLevel
-          ) {
+          if (lowestFailLevel === null || level < lowestFailLevel) {
             lowestFailLevel = level;
           }
         }
 
         if (result === "권고") {
-          row.classList.add(
-            "status-recommend"
-          );
-
+          row.classList.add("status-recommend");
           recommendCount += 1;
         }
       });
 
-      const auditScore =
-        lowestFailLevel === null
-          ? 5
-          : lowestFailLevel - 1;
+      const auditScore = lowestFailLevel === null ? 5 : lowestFailLevel - 1;
 
-      document.getElementById(
-        `section${sectionNumber}AuditScore`
-      ).textContent =
+      document.getElementById(`section${key}AuditScore`).textContent =
         auditScore.toFixed(1);
-
-      document.getElementById(
-        `section${sectionNumber}FailCount`
-      ).textContent =
-        failCount;
-
-      document.getElementById(
-        `section${sectionNumber}RecommendCount`
-      ).textContent =
-        recommendCount;
-
-      document.getElementById(
-        `section${sectionNumber}CompletedCount`
-      ).textContent =
+      document.getElementById(`section${key}FailCount`).textContent = failCount;
+      document.getElementById(`section${key}RecommendCount`).textContent = recommendCount;
+      document.getElementById(`section${key}CompletedCount`).textContent =
         `${completedCount} / ${rows.length}`;
 
-      const questionSummary =
-        document.getElementById(
-          `section${sectionNumber}QuestionSummary`
+      const summary = document.getElementById(`section${key}QuestionSummary`);
+      if (summary) {
+        summary.textContent =
+          `Level 1부터 Level 5까지 총 ${rows.length}개 평가항목 · 레벨제도`;
+      }
+    }
+
+    function updateAverageSectionResult(section) {
+      const key = safeKey(section.sectionKey);
+      const wrapper = document.getElementById(`section${key}Wrapper`);
+
+      if (!wrapper || wrapper.dataset.applicable === "false") return;
+
+      const gradeScoreMap = { A: 5, B: 4, C: 3, D: 1, E: 0 };
+      let totalScore = 0;
+      let completedCount = 0;
+
+      section.questions.forEach(question => {
+        const rowKey = `section${key}Average${question.number}`;
+        const select = document.getElementById(`${rowKey}Grade`);
+        const scoreCell = document.getElementById(`${rowKey}Score`);
+        const row = select.closest("tr");
+        const grade = select.value;
+
+        row.classList.remove(
+          "average-result-a",
+          "average-result-b",
+          "average-result-c",
+          "average-result-d",
+          "average-result-e"
         );
 
-      if (questionSummary) {
-        questionSummary.textContent =
-          `Level 1부터 Level 5까지 총 ${rows.length}개 평가항목`;
+        if (grade && gradeScoreMap[grade] !== undefined) {
+          const score = gradeScoreMap[grade];
+          totalScore += score;
+          completedCount += 1;
+          scoreCell.textContent = score.toFixed(1);
+          row.classList.add(`average-result-${grade.toLowerCase()}`);
+        } else {
+          scoreCell.textContent = "-";
+        }
+      });
+
+      const auditScore = completedCount > 0
+        ? totalScore / completedCount
+        : null;
+
+      document.getElementById(`section${key}AuditScore`).textContent =
+        auditScore === null ? "-" : auditScore.toFixed(2);
+
+      document.getElementById(`section${key}CompletedCount`).textContent =
+        `${completedCount} / ${section.questions.length}`;
+    }
+
+    function updateSectionResult(section) {
+      if (section.scoringType === "average") {
+        updateAverageSectionResult(section);
+      } else {
+        updateLevelSectionResult(section);
       }
     }
 
     function applyMaterialGroupRules() {
-      const selectedGroups =
-        getSelectedMaterialGroups();
+      const selectedGroups = getSelectedMaterialGroups();
 
       auditSections.forEach(section => {
-        const sectionNumber =
-          section.sectionNumber;
+        const key = safeKey(section.sectionKey);
+        const wrapper = document.getElementById(`section${key}Wrapper`);
+        const sectionApplicable = isMaterialApplicable(
+          section.materialGroups,
+          selectedGroups
+        );
 
-        const wrapper =
-          document.getElementById(
-            `section${sectionNumber}Wrapper`
+        wrapper.dataset.applicable = sectionApplicable ? "true" : "false";
+        wrapper.style.display = sectionApplicable ? "" : "none";
+
+        if (!sectionApplicable) return;
+
+        const body = document.getElementById(`section${key}Body`);
+
+        section.questions.forEach(question => {
+          const row = Array.from(body.querySelectorAll("tr")).find(item =>
+            item.dataset.questionNumber === String(question.number)
           );
 
-        const sectionApplicable =
-          isMaterialApplicable(
-            section.materialGroups,
+          if (!row) return;
+
+          const questionApplicable = isMaterialApplicable(
+            question.materialGroups,
             selectedGroups
           );
 
-        wrapper.dataset.applicable =
-          sectionApplicable
-            ? "true"
-            : "false";
-
-        wrapper.style.display =
-          sectionApplicable
-            ? ""
-            : "none";
-
-        if (!sectionApplicable) {
-          return;
-        }
-
-        const body =
-          document.getElementById(
-            `section${sectionNumber}Body`
-          );
-
-        section.questions.forEach(question => {
-          const row =
-            Array.from(
-              body.querySelectorAll("tr")
-            ).find(item =>
-              item.dataset.questionNumber ===
-              question.number
-            );
-
-          if (!row) {
-            return;
-          }
-
-          const questionApplicable =
-            isMaterialApplicable(
-              question.materialGroups,
-              selectedGroups
-            );
-
-          row.dataset.applicable =
-            questionApplicable
-              ? "true"
-              : "false";
-
-          row.style.display =
-            questionApplicable
-              ? ""
-              : "none";
+          row.dataset.applicable = questionApplicable ? "true" : "false";
+          row.style.display = questionApplicable ? "" : "none";
         });
 
-        updateSectionResult(
-          sectionNumber
-        );
+        updateSectionResult(section);
       });
     }
 
     auditSections.forEach(section => {
-      const sectionNumber =
-        section.sectionNumber;
+      const key = safeKey(section.sectionKey);
+      const header = document.getElementById(`section${key}Header`);
+      const content = document.getElementById(`section${key}Content`);
+      const body = document.getElementById(`section${key}Body`);
 
-      const header =
-        document.getElementById(
-          `section${sectionNumber}Header`
-        );
+      header.addEventListener("click", () => {
+        header.classList.toggle("open");
+        content.classList.toggle("open");
+      });
 
-      const content =
-        document.getElementById(
-          `section${sectionNumber}Content`
-        );
-
-      const body =
-        document.getElementById(
-          `section${sectionNumber}Body`
-        );
-
-      header.addEventListener(
-        "click",
-        () => {
-          header.classList.toggle(
-            "open"
-          );
-
-          content.classList.toggle(
-            "open"
-          );
+      body.addEventListener("change", event => {
+        if (
+          event.target.matches('input[type="radio"]') ||
+          event.target.matches(".average-grade-select")
+        ) {
+          updateSectionResult(section);
         }
-      );
+      });
 
-      body.addEventListener(
-        "change",
-        event => {
-          if (
-            event.target.matches(
-              'input[type="radio"]'
-            )
-          ) {
-            updateSectionResult(
-              sectionNumber
-            );
-          }
-        }
-      );
-
-      updateSectionResult(
-        sectionNumber
-      );
+      updateSectionResult(section);
     });
 
     document
-      .querySelectorAll(
-        'input[name="materialGroup"]'
-      )
+      .querySelectorAll('input[name="materialGroup"]')
       .forEach(checkbox => {
-        checkbox.addEventListener(
-          "change",
-          applyMaterialGroupRules
-        );
+        checkbox.addEventListener("change", applyMaterialGroupRules);
       });
 
     applyMaterialGroupRules();
