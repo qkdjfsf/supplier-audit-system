@@ -650,6 +650,63 @@ margin-bottom: 8px;
   border-color: rgba(50,60,70,0.18);
 }
 
+
+.department-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+}
+.department-heading-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.department-score-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 10px;
+  min-width: 330px;
+}
+.department-score-box {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.82);
+  text-align: center;
+}
+.department-score-box span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: bold;
+}
+.department-score-box strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1.15;
+}
+.department-score-box.audit {
+  background: rgba(255,255,255,0.94);
+}
+@media (max-width: 900px) {
+  .department-heading-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .department-score-board {
+    width: 100%;
+    min-width: 0;
+  }
+}
+@media (max-width: 520px) {
+  .department-score-board {
+    grid-template-columns: 1fr;
+  }
+}
 footer {
 padding: 22px;
 color: var(--muted);
@@ -762,27 +819,63 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </section>
 
 <section class="card department-card production-card">
-<div class="section-heading"><div class="section-number production-number">01</div><div><h2>Production Audit Sections</h2><p>Section 1부터 Section 5까지의 생산부서 심사 체크시트</p></div></div>
+<div class="section-heading department-heading-row">
+  <div class="department-heading-title"><div class="section-number production-number">01</div><div><h2>Production Audit Sections</h2><p>Section 1부터 Section 5까지의 생산부서 심사 체크시트</p></div></div>
+  <div class="department-score-board">
+    <div class="department-score-box"><span>Production Self-Audit Score</span><strong id="productionDepartmentSelfScore">-</strong></div>
+    <div class="department-score-box audit"><span>Production Audit Score</span><strong id="productionDepartmentAuditScore">-</strong></div>
+  </div>
+</div>
 <div id="productionAuditSections"></div>
 </section>
 <section class="card department-card quality-card">
-<div class="section-heading"><div class="section-number quality-number">02</div><div><h2>Quality Audit Sections</h2><p>Section 6부터 Section 13까지의 품질부서 심사 체크시트</p></div></div>
+<div class="section-heading department-heading-row">
+  <div class="department-heading-title"><div class="section-number quality-number">02</div><div><h2>Quality Audit Sections</h2><p>Section 6부터 Section 13까지의 품질부서 심사 체크시트</p></div></div>
+  <div class="department-score-board">
+    <div class="department-score-box"><span>Quality Self-Audit Score</span><strong id="qualityDepartmentSelfScore">-</strong></div>
+    <div class="department-score-box audit"><span>Quality Audit Score</span><strong id="qualityDepartmentAuditScore">-</strong></div>
+  </div>
+</div>
 <div id="qualityAuditSections"></div>
 </section>
 <section class="card department-card purchase-card">
-<div class="section-heading"><div class="section-number purchase-number">03</div><div><h2>Purchase Audit Sections</h2><p>Section 14부터 Section 18까지의 구매부서 심사 체크시트</p></div></div>
+<div class="section-heading department-heading-row">
+  <div class="department-heading-title"><div class="section-number purchase-number">03</div><div><h2>Purchase Audit Sections</h2><p>Section 14부터 Section 18까지의 구매부서 심사 체크시트</p></div></div>
+  <div class="department-score-board">
+    <div class="department-score-box"><span>Purchase Self-Audit Score</span><strong id="purchaseDepartmentSelfScore">-</strong></div>
+    <div class="department-score-box audit"><span>Purchase Audit Score</span><strong id="purchaseDepartmentAuditScore">-</strong></div>
+  </div>
+</div>
 <div id="purchaseAuditSections"></div>
 </section>
 <section class="card department-card security-card">
-<div class="section-heading"><div class="section-number security-number">04</div><div><h2>Security Audit Sections</h2><p>Section 21부터 Section 25까지의 보안부서 심사 체크시트</p></div></div>
+<div class="section-heading department-heading-row">
+  <div class="department-heading-title"><div class="section-number security-number">04</div><div><h2>Security Audit Sections</h2><p>Section 21부터 Section 25까지의 보안부서 심사 체크시트</p></div></div>
+  <div class="department-score-board">
+    <div class="department-score-box"><span>Security Self-Audit Score</span><strong id="securityDepartmentSelfScore">-</strong></div>
+    <div class="department-score-box audit"><span>Security Audit Score</span><strong id="securityDepartmentAuditScore">-</strong></div>
+  </div>
+</div>
 <div id="securityAuditSections"></div>
 </section>
 <section class="card department-card system-card">
-<div class="section-heading"><div class="section-number system-number">05</div><div><h2>System Audit Sections</h2><p>Section 26 시스템부서 심사 체크시트</p></div></div>
+<div class="section-heading department-heading-row">
+  <div class="department-heading-title"><div class="section-number system-number">05</div><div><h2>System Audit Sections</h2><p>Section 26 시스템부서 심사 체크시트</p></div></div>
+  <div class="department-score-board">
+    <div class="department-score-box"><span>System Self-Audit Score</span><strong id="systemDepartmentSelfScore">-</strong></div>
+    <div class="department-score-box audit"><span>System Audit Score</span><strong id="systemDepartmentAuditScore">-</strong></div>
+  </div>
+</div>
 <div id="systemAuditSections"></div>
 </section>
 <section class="card department-card compliance-card">
-<div class="section-heading"><div class="section-number compliance-number">06</div><div><h2>Compliance &amp; Ethics Audit Sections</h2><p>Section 27부터 Section 28까지의 Compliance &amp; Ethics 심사 체크시트</p></div></div>
+<div class="section-heading department-heading-row">
+  <div class="department-heading-title"><div class="section-number compliance-number">06</div><div><h2>Compliance &amp; Ethics Audit Sections</h2><p>Section 27부터 Section 28까지의 Compliance &amp; Ethics 심사 체크시트</p></div></div>
+  <div class="department-score-board">
+    <div class="department-score-box"><span>Compliance &amp; Ethics Self-Audit Score</span><strong id="complianceDepartmentSelfScore">-</strong></div>
+    <div class="department-score-box audit"><span>Compliance &amp; Ethics Audit Score</span><strong id="complianceDepartmentAuditScore">-</strong></div>
+  </div>
+</div>
 <div id="complianceAuditSections"></div>
 </section>
 </main>
@@ -1939,6 +2032,82 @@ updateAverageSectionResult(section);
 } else {
 updateLevelSectionResult(section);
 }
+updateAllDepartmentScores();
+}
+const departmentDefinitions = {
+production: { sectionNumbers: [1, 2, 3, 4, 5] },
+quality: { sectionNumbers: [6, 7, 8, 9, 10, 11, 12, 13] },
+purchase: { sectionNumbers: [14, 15, 16, 17, 18], combineSection17: true },
+security: { sectionNumbers: [21, 22, 23, 24, 25] },
+system: { sectionNumbers: [26] },
+compliance: { sectionNumbers: [27, 28] }
+};
+function getApplicableSectionsByNumber(sectionNumber) {
+return auditSections.filter(section => {
+if (section.sectionNumber !== sectionNumber) return false;
+const key = safeKey(section.sectionKey);
+const wrapper = document.getElementById(`section${key}Wrapper`);
+return wrapper && wrapper.dataset.applicable !== "false" && wrapper.style.display !== "none";
+});
+}
+function getSectionSelfScore(section) {
+const key = safeKey(section.sectionKey);
+const control = document.getElementById(`section${key}SelfAuditScore`);
+if (!control || control.value === "") return null;
+const value = Number(control.value);
+return Number.isFinite(value) ? value : null;
+}
+function getSectionAuditScore(section) {
+const key = safeKey(section.sectionKey);
+const scoreElement = document.getElementById(`section${key}AuditScore`);
+if (!scoreElement) return null;
+const value = Number(scoreElement.textContent);
+return Number.isFinite(value) ? value : null;
+}
+function averageValues(values) {
+const validValues = values.filter(value => Number.isFinite(value));
+if (validValues.length === 0) return null;
+return validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
+}
+function getRepresentativeSectionScore(sectionNumber, scoreType, combineSection17 = false) {
+const sections = getApplicableSectionsByNumber(sectionNumber);
+if (sections.length === 0) return null;
+const getter = scoreType === "self" ? getSectionSelfScore : getSectionAuditScore;
+const values = sections.map(getter).filter(value => Number.isFinite(value));
+if (values.length === 0) return null;
+if (combineSection17 && sectionNumber === 17) {
+return averageValues(values);
+}
+return values[0];
+}
+function updateDepartmentScore(departmentKey) {
+const definition = departmentDefinitions[departmentKey];
+if (!definition) return;
+const selfSectionScores = [];
+const auditSectionScores = [];
+definition.sectionNumbers.forEach(sectionNumber => {
+const selfScore = getRepresentativeSectionScore(
+sectionNumber,
+"self",
+definition.combineSection17 === true
+);
+const auditScore = getRepresentativeSectionScore(
+sectionNumber,
+"audit",
+definition.combineSection17 === true
+);
+if (Number.isFinite(selfScore)) selfSectionScores.push(selfScore);
+if (Number.isFinite(auditScore)) auditSectionScores.push(auditScore);
+});
+const selfAverage = averageValues(selfSectionScores);
+const auditAverage = averageValues(auditSectionScores);
+const selfElement = document.getElementById(`${departmentKey}DepartmentSelfScore`);
+const auditElement = document.getElementById(`${departmentKey}DepartmentAuditScore`);
+if (selfElement) selfElement.textContent = selfAverage === null ? "-" : selfAverage.toFixed(2);
+if (auditElement) auditElement.textContent = auditAverage === null ? "-" : auditAverage.toFixed(2);
+}
+function updateAllDepartmentScores() {
+Object.keys(departmentDefinitions).forEach(updateDepartmentScore);
 }
 function applyMaterialGroupRules() {
 const selectedGroups = getSelectedMaterialGroups();
@@ -1968,6 +2137,7 @@ row.style.display = questionApplicable ? "" : "none";
 applyServerTypeRules(section);
 updateSectionResult(section);
 });
+updateAllDepartmentScores();
 }
 auditSections.forEach(section => {
 const key = safeKey(section.sectionKey);
@@ -1989,6 +2159,12 @@ updateSectionResult(section);
 updateSectionResult(section);
 });
 document
+.querySelectorAll('.self-audit-select, .average-self-input')
+.forEach(control => {
+control.addEventListener("change", updateAllDepartmentScores);
+control.addEventListener("input", updateAllDepartmentScores);
+});
+document
 .querySelectorAll('input[name="section24ServerType"]')
 .forEach(checkbox => {
 checkbox.addEventListener("change", () => {
@@ -2003,6 +2179,7 @@ document
 checkbox.addEventListener("change", applyMaterialGroupRules);
 });
 applyMaterialGroupRules();
+updateAllDepartmentScores();
 </script>
 </body>
 </html>
