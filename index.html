@@ -550,6 +550,70 @@ border-right: 0;
 background: var(--white) !important;
 }
 
+
+.overtime-input-box {
+padding: 18px;
+border: 1px solid #e0c75e;
+border-radius: 10px;
+background: #fffbe8;
+}
+.overtime-input-title {
+display: block;
+margin-bottom: 14px;
+font-size: 14px;
+font-weight: bold;
+color: #5b4b00;
+}
+.overtime-grid {
+display: grid;
+grid-template-columns: minmax(240px, 1.3fr) minmax(120px, 0.7fr) 70px;
+gap: 8px;
+align-items: center;
+}
+.overtime-grid .overtime-head {
+padding: 8px 10px;
+font-size: 12px;
+font-weight: bold;
+text-align: center;
+background: #f2f3f5;
+border: 1px solid var(--border);
+}
+.overtime-label,
+.overtime-unit {
+padding: 9px 10px;
+font-size: 13px;
+background: var(--white);
+border: 1px solid var(--border);
+}
+.overtime-unit {
+text-align: center;
+}
+.overtime-input {
+height: 42px;
+background: #fff7a8;
+font-weight: bold;
+}
+.overtime-note {
+margin-top: 12px;
+padding: 12px 14px;
+border-radius: 8px;
+background: #f7f8fa;
+font-size: 12px;
+line-height: 1.7;
+color: var(--muted);
+}
+@media (max-width: 700px) {
+.overtime-grid {
+grid-template-columns: 1fr;
+}
+.overtime-grid .overtime-head {
+display: none;
+}
+.overtime-unit {
+margin-bottom: 8px;
+}
+}
+
 footer {
 padding: 22px;
 color: var(--muted);
@@ -749,6 +813,28 @@ placeholder="Compliance & Ethics Auditor Name"
 </div>
 <div id="securityAuditSections"></div>
 </section>
+
+<section class="card">
+<div class="section-heading">
+<div class="section-number">06</div>
+<div>
+<h2>System Audit Sections</h2>
+<p>Section 26 시스템부서 심사 체크시트</p>
+</div>
+</div>
+<div id="systemAuditSections"></div>
+</section>
+<section class="card">
+<div class="section-heading">
+<div class="section-number">07</div>
+<div>
+<h2>Compliance &amp; Ethics Audit Sections</h2>
+<p>Section 27부터 Section 28까지의 Compliance &amp; Ethics 심사 체크시트</p>
+</div>
+</div>
+<div id="complianceAuditSections"></div>
+</section>
+
 </main>
 <footer>
 SRE Analysis System · PSK Audit Prototype
@@ -795,6 +881,21 @@ content,
 criteria,
 materialGroups
 });
+
+const createComplianceCriteria = () => [
+["규정/지침 중 한 가지 이상을 갖추고 있으며, 규정/지침 수립여부와 평가항목과 관련된 모든 실제 준수 사례 증빙을 제시할 수 있다.", "A", 5],
+["규정/지침 중 한 가지 이상을 갖추고 있으며, 규정/지침 수립여부와 평가항목과 관련된 일부 실제 준수 사례에 대해 관련 증빙을 제시할 수 있다.", "B", 3],
+["규정/지침이 없으나, 평가항목과 관련된 실제 준수 사례에 대해 관련 증빙을 제시할 수 있다.", "C", 1],
+["규정/지침은 있으나, 평가항목과 관련된 실제 준수 사례에 대해 관련 증빙을 제시할 수 없다.", "C", 1],
+["규정/지침이 수립되어 있지 않고, 평가항목과 관련된 실제 준수 사례에 대해 관련 증빙을 제시할 수 없다.", "D", 0]
+];
+const createWageStatementCriteria = () => [
+["제시된 임금 명세서 구체항목 3개 모두 포함", "A", 5],
+["제시된 임금 명세서 구체항목 2개 포함", "B", 3],
+["제시된 임금 명세서 구체항목 1개 포함", "C", 1],
+["제시된 임금 명세서 구체항목 미포함", "D", 0]
+];
+
 const auditSections = [
 createSectionData(
 1,
@@ -1342,6 +1443,61 @@ createQuestionData(5, "5.2", `시스템 및 서비스의 운영(변경, 인수, 
 createQuestionData(5, "5.3", `정보보호 시스템 유형별로 관리자 지정, 최신 정책 업데이트, 이벤트 모니터링의 절차를 수립하여 현황을 관리하고 있는가<br>- 최신 패턴 또는 SW 업데이트 현황을 파악하여 최신성을 유지<br>- 이벤트 모니터링 절차 수립<br>- 정보시스템 관리자의 행위 모니터링`)
 ]
 )
+,
+createSectionData(
+26,
+"시스템 구축 및 운영",
+["ALL"],
+[
+createQuestionData(1, "1.1", "운영중인 시스템이 있으며, 해당 시스템을 사용하고 있는가?"),
+createQuestionData(1, "1.2", "결재 업무가 시스템을 통해 수행되며, 시완료된 결재에 대한 이력 확인이 가능한가?"),
+createQuestionData(2, "2.1", "시스템 운영 또는 관리에 관한 규정/지침서(Manual)가 있는가?"),
+createQuestionData(2, "2.2", "시스템 운영/관리를 담당하는 담당자가 지정되어 있는가?"),
+createQuestionData(2, "2.3", "ERP(Enterprise Resource Planning) 시스템을 사용하고 있는가?"),
+createQuestionData(3, "3.1", "PLM(Product Lifecycle Management) 또는 PDM(Product Data Management) 시스템을 사용하고 있는가?", ["ODM", "M.ODM"]),
+createQuestionData(3, "3.2", "사용자 별 시스템 권한을 구분하여 사용하고 있는가?"),
+createQuestionData(3, "3.3", "업무 겸직이 아닌 시스템 관리자 또는 담당자가 있는가?"),
+createQuestionData(3, "3.4", "시스템 변경(개발/개선 등) 진행 전 사전 심의를 통한 타당성 검토 후 진행되고 있는가?"),
+createQuestionData(4, "4.1", "별도의 시스템 운영/관리 부서가 있는가?"),
+createQuestionData(4, "4.2", "데이터 강제 변경이 필요할 경우 사전 승인 절차를 통해 운영되고 있는가?"),
+createQuestionData(4, "4.3", "시스템 변경사항에 대해 별도 서버에서 테스트 후 운영서버에 적용하고 있는가?"),
+createQuestionData(5, "5.1", "시스템 또는 데이터 이상 발생에 대해 전담 부서에서 모니터링하여 선조치 운영하고 있는가?"),
+createQuestionData(5, "5.2", "시스템에 대한 지속적인 투자가 이루어지고 있는가?"),
+createQuestionData(5, "5.3", "BCP(Business Continuity Planning) 프로세스가 규정화 되어 있으며, 사내 주요 업무를 모두 전산화 되어 운영되고 있는가?")
+]
+),
+createSectionData(
+27,
+"Compliance",
+["ALL"],
+[
+createAverageQuestionData(1, "당사는 고용, 근로조건에 있어 성별, 인종, 국적, 종교 등에 대해 차별하지 않습니다.", createComplianceCriteria()),
+createAverageQuestionData(2, "당사는 15세 미만 아동 및 청소년을 고용하지 않습니다.", createComplianceCriteria()),
+createAverageQuestionData(3, "당사는 정신적/신체적 구속을 통한 강제근로를 방지하기 위하여 고용을 조건으로 정부가 발행한 신분증 및 개인서류 원본을 요구하지 않습니다.", createComplianceCriteria()),
+createAverageQuestionData(4, "당사는 근로자에게 법정 최저임금 이상을 지급하고 있습니다.", createComplianceCriteria()),
+createAverageQuestionData(5, "당사는 임금명세서(1.임금의 구성항목, 2.계산방법 3.공제내역)를 교부를 교부하고 있습니다.", createWageStatementCriteria()),
+createAverageQuestionData(6, "당사는 정규 근로시간, 초과 근로시간에 대하여 노동관계 법규 기준을 준수하고 있습니다.", createComplianceCriteria()),
+createAverageQuestionData(7, "당사는 노동관계 법규에 의한 결사의 자유 및 노동3권(단결권/단체교섭권/단체행동권)에 대해 보장하고 이로 인한 차별을 금지하고 있습니다.", createComplianceCriteria()),
+createAverageQuestionData(8, "당사는 노동관계 법규에 의해 소정근로시간, 초과 근로시간, 초과 근로에 따른 수당 및 보상휴가 지급 기준을 준수하고 있습니다.", createComplianceCriteria())
+],
+false,
+"average"
+),
+createSectionData(
+28,
+"Ethic",
+["ALL"],
+[
+createAverageQuestionData(1, "당사는 직장내 성희롱 예방에 대한 교육 및 조치에 대한 제도를 수립하고 준수하고 있습니다.", createComplianceCriteria()),
+createAverageQuestionData(2, "당사는 괴롭힘 방지에 대한 교육 및 조치에 대한 제도를 수립하고 준수하고 있습니다.", createComplianceCriteria()),
+createAverageQuestionData(3, "공정거래 및 경쟁에 대한 제도를 수립하고 준수하고 있습니다.", createComplianceCriteria()),
+createAverageQuestionData(4, "지적 재산권 보호에 대한 제도를 수립하고 준수하고 있습니다.", createComplianceCriteria()),
+createAverageQuestionData(5, "당사는 개인정보 보호를 위한 제도를 수립하고 교육을 실시하고 있습니다", createComplianceCriteria()),
+createAverageQuestionData(6, "당사는 사내 비윤리 행위에 대한 신고자 익명성을 보호하는 신고절차를 수립 및 운영하고 있습니다.<br>(신고자 익명성 보호와 관련된 내용 반드시 포함 - 미포함시 B이하 점수 부여)", createComplianceCriteria())
+],
+false,
+"average"
+)
 
 ];
 function materialGroupLabel(groups) {
@@ -1453,6 +1609,10 @@ ${criteria.map(([condition, grade, score]) => `
 function createAverageQuestionRow(section, question) {
 const key = safeKey(section.sectionKey);
 const rowKey = `section${key}Average${question.number}`;
+const gradeOptions = [];
+question.criteria.forEach(([, grade]) => {
+if (!gradeOptions.includes(grade)) gradeOptions.push(grade);
+});
 return `
 <tr
 data-question-number="${question.number}"
@@ -1464,11 +1624,7 @@ data-applicable="true"
 <td class="result-cell">
 <select class="average-grade-select" id="${rowKey}Grade">
 <option value="">선택 안 함</option>
-<option value="A">A</option>
-<option value="B">B</option>
-<option value="C">C</option>
-<option value="D">D</option>
-<option value="E">E</option>
+${gradeOptions.map(grade => `<option value="${grade}">${grade}</option>`).join("")}
 </select>
 </td>
 <td class="average-score-cell" id="${rowKey}Score">-</td>
@@ -1499,6 +1655,38 @@ return `
 </tr>
 `;
 }
+
+function createSection27OvertimeRow() {
+return `
+<tr class="section27-overtime-row">
+<td colspan="6">
+<div class="overtime-input-box">
+<span class="overtime-input-title">Question 6 · 초과근로시간 추가 입력</span>
+<div class="overtime-grid">
+<div class="overtime-head">구분</div>
+<div class="overtime-head">입력</div>
+<div class="overtime-head">단위</div>
+<div class="overtime-label">평가일 직전 1월 총 초과근로시간</div>
+<input id="section27OvertimeMonth1" class="overtime-input" type="number" min="0" step="0.1" placeholder="시간 입력">
+<div class="overtime-unit">시간</div>
+<div class="overtime-label">평가일 직전 2월 총 초과근로시간</div>
+<input id="section27OvertimeMonth2" class="overtime-input" type="number" min="0" step="0.1" placeholder="시간 입력">
+<div class="overtime-unit">시간</div>
+<div class="overtime-label">평가일 직전 3월 총 초과근로시간</div>
+<input id="section27OvertimeMonth3" class="overtime-input" type="number" min="0" step="0.1" placeholder="시간 입력">
+<div class="overtime-unit">시간</div>
+</div>
+<div class="overtime-note">
+<strong>샘플링 대상 :</strong> 평가일 직전 1일 기준 최장시간 근로한 자<br>
+<strong>참고 :</strong> 초과근로시간은 주 소정근로시간을 초과하여 근무한 시간의 합계를 입력합니다.<br>
+예시) 주 소정근로시간 = 40시간, 특정 주 근무시간 48시간인 경우 → 8시간 합산
+</div>
+</div>
+</td>
+</tr>
+`;
+}
+
 function createSectionHtml(section) {
 const key = safeKey(section.sectionKey);
 const totalQuestions = section.questions.length;
@@ -1536,16 +1724,26 @@ const markerRow = createLevelQuestionRow(section, marker);
 rows = rows.replace(markerRow, markerRow + createServerTypeSelectorRow());
 }
 }
+if (section.sectionKey === "27") {
+const marker = section.questions.find(question => String(question.number) === "6");
+if (marker) {
+const markerRow = createAverageQuestionRow(section, marker);
+rows = rows.replace(markerRow, markerRow + createSection27OvertimeRow());
+}
+}
 const scoringLabel = isAverage ? "에버리지제도" : "레벨제도";
 const summaryText = isAverage
 ? `총 ${totalQuestions}개 평가항목 · ${scoringLabel}`
 : `Level 1부터 Level 5까지 총 ${totalQuestions}개 평가항목 · ${scoringLabel}`;
+const averageGradeText = section.sectionKey === "14"
+? "A=5점 / B=4점 / C=3점 / D=1점 / E=0점"
+: "A=5점 / B=3점 / C=1점 / D=0점";
 const scoreRule = isAverage
 ? `
 <strong>Audit Score 계산 기준 · 에버리지제도</strong><br>
-각 항목의 평가 Grade를 A=5점 / B=4점 / C=3점 / D=1점 / E=0점으로 환산하고,
+각 항목의 평가 Grade를 ${averageGradeText}으로 환산하고,
 평가 완료된 항목의 평균을 Audit Score로 계산합니다.<br>
-Section 14 Self-Audit Score는 협력업체 자체평가 평균점수를 직접 입력합니다.
+Self-Audit Score는 협력업체 자체평가 평균점수를 직접 입력합니다.
 `
 : `
 <strong>Audit Score 계산 기준 · 레벨제도</strong><br>
@@ -1602,7 +1800,7 @@ ${isAverage ? `
 </div>
 <div class="summary-card">
 <span>Grade</span>
-<strong style="font-size:16px;">A/B/C/D/E</strong>
+<strong style="font-size:16px;">${section.sectionKey === "14" ? "A/B/C/D/E" : "A/B/C/D"}</strong>
 </div>
 ` : `
 <div class="summary-card">
@@ -1642,6 +1840,12 @@ section.sectionNumber >= 14 && section.sectionNumber <= 18
 const securitySections = auditSections.filter(section =>
 section.sectionNumber >= 21 && section.sectionNumber <= 25
 );
+const systemSections = auditSections.filter(section =>
+section.sectionNumber === 26
+);
+const complianceSections = auditSections.filter(section =>
+section.sectionNumber >= 27 && section.sectionNumber <= 28
+);
 document.getElementById("productionAuditSections").innerHTML =
 productionSections.map(createSectionHtml).join("");
 document.getElementById("qualityAuditSections").innerHTML =
@@ -1650,6 +1854,10 @@ document.getElementById("purchaseAuditSections").innerHTML =
 purchaseSections.map(createSectionHtml).join("");
 document.getElementById("securityAuditSections").innerHTML =
 securitySections.map(createSectionHtml).join("");
+document.getElementById("systemAuditSections").innerHTML =
+systemSections.map(createSectionHtml).join("");
+document.getElementById("complianceAuditSections").innerHTML =
+complianceSections.map(createSectionHtml).join("");
 function getSelectedMaterialGroups() {
 return Array.from(
 document.querySelectorAll('input[name="materialGroup"]:checked')
@@ -1731,13 +1939,13 @@ function updateAverageSectionResult(section) {
 const key = safeKey(section.sectionKey);
 const wrapper = document.getElementById(`section${key}Wrapper`);
 if (!wrapper || wrapper.dataset.applicable === "false") return;
-const gradeScoreMap = { A: 5, B: 4, C: 3, D: 1, E: 0 };
 let totalScore = 0;
 let completedCount = 0;
 section.questions.forEach(question => {
 const rowKey = `section${key}Average${question.number}`;
 const select = document.getElementById(`${rowKey}Grade`);
 const scoreCell = document.getElementById(`${rowKey}Score`);
+if (!select || !scoreCell) return;
 const row = select.closest("tr");
 const grade = select.value;
 row.classList.remove(
@@ -1747,8 +1955,9 @@ row.classList.remove(
 "average-result-d",
 "average-result-e"
 );
-if (grade && gradeScoreMap[grade] !== undefined) {
-const score = gradeScoreMap[grade];
+const matched = question.criteria.find(([, criterionGrade]) => criterionGrade === grade);
+if (grade && matched) {
+const score = Number(matched[2]);
 totalScore += score;
 completedCount += 1;
 scoreCell.textContent = score.toFixed(1);
