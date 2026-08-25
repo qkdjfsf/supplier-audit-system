@@ -787,7 +787,8 @@ margin-bottom: 8px;
   overflow-x: auto;
 }
 .summary-table {
-  min-width: 1650px;
+  min-width: 1500px;
+  table-layout: fixed;
 }
 .summary-table th {
   white-space: nowrap;
@@ -796,15 +797,15 @@ margin-bottom: 8px;
   vertical-align: top;
   line-height: 1.55;
 }
-.summary-table .summary-no { width: 58px; text-align: center; }
-.summary-table .summary-category { width: 180px; font-weight: bold; }
-.summary-table .summary-section { width: 230px; }
-.summary-table .summary-gap { width: 115px; text-align: center; font-weight: bold; }
-.summary-table .summary-question { width: 115px; text-align: center; }
-.summary-table .summary-auditor { width: 115px; text-align: center; }
-.summary-table .summary-date { width: 125px; text-align: center; }
-.summary-table .summary-evaluation { min-width: 360px; }
-.summary-table .summary-description { min-width: 360px; white-space: pre-wrap; }
+.summary-table .summary-no { width: 42px; text-align: center; white-space: nowrap; }
+.summary-table .summary-category { width: 170px; font-weight: bold; }
+.summary-table .summary-section { width: 205px; }
+.summary-table .summary-gap { width: 92px; text-align: center; font-weight: bold; white-space: nowrap; }
+.summary-table .summary-question { width: 92px; text-align: center; white-space: nowrap; }
+.summary-table .summary-auditor { width: 82px; text-align: center; white-space: nowrap; }
+.summary-table .summary-date { width: 100px; text-align: center; white-space: nowrap; }
+.summary-table .summary-evaluation { width: 340px; }
+.summary-table .summary-description { width: 377px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
 .summary-empty {
   padding: 28px;
   border: 1px dashed var(--border);
@@ -824,6 +825,164 @@ margin-bottom: 8px;
   .summary-overview {
     grid-template-columns: 1fr;
   }
+}
+
+/* SRE Evaluation Result */
+.sre-result-block {
+  margin-bottom: 26px;
+}
+.summary-subtitle {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: var(--text);
+}
+.sre-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+.sre-result-table {
+  width: 100%;
+  min-width: 1180px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.sre-result-table th {
+  padding: 9px 7px;
+  color: #ffffff;
+  background: #0f3676;
+  border: 1px solid #182634;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.35;
+}
+.sre-result-table td {
+  padding: 8px 7px;
+  border: 1px solid #aeb6bf;
+  font-size: 12px;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.sre-result-table .sre-category {
+  width: 112px;
+  text-align: center;
+  font-weight: bold;
+}
+.sre-result-table .sre-section-no {
+  width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+.sre-result-table .sre-material {
+  width: 130px;
+  text-align: center;
+}
+.sre-result-table .sre-section-title {
+  width: 280px;
+  font-weight: 600;
+}
+.sre-result-table .sre-score {
+  width: 112px;
+  text-align: center;
+  font-weight: bold;
+}
+.sre-result-table .sre-dept-average {
+  width: 125px;
+  text-align: center;
+  font-weight: bold;
+  background: #f7f9fb;
+}
+.sre-result-table .sre-self-head {
+  background: #476b2d;
+}
+.sre-result-table .sre-total-label {
+  text-align: center;
+  font-weight: bold;
+  background: #f4f5f6;
+}
+.sre-result-table .sre-total-score {
+  font-weight: bold;
+  text-align: center;
+  background: #fff3c9;
+  font-size: 14px;
+}
+.radar-panel {
+  margin: 0 0 24px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fbfcfd;
+}
+.radar-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.radar-panel-head h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.radar-panel-head p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.radar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.radar-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.radar-legend-line {
+  display: inline-block;
+  width: 25px;
+  height: 3px;
+  border-radius: 2px;
+}
+.radar-legend-line.audit { background: #1683d8; }
+.radar-legend-line.goal { background: #d83b37; }
+.radar-chart-wrap {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+.radar-chart-wrap svg {
+  display: block;
+  width: min(720px, 100%);
+  min-width: 600px;
+  height: auto;
+}
+.radar-axis-label {
+  font-size: 13px;
+  font-weight: bold;
+  fill: #202933;
+}
+.radar-scale-label {
+  font-size: 10px;
+  fill: #697582;
+}
+.radar-no-data {
+  padding: 32px;
+  color: var(--muted);
+  text-align: center;
+}
+@media (max-width: 700px) {
+  .radar-panel-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Summary findings layout */
+.summary-table {
+  min-width: 1500px;
 }
 
 footer {
@@ -1010,10 +1169,30 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
   <div class="section-heading">
     <div>
       <h2>Audit Result Summary</h2>
-      <p>부적합 및 권고 항목 자동 집계 결과</p>
+      <p>부서별 평가 결과와 부적합 및 권고 항목 자동 집계 결과</p>
     </div>
   </div>
 
+  <div class="sre-result-block">
+    <h3 class="summary-subtitle">SRE Evaluation Result</h3>
+    <div id="sreEvaluationTableContainer"></div>
+  </div>
+
+  <div class="radar-panel">
+    <div class="radar-panel-head">
+      <div>
+        <h3>Department Audit Score Radar Chart</h3>
+        <p>Goal은 모든 부서 3.0으로 고정되며, Audit Score는 현재 부서별 평가 점수를 반영합니다.</p>
+      </div>
+      <div class="radar-legend">
+        <span class="radar-legend-item"><i class="radar-legend-line audit"></i>Audit Score</span>
+        <span class="radar-legend-item"><i class="radar-legend-line goal"></i>Goal</span>
+      </div>
+    </div>
+    <div id="departmentRadarChart" class="radar-chart-wrap"></div>
+  </div>
+
+  <h3 class="summary-subtitle">Recommendation &amp; Nonconformity Summary</h3>
   <div class="summary-overview">
     <div class="summary-count-card fail">
       <span>총 부적합 건수</span>
@@ -2302,6 +2481,261 @@ function getAverageGap(score) {
   if (numericScore < 5) return "Opportunity";
   return "-";
 }
+
+const sreDepartmentOrder = [
+  "production",
+  "quality",
+  "purchase",
+  "security",
+  "system",
+  "compliance"
+];
+
+function formatScore(value, digits = 1) {
+  return Number.isFinite(value) ? value.toFixed(digits) : "-";
+}
+
+function getDepartmentAverages(departmentKey) {
+  const definition = departmentDefinitions[departmentKey];
+  if (!definition) return { selfAverage: null, auditAverage: null };
+
+  const selfScores = [];
+  const auditScores = [];
+
+  definition.sectionNumbers.forEach(sectionNumber => {
+    const selfScore = getRepresentativeSectionScore(
+      sectionNumber,
+      "self",
+      definition.combineSection17 === true
+    );
+    const auditScore = getRepresentativeSectionScore(
+      sectionNumber,
+      "audit",
+      definition.combineSection17 === true
+    );
+    if (Number.isFinite(selfScore)) selfScores.push(selfScore);
+    if (Number.isFinite(auditScore)) auditScores.push(auditScore);
+  });
+
+  return {
+    selfAverage: averageValues(selfScores),
+    auditAverage: averageValues(auditScores)
+  };
+}
+
+function getSectionMaterialLabel(section) {
+  return materialGroupLabel(section.materialGroups);
+}
+
+function getSectionMethodLabel(section) {
+  return section.scoringType === "average" ? "Average" : "Level";
+}
+
+function getApplicableSectionsForSreTable(departmentKey) {
+  const definition = departmentDefinitions[departmentKey];
+  if (!definition) return [];
+
+  const rows = [];
+  definition.sectionNumbers.forEach(sectionNumber => {
+    const sections = getApplicableSectionsByNumber(sectionNumber);
+    sections.forEach(section => rows.push(section));
+  });
+  return rows;
+}
+
+function renderSreEvaluationResult() {
+  const container = document.getElementById("sreEvaluationTableContainer");
+  if (!container) return;
+
+  const departmentRows = sreDepartmentOrder.map(departmentKey => {
+    const department = summaryDepartmentMap[departmentKey];
+    const sections = getApplicableSectionsForSreTable(departmentKey);
+    const averages = getDepartmentAverages(departmentKey);
+    return {
+      departmentKey,
+      departmentName: department?.name || departmentKey,
+      sections,
+      ...averages
+    };
+  }).filter(item => item.sections.length > 0);
+
+  if (departmentRows.length === 0) {
+    container.innerHTML = '<div class="summary-empty">표시할 평가 Section이 없습니다.</div>';
+    return;
+  }
+
+  const totalSelfAverage = averageValues(
+    departmentRows.map(item => item.selfAverage).filter(Number.isFinite)
+  );
+  const totalAuditAverage = averageValues(
+    departmentRows.map(item => item.auditAverage).filter(Number.isFinite)
+  );
+
+  const bodyRows = departmentRows.map(group => {
+    return group.sections.map((section, sectionIndex) => {
+      const selfScore = getSectionSelfScore(section);
+      const auditScore = getSectionAuditScore(section);
+      const categoryCell = sectionIndex === 0
+        ? `<td class="sre-category" rowspan="${group.sections.length}">${escapeHtml(group.departmentName)}</td>`
+        : "";
+      const selfAverageCell = sectionIndex === 0
+        ? `<td class="sre-dept-average" rowspan="${group.sections.length}">${formatScore(group.selfAverage, 1)}</td>`
+        : "";
+      const auditAverageCell = sectionIndex === 0
+        ? `<td class="sre-dept-average" rowspan="${group.sections.length}">${formatScore(group.auditAverage, 1)}</td>`
+        : "";
+
+      return `
+        <tr>
+          ${categoryCell}
+          <td class="sre-section-no">${section.sectionNumber} (${getSectionMethodLabel(section)})</td>
+          <td class="sre-material">${escapeHtml(getSectionMaterialLabel(section))}</td>
+          <td class="sre-section-title">${escapeHtml(section.title)}</td>
+          <td class="sre-score">${formatScore(selfScore, 1)}</td>
+          <td class="sre-score">${formatScore(auditScore, 1)}</td>
+          ${selfAverageCell}
+          ${auditAverageCell}
+        </tr>
+      `;
+    }).join("");
+  }).join("");
+
+  container.innerHTML = `
+    <div class="sre-table-wrap">
+      <table class="sre-result-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Section No.</th>
+            <th>Material Group</th>
+            <th>Section</th>
+            <th class="sre-self-head">Self-Audit<br>Score</th>
+            <th>PSK-Audit<br>Score</th>
+            <th class="sre-self-head">Self-Audit<br>Average</th>
+            <th>PSK-Audit<br>Average</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${bodyRows}
+          <tr>
+            <td class="sre-total-label" colspan="6">Total</td>
+            <td class="sre-total-score">${formatScore(totalSelfAverage, 1)}</td>
+            <td class="sre-total-score">${formatScore(totalAuditAverage, 1)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderDepartmentRadarChart() {
+  const container = document.getElementById("departmentRadarChart");
+  if (!container) return;
+
+  const labels = [
+    "Production",
+    "Quality",
+    "Purchase",
+    "Security",
+    "System",
+    "Compliance & Ethics"
+  ];
+
+  const keys = [
+    "production",
+    "quality",
+    "purchase",
+    "security",
+    "system",
+    "compliance"
+  ];
+
+  const auditScores = keys.map(key => getDepartmentAverages(key).auditAverage);
+  const hasAnyScore = auditScores.some(Number.isFinite);
+  if (!hasAnyScore) {
+    container.innerHTML = '<div class="radar-no-data">부서별 Audit Score가 계산되면 방사형 차트가 표시됩니다.</div>';
+    return;
+  }
+
+  const width = 700;
+  const height = 470;
+  const cx = 350;
+  const cy = 235;
+  const radius = 155;
+  const maxScore = 5;
+  const axisCount = labels.length;
+  const goalScore = 3;
+
+  const point = (index, score) => {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * index / axisCount);
+    const r = radius * (score / maxScore);
+    return [
+      cx + Math.cos(angle) * r,
+      cy + Math.sin(angle) * r
+    ];
+  };
+
+  const polygonPoints = scoreValues => scoreValues.map((score, index) => {
+    const safeScore = Number.isFinite(score) ? Math.max(0, Math.min(maxScore, score)) : 0;
+    const [x, y] = point(index, safeScore);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+
+  const gridPolygons = [1, 2, 3, 4, 5].map(level => {
+    const pts = polygonPoints(Array(axisCount).fill(level));
+    return `<polygon points="${pts}" fill="none" stroke="#c8cdd3" stroke-width="1"/>`;
+  }).join("");
+
+  const axes = labels.map((_, index) => {
+    const [x, y] = point(index, maxScore);
+    return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#d3d7dc" stroke-width="1"/>`;
+  }).join("");
+
+  const labelPositions = labels.map((label, index) => {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * index / axisCount);
+    const labelRadius = radius + 42;
+    let x = cx + Math.cos(angle) * labelRadius;
+    let y = cy + Math.sin(angle) * labelRadius;
+    let anchor = "middle";
+
+    if (Math.cos(angle) > 0.35) anchor = "start";
+    if (Math.cos(angle) < -0.35) anchor = "end";
+
+    const parts = label === "Compliance & Ethics" ? ["Compliance", "& Ethics"] : [label];
+    const tspans = parts.map((part, partIndex) =>
+      `<tspan x="${x.toFixed(1)}" dy="${partIndex === 0 ? 0 : 15}">${escapeHtml(part)}</tspan>`
+    ).join("");
+
+    return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" class="radar-axis-label">${tspans}</text>`;
+  }).join("");
+
+  const scaleLabels = [0, 1, 2, 3, 4, 5].map(level => {
+    const y = cy - radius * (level / maxScore);
+    return `<text x="${(cx - 10).toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="end" class="radar-scale-label">${level.toFixed(1)}</text>`;
+  }).join("");
+
+  const auditPoints = polygonPoints(auditScores);
+  const goalPoints = polygonPoints(Array(axisCount).fill(goalScore));
+
+  const auditDots = auditScores.map((score, index) => {
+    if (!Number.isFinite(score)) return "";
+    const [x, y] = point(index, Math.max(0, Math.min(maxScore, score)));
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.3" fill="#1683d8"/>`;
+  }).join("");
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="부서별 Audit Score와 Goal 3.0 비교 방사형 차트">
+      ${gridPolygons}
+      ${axes}
+      ${scaleLabels}
+      <polygon points="${goalPoints}" fill="rgba(216,59,55,0.04)" stroke="#d83b37" stroke-width="2.3"/>
+      <polygon points="${auditPoints}" fill="rgba(22,131,216,0.08)" stroke="#1683d8" stroke-width="2.6"/>
+      ${auditDots}
+      ${labelPositions}
+    </svg>
+  `;
+}
+
 function collectSummaryFindings() {
   const findings = [];
   let failCount = 0;
@@ -2383,6 +2817,9 @@ function renderAuditSummary() {
   const failCountElement = document.getElementById("summaryFailCount");
   const recommendCountElement = document.getElementById("summaryRecommendCount");
   const { findings, failCount, recommendCount } = collectSummaryFindings();
+
+  renderSreEvaluationResult();
+  renderDepartmentRadarChart();
 
   failCountElement.textContent = failCount;
   recommendCountElement.textContent = recommendCount;
