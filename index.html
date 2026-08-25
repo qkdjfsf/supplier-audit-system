@@ -755,7 +755,7 @@ margin-bottom: 8px;
 }
 .summary-overview {
   display: grid;
-  grid-template-columns: repeat(2, minmax(160px, 220px));
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
   gap: 12px;
   margin-bottom: 20px;
 }
@@ -783,11 +783,28 @@ margin-bottom: 8px;
   border-color: #ead29b;
   background: var(--recommend-soft);
 }
+
+.summary-count-card.major {
+  border-color: #e2aaaa;
+  background: #fbe5e5;
+}
+.summary-count-card.minor {
+  border-color: #edc98b;
+  background: #fff1d8;
+}
+.summary-count-card.opportunity {
+  border-color: #bad1a8;
+  background: #edf6e8;
+}
+.summary-count-card.recommendation {
+  border-color: #b9c9db;
+  background: #edf3f9;
+}
 .summary-table-wrap {
   overflow-x: auto;
 }
 .summary-table {
-  min-width: 1500px;
+  min-width: 1400px;
   table-layout: fixed;
 }
 .summary-table th {
@@ -798,14 +815,13 @@ margin-bottom: 8px;
   line-height: 1.55;
 }
 .summary-table .summary-no { width: 42px; text-align: center; white-space: nowrap; }
-.summary-table .summary-category { width: 170px; font-weight: bold; }
-.summary-table .summary-section { width: 205px; }
+.summary-table .summary-category { width: 110px; font-weight: bold; white-space: nowrap; }
+.summary-table .summary-section { width: 280px; }
 .summary-table .summary-gap { width: 92px; text-align: center; font-weight: bold; white-space: nowrap; }
-.summary-table .summary-question { width: 92px; text-align: center; white-space: nowrap; }
 .summary-table .summary-auditor { width: 82px; text-align: center; white-space: nowrap; }
 .summary-table .summary-date { width: 100px; text-align: center; white-space: nowrap; }
-.summary-table .summary-evaluation { width: 340px; }
-.summary-table .summary-description { width: 377px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
+.summary-table .summary-evaluation { width: 365px; }
+.summary-table .summary-description { width: 429px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
 .summary-empty {
   padding: 28px;
   border: 1px dashed var(--border);
@@ -814,6 +830,12 @@ margin-bottom: 8px;
   background: #fafbfc;
   text-align: center;
 }
+@media (max-width: 1050px) {
+  .summary-overview {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
+
 @media (max-width: 700px) {
   .summary-action-card {
     align-items: stretch;
@@ -982,7 +1004,7 @@ margin-bottom: 8px;
 
 /* Summary findings layout */
 .summary-table {
-  min-width: 1500px;
+  min-width: 1400px;
 }
 
 footer {
@@ -1194,13 +1216,21 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 
   <h3 class="summary-subtitle">Recommendation &amp; Nonconformity Summary</h3>
   <div class="summary-overview">
-    <div class="summary-count-card fail">
-      <span>총 부적합 건수</span>
-      <strong id="summaryFailCount">0</strong>
+    <div class="summary-count-card major">
+      <span>Major Gap</span>
+      <strong id="summaryMajorGapCount">0</strong>
     </div>
-    <div class="summary-count-card recommend">
-      <span>총 권고 건수</span>
-      <strong id="summaryRecommendCount">0</strong>
+    <div class="summary-count-card minor">
+      <span>Minor Gap</span>
+      <strong id="summaryMinorGapCount">0</strong>
+    </div>
+    <div class="summary-count-card opportunity">
+      <span>Opportunity</span>
+      <strong id="summaryOpportunityCount">0</strong>
+    </div>
+    <div class="summary-count-card recommendation">
+      <span>-</span>
+      <strong id="summaryRecommendationCount">0</strong>
     </div>
   </div>
 
@@ -2738,8 +2768,12 @@ function renderDepartmentRadarChart() {
 
 function collectSummaryFindings() {
   const findings = [];
-  let failCount = 0;
-  let recommendCount = 0;
+  const gapCounts = {
+    "Major Gap": 0,
+    "Minor Gap": 0,
+    "Opportunity": 0,
+    "-": 0
+  };
   const issueDate = document.getElementById("auditDate")?.value || "";
 
   auditSections.forEach(section => {
@@ -2750,6 +2784,7 @@ function collectSummaryFindings() {
     const departmentKey = getSummaryDepartment(section.sectionNumber);
     const department = summaryDepartmentMap[departmentKey];
     if (!department) return;
+
     const auditor = document.getElementById(department.auditorId)?.value.trim() || "";
     const body = document.getElementById(`section${key}Body`);
     if (!body) return;
@@ -2760,69 +2795,75 @@ function collectSummaryFindings() {
         row.dataset.applicable !== "false" &&
         row.style.display !== "none"
       );
+
       if (rows.length === 0) return;
+
       const row = rows[0];
       const comment = row.querySelector(".comment-input")?.value.trim() || "";
+      let gap = "";
+      let resultType = "";
 
       if (section.scoringType === "average") {
         const rowKey = `section${key}Average${question.number}`;
         const select = document.getElementById(`${rowKey}Grade`);
         const grade = select?.value || "";
         if (!grade) return;
+
         const matched = question.criteria.find(([, criterionGrade]) => criterionGrade === grade);
         if (!matched) return;
+
         const score = Number(matched[2]);
         if (!Number.isFinite(score) || score >= 5) return;
 
-        failCount += 1;
-        findings.push({
-          category: `${department.name} [Section ${section.sectionNumber}]`,
-          section: `Section ${section.sectionNumber} · ${section.title}`,
-          gap: getAverageGap(score),
-          questionNumber: String(question.number),
-          auditor,
-          issueDate,
-          evaluationContents: stripHtml(question.content),
-          description: comment,
-          resultType: "부적합"
-        });
-        return;
+        gap = getAverageGap(score);
+        resultType = "부적합";
+      } else {
+        const selected = row.querySelector('input[type="radio"]:checked');
+        const result = selected?.value || "미평가";
+        if (result !== "부적합" && result !== "권고") return;
+
+        gap = result === "권고" ? "-" : getLevelGap(question.level);
+        resultType = result;
       }
 
-      const selected = row.querySelector('input[type="radio"]:checked');
-      const result = selected?.value || "미평가";
-      if (result !== "부적합" && result !== "권고") return;
+      if (Object.prototype.hasOwnProperty.call(gapCounts, gap)) {
+        gapCounts[gap] += 1;
+      }
 
-      if (result === "부적합") failCount += 1;
-      if (result === "권고") recommendCount += 1;
       findings.push({
-        category: `${department.name} [Section ${section.sectionNumber}]`,
-        section: `Section ${section.sectionNumber} · ${section.title}`,
-        gap: result === "권고" ? "-" : getLevelGap(question.level),
-        questionNumber: String(question.number),
+        category: department.name,
+        section: `Section ${section.sectionNumber} ${section.title} - ${question.number}`,
+        gap,
         auditor,
         issueDate,
         evaluationContents: stripHtml(question.content),
         description: comment,
-        resultType: result
+        resultType
       });
     });
   });
 
-  return { findings, failCount, recommendCount };
+  return { findings, gapCounts };
 }
+
 function renderAuditSummary() {
   const summarySection = document.getElementById("auditResultSummary");
   const tableContainer = document.getElementById("summaryTableContainer");
-  const failCountElement = document.getElementById("summaryFailCount");
-  const recommendCountElement = document.getElementById("summaryRecommendCount");
-  const { findings, failCount, recommendCount } = collectSummaryFindings();
+
+  const majorCountElement = document.getElementById("summaryMajorGapCount");
+  const minorCountElement = document.getElementById("summaryMinorGapCount");
+  const opportunityCountElement = document.getElementById("summaryOpportunityCount");
+  const recommendationCountElement = document.getElementById("summaryRecommendationCount");
+
+  const { findings, gapCounts } = collectSummaryFindings();
 
   renderSreEvaluationResult();
   renderDepartmentRadarChart();
 
-  failCountElement.textContent = failCount;
-  recommendCountElement.textContent = recommendCount;
+  majorCountElement.textContent = gapCounts["Major Gap"];
+  minorCountElement.textContent = gapCounts["Minor Gap"];
+  opportunityCountElement.textContent = gapCounts["Opportunity"];
+  recommendationCountElement.textContent = gapCounts["-"];
 
   if (findings.length === 0) {
     tableContainer.innerHTML = `
@@ -2840,7 +2881,6 @@ function renderAuditSummary() {
               <th>Category</th>
               <th>Section</th>
               <th>Gap</th>
-              <th>Question Number</th>
               <th>Auditor</th>
               <th>Issue Date</th>
               <th>Evaluation Contents</th>
@@ -2854,7 +2894,6 @@ function renderAuditSummary() {
                 <td class="summary-category">${escapeHtml(item.category)}</td>
                 <td class="summary-section">${escapeHtml(item.section)}</td>
                 <td class="summary-gap">${escapeHtml(item.gap)}</td>
-                <td class="summary-question">${escapeHtml(item.questionNumber)}</td>
                 <td class="summary-auditor">${escapeHtml(item.auditor)}</td>
                 <td class="summary-date">${escapeHtml(item.issueDate)}</td>
                 <td class="summary-evaluation">${escapeHtml(item.evaluationContents)}</td>
