@@ -707,6 +707,125 @@ margin-bottom: 8px;
     grid-template-columns: 1fr;
   }
 }
+
+/* Audit Result Summary */
+.summary-action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: 0 5px 18px rgba(23, 35, 49, 0.05);
+  margin-bottom: 22px;
+}
+.summary-action-copy strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 17px;
+}
+.summary-action-copy span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.summary-generate-button {
+  width: auto;
+  min-width: 160px;
+  padding: 13px 24px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--white);
+  background: var(--navy);
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.summary-generate-button:hover {
+  background: var(--navy-light);
+}
+.audit-result-summary {
+  display: none;
+  scroll-margin-top: 20px;
+}
+.audit-result-summary.visible {
+  display: block;
+}
+.summary-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 220px));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.summary-count-card {
+  padding: 17px 18px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: #fafbfc;
+}
+.summary-count-card span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: bold;
+}
+.summary-count-card strong {
+  font-size: 26px;
+}
+.summary-count-card.fail {
+  border-color: #e5bcbc;
+  background: var(--fail-soft);
+}
+.summary-count-card.recommend {
+  border-color: #ead29b;
+  background: var(--recommend-soft);
+}
+.summary-table-wrap {
+  overflow-x: auto;
+}
+.summary-table {
+  min-width: 1650px;
+}
+.summary-table th {
+  white-space: nowrap;
+}
+.summary-table td {
+  vertical-align: top;
+  line-height: 1.55;
+}
+.summary-table .summary-no { width: 58px; text-align: center; }
+.summary-table .summary-category { width: 180px; font-weight: bold; }
+.summary-table .summary-section { width: 230px; }
+.summary-table .summary-gap { width: 115px; text-align: center; font-weight: bold; }
+.summary-table .summary-question { width: 115px; text-align: center; }
+.summary-table .summary-auditor { width: 115px; text-align: center; }
+.summary-table .summary-date { width: 125px; text-align: center; }
+.summary-table .summary-evaluation { min-width: 360px; }
+.summary-table .summary-description { min-width: 360px; white-space: pre-wrap; }
+.summary-empty {
+  padding: 28px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  background: #fafbfc;
+  text-align: center;
+}
+@media (max-width: 700px) {
+  .summary-action-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .summary-generate-button {
+    width: 100%;
+  }
+  .summary-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
 footer {
 padding: 22px;
 color: var(--muted);
@@ -818,6 +937,14 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </div>
 </section>
 
+<section class="summary-action-card">
+  <div class="summary-action-copy">
+    <strong>Audit Result Summary</strong>
+    <span>평가된 부적합 및 권고 항목을 자동 집계하여 Summary Database를 생성합니다.</span>
+  </div>
+  <button id="generateSummaryButton" class="summary-generate-button" type="button">Summary</button>
+</section>
+
 <section class="card department-card production-card">
 <div class="section-heading department-heading-row">
   <div class="department-heading-title"><div class="section-number production-number">01</div><div><h2>Production Audit Sections</h2><p>Section 1부터 Section 5까지의 생산부서 심사 체크시트</p></div></div>
@@ -877,6 +1004,28 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
   </div>
 </div>
 <div id="complianceAuditSections"></div>
+</section>
+
+<section id="auditResultSummary" class="card audit-result-summary">
+  <div class="section-heading">
+    <div>
+      <h2>Audit Result Summary</h2>
+      <p>부적합 및 권고 항목 자동 집계 결과</p>
+    </div>
+  </div>
+
+  <div class="summary-overview">
+    <div class="summary-count-card fail">
+      <span>총 부적합 건수</span>
+      <strong id="summaryFailCount">0</strong>
+    </div>
+    <div class="summary-count-card recommend">
+      <span>총 권고 건수</span>
+      <strong id="summaryRecommendCount">0</strong>
+    </div>
+  </div>
+
+  <div id="summaryTableContainer"></div>
 </section>
 </main>
 <footer>
@@ -1783,10 +1932,8 @@ const markerRow = createAverageQuestionRow(section, marker);
 rows = rows.replace(markerRow, markerRow + createSection27OvertimeRow());
 }
 }
-const scoringLabel = isAverage ? "에버리지제도" : "레벨제도";
-const summaryText = isAverage
-? `총 ${totalQuestions}개 평가항목 · ${scoringLabel}`
-: `Level 1부터 Level 5까지 총 ${totalQuestions}개 평가항목 · ${scoringLabel}`;
+const scoringLabel = isAverage ? "Average" : "Level";
+const summaryText = `총 ${totalQuestions}개 평가항목 · ${scoringLabel}`;
 const averageGradeText = section.sectionKey === "14"
 ? "A=5점 / B=4점 / C=3점 / D=1점 / E=0점"
 : "A=5점 / B=3점 / C=1점 / D=0점";
@@ -1984,7 +2131,7 @@ document.getElementById(`section${key}CompletedCount`).textContent =
 const summary = document.getElementById(`section${key}QuestionSummary`);
 if (summary) {
 summary.textContent =
-`Level 1부터 Level 5까지 총 ${rows.length}개 평가항목 · 레벨제도`;
+`총 ${rows.length}개 평가항목 · Level`;
 }
 }
 function updateAverageSectionResult(section) {
@@ -2109,6 +2256,184 @@ if (auditElement) auditElement.textContent = auditAverage === null ? "-" : audit
 function updateAllDepartmentScores() {
 Object.keys(departmentDefinitions).forEach(updateDepartmentScore);
 }
+
+const summaryDepartmentMap = {
+  production: { name: "Production", auditorId: "productionAuditor" },
+  quality: { name: "Quality", auditorId: "qualityAuditor" },
+  purchase: { name: "Purchase", auditorId: "purchaseAuditor" },
+  security: { name: "Security", auditorId: "securityAuditor" },
+  system: { name: "System", auditorId: "systemAuditor" },
+  compliance: { name: "Compliance & Ethics", auditorId: "complianceAuditor" }
+};
+function getSummaryDepartment(sectionNumber) {
+  if (sectionNumber >= 1 && sectionNumber <= 5) return "production";
+  if (sectionNumber >= 6 && sectionNumber <= 13) return "quality";
+  if (sectionNumber >= 14 && sectionNumber <= 18) return "purchase";
+  if (sectionNumber >= 21 && sectionNumber <= 25) return "security";
+  if (sectionNumber === 26) return "system";
+  if (sectionNumber >= 27 && sectionNumber <= 28) return "compliance";
+  return "";
+}
+function stripHtml(value) {
+  const temp = document.createElement("div");
+  temp.innerHTML = value || "";
+  return (temp.textContent || temp.innerText || "").trim();
+}
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+function getLevelGap(level) {
+  const numericLevel = Number(level);
+  if (numericLevel === 1 || numericLevel === 2) return "Major Gap";
+  if (numericLevel === 3 || numericLevel === 4) return "Minor Gap";
+  if (numericLevel === 5) return "Opportunity";
+  return "-";
+}
+function getAverageGap(score) {
+  const numericScore = Number(score);
+  if (!Number.isFinite(numericScore)) return "-";
+  if (numericScore < 2) return "Major Gap";
+  if (numericScore < 4) return "Minor Gap";
+  if (numericScore < 5) return "Opportunity";
+  return "-";
+}
+function collectSummaryFindings() {
+  const findings = [];
+  let failCount = 0;
+  let recommendCount = 0;
+  const issueDate = document.getElementById("auditDate")?.value || "";
+
+  auditSections.forEach(section => {
+    const key = safeKey(section.sectionKey);
+    const wrapper = document.getElementById(`section${key}Wrapper`);
+    if (!wrapper || wrapper.dataset.applicable === "false" || wrapper.style.display === "none") return;
+
+    const departmentKey = getSummaryDepartment(section.sectionNumber);
+    const department = summaryDepartmentMap[departmentKey];
+    if (!department) return;
+    const auditor = document.getElementById(department.auditorId)?.value.trim() || "";
+    const body = document.getElementById(`section${key}Body`);
+    if (!body) return;
+
+    section.questions.forEach(question => {
+      const rows = Array.from(body.querySelectorAll("tr")).filter(row =>
+        row.dataset.questionNumber === String(question.number) &&
+        row.dataset.applicable !== "false" &&
+        row.style.display !== "none"
+      );
+      if (rows.length === 0) return;
+      const row = rows[0];
+      const comment = row.querySelector(".comment-input")?.value.trim() || "";
+
+      if (section.scoringType === "average") {
+        const rowKey = `section${key}Average${question.number}`;
+        const select = document.getElementById(`${rowKey}Grade`);
+        const grade = select?.value || "";
+        if (!grade) return;
+        const matched = question.criteria.find(([, criterionGrade]) => criterionGrade === grade);
+        if (!matched) return;
+        const score = Number(matched[2]);
+        if (!Number.isFinite(score) || score >= 5) return;
+
+        failCount += 1;
+        findings.push({
+          category: `${department.name} [Section ${section.sectionNumber}]`,
+          section: `Section ${section.sectionNumber} · ${section.title}`,
+          gap: getAverageGap(score),
+          questionNumber: String(question.number),
+          auditor,
+          issueDate,
+          evaluationContents: stripHtml(question.content),
+          description: comment,
+          resultType: "부적합"
+        });
+        return;
+      }
+
+      const selected = row.querySelector('input[type="radio"]:checked');
+      const result = selected?.value || "미평가";
+      if (result !== "부적합" && result !== "권고") return;
+
+      if (result === "부적합") failCount += 1;
+      if (result === "권고") recommendCount += 1;
+      findings.push({
+        category: `${department.name} [Section ${section.sectionNumber}]`,
+        section: `Section ${section.sectionNumber} · ${section.title}`,
+        gap: result === "권고" ? "-" : getLevelGap(question.level),
+        questionNumber: String(question.number),
+        auditor,
+        issueDate,
+        evaluationContents: stripHtml(question.content),
+        description: comment,
+        resultType: result
+      });
+    });
+  });
+
+  return { findings, failCount, recommendCount };
+}
+function renderAuditSummary() {
+  const summarySection = document.getElementById("auditResultSummary");
+  const tableContainer = document.getElementById("summaryTableContainer");
+  const failCountElement = document.getElementById("summaryFailCount");
+  const recommendCountElement = document.getElementById("summaryRecommendCount");
+  const { findings, failCount, recommendCount } = collectSummaryFindings();
+
+  failCountElement.textContent = failCount;
+  recommendCountElement.textContent = recommendCount;
+
+  if (findings.length === 0) {
+    tableContainer.innerHTML = `
+      <div class="summary-empty">
+        현재 기록할 부적합 또는 권고 항목이 없습니다.
+      </div>
+    `;
+  } else {
+    tableContainer.innerHTML = `
+      <div class="summary-table-wrap">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Category</th>
+              <th>Section</th>
+              <th>Gap</th>
+              <th>Question Number</th>
+              <th>Auditor</th>
+              <th>Issue Date</th>
+              <th>Evaluation Contents</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${findings.map((item, index) => `
+              <tr>
+                <td class="summary-no">${index + 1}</td>
+                <td class="summary-category">${escapeHtml(item.category)}</td>
+                <td class="summary-section">${escapeHtml(item.section)}</td>
+                <td class="summary-gap">${escapeHtml(item.gap)}</td>
+                <td class="summary-question">${escapeHtml(item.questionNumber)}</td>
+                <td class="summary-auditor">${escapeHtml(item.auditor)}</td>
+                <td class="summary-date">${escapeHtml(item.issueDate)}</td>
+                <td class="summary-evaluation">${escapeHtml(item.evaluationContents)}</td>
+                <td class="summary-description">${escapeHtml(item.description)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  summarySection.classList.add("visible");
+  summarySection.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function applyMaterialGroupRules() {
 const selectedGroups = getSelectedMaterialGroups();
 auditSections.forEach(section => {
@@ -2178,6 +2503,7 @@ document
 .forEach(checkbox => {
 checkbox.addEventListener("change", applyMaterialGroupRules);
 });
+document.getElementById("generateSummaryButton").addEventListener("click", renderAuditSummary);
 applyMaterialGroupRules();
 updateAllDepartmentScores();
 </script>
