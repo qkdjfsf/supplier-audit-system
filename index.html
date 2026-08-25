@@ -814,14 +814,14 @@ margin-bottom: 8px;
   vertical-align: top;
   line-height: 1.55;
 }
-.summary-table .summary-no { width: 28px; text-align: center; white-space: nowrap; }
+.summary-table .summary-no { width: 42px; text-align: center; white-space: nowrap; }
 .summary-table .summary-category { width: 110px; font-weight: bold; white-space: nowrap; }
 .summary-table .summary-section { width: 280px; }
 .summary-table .summary-gap { width: 92px; text-align: center; font-weight: bold; white-space: nowrap; }
 .summary-table .summary-auditor { width: 82px; text-align: center; white-space: nowrap; }
 .summary-table .summary-date { width: 100px; text-align: center; white-space: nowrap; }
 .summary-table .summary-evaluation { width: 365px; }
-.summary-table .summary-description { width: 500px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
+.summary-table .summary-description { width: 429px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
 .summary-empty {
   padding: 28px;
   border: 1px dashed var(--border);
@@ -1038,6 +1038,41 @@ align-items: flex-start;
 flex-direction: column;
 }
 }
+
+/* Recommendation & Nonconformity Summary - final column widths */
+.summary-table th:nth-child(1),
+.summary-table td:nth-child(1) {
+  width: 45px !important;
+}
+.summary-table th:nth-child(2),
+.summary-table td:nth-child(2) {
+  width: 105px !important;
+}
+.summary-table th:nth-child(3),
+.summary-table td:nth-child(3) {
+  width: 280px !important;
+}
+.summary-table th:nth-child(4),
+.summary-table td:nth-child(4) {
+  width: 95px !important;
+}
+.summary-table th:nth-child(5),
+.summary-table td:nth-child(5) {
+  width: 90px !important;
+}
+.summary-table th:nth-child(6),
+.summary-table td:nth-child(6) {
+  width: 105px !important;
+}
+.summary-table th:nth-child(7),
+.summary-table td:nth-child(7) {
+  width: 390px !important;
+}
+.summary-table th:nth-child(8),
+.summary-table td:nth-child(8) {
+  width: 500px !important;
+}
+
 </style>
 </head>
 <body>
