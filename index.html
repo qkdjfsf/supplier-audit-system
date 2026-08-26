@@ -746,6 +746,33 @@ margin-bottom: 8px;
 .summary-generate-button:hover {
   background: var(--navy-light);
 }
+
+.zqmr-export-card {
+  margin-top: -10px;
+}
+
+.zqmr-export-button {
+  width: auto;
+  min-width: 160px;
+  padding: 13px 24px;
+  border: 1px solid #476b2d;
+  border-radius: 10px;
+  color: #ffffff;
+  background: #476b2d;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.zqmr-export-button:hover {
+  background: #385623;
+}
+
+@media (max-width: 700px) {
+  .zqmr-export-button {
+    width: 100%;
+  }
+}
 .audit-result-summary {
   display: none;
   scroll-margin-top: 20px;
@@ -1221,6 +1248,14 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
   <button id="generateSummaryButton" class="summary-generate-button" type="button">Summary</button>
 </section>
 
+<section class="summary-action-card zqmr-export-card">
+  <div class="summary-action-copy">
+    <strong>ZQMR0270</strong>
+    <span>권고 및 부적합 사항 Excel 추출</span>
+  </div>
+  <button id="exportZQMR0270Button" class="zqmr-export-button" type="button">ZQMR0270</button>
+</section>
+
 <section class="card department-card production-card">
 <div class="section-heading department-heading-row">
   <div class="department-heading-title"><div class="section-number production-number">01</div><div><h2>Production Audit Sections</h2><p>Section 1 - Section 5</p></div></div>
@@ -1335,6 +1370,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 <footer>
 SRE Analysis System · PSK Audit Prototype
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
 const createSectionData = (
 sectionNumber,
@@ -2927,6 +2963,7 @@ function collectSummaryFindings() {
 
       findings.push({
         category: department.name,
+        sectionNumber: Number(section.sectionNumber),
         section: `Section ${section.sectionNumber} ${section.title} - ${question.number}`,
         gap,
         auditor,
@@ -3005,6 +3042,107 @@ function renderAuditSummary() {
   summarySection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+
+async function exportZQMR0270() {
+  const { findings } = collectSummaryFindings();
+
+  if (findings.length === 0) {
+    alert("추출할 권고 또는 부적합 항목이 없습니다.");
+    return;
+  }
+
+  if (typeof ExcelJS === "undefined") {
+    alert("Excel 생성 라이브러리를 불러오지 못했습니다. 인터넷 연결 상태를 확인한 후 다시 시도해 주세요.");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "SRE Analysis System";
+  workbook.created = new Date();
+
+  const worksheet = workbook.addWorksheet("ZQMR0270", {
+    views: [{ state: "frozen", ySplit: 1 }]
+  });
+
+  worksheet.columns = [
+    { header: "부적합 구분", key: "type", width: 16 },
+    { header: "평가항목코드", key: "code", width: 18 },
+    { header: "부적합 내용", key: "content", width: 70 }
+  ];
+
+  findings.forEach(item => {
+    worksheet.addRow({
+      type: item.gap === "-" ? "A" : "B",
+      code: Number(item.sectionNumber) + 10,
+      content: item.description || ""
+    });
+  });
+
+  const headerRow = worksheet.getRow(1);
+  headerRow.height = 24;
+  headerRow.font = { bold: true };
+  headerRow.alignment = {
+    horizontal: "center",
+    vertical: "middle"
+  };
+
+  headerRow.eachCell(cell => {
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFD9E2F3" }
+    };
+    cell.border = {
+      top: { style: "thin", color: { argb: "FF808080" } },
+      left: { style: "thin", color: { argb: "FF808080" } },
+      bottom: { style: "thin", color: { argb: "FF808080" } },
+      right: { style: "thin", color: { argb: "FF808080" } }
+    };
+  });
+
+  for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+    const row = worksheet.getRow(rowNumber);
+
+    row.getCell(1).alignment = {
+      horizontal: "center",
+      vertical: "middle"
+    };
+    row.getCell(2).alignment = {
+      horizontal: "center",
+      vertical: "middle"
+    };
+    row.getCell(3).alignment = {
+      horizontal: "left",
+      vertical: "middle",
+      wrapText: true
+    };
+
+    row.eachCell(cell => {
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD0D0D0" } },
+        left: { style: "thin", color: { argb: "FFD0D0D0" } },
+        bottom: { style: "thin", color: { argb: "FFD0D0D0" } },
+        right: { style: "thin", color: { argb: "FFD0D0D0" } }
+      };
+    });
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob(
+    [buffer],
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+  );
+
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = "ZQMR0270.xlsx";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(downloadUrl);
+}
+
 function applyMaterialGroupRules() {
 const selectedGroups = getSelectedMaterialGroups();
 auditSections.forEach(section => {
@@ -3075,6 +3213,7 @@ document
 checkbox.addEventListener("change", applyMaterialGroupRules);
 });
 document.getElementById("generateSummaryButton").addEventListener("click", renderAuditSummary);
+document.getElementById("exportZQMR0270Button").addEventListener("click", exportZQMR0270);
 applyMaterialGroupRules();
 updateAllDepartmentScores();
 </script>
