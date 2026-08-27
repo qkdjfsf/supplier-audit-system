@@ -2680,8 +2680,11 @@ recommendCount += 1;
 }
 });
 const auditScore = lowestFailLevel === null ? 5 : lowestFailLevel - 1;
-document.getElementById(`section${key}AuditScore`).textContent =
-auditScore.toFixed(1);
+const auditScoreElement = document.getElementById(`section${key}AuditScore`);
+if (auditScoreElement) {
+auditScoreElement.dataset.rawScore = String(auditScore);
+auditScoreElement.textContent = auditScore.toFixed(1);
+}
 document.getElementById(`section${key}FailCount`).textContent = failCount;
 document.getElementById(`section${key}RecommendCount`).textContent = recommendCount;
 document.getElementById(`section${key}CompletedCount`).textContent =
@@ -2738,11 +2741,17 @@ selfCompletedCount += 1;
 const auditScore = completedCount > 0 ? totalScore / completedCount : null;
 const selfAuditScore = selfCompletedCount > 0 ? selfTotalScore / selfCompletedCount : null;
 
-document.getElementById(`section${key}AuditScore`).textContent =
-auditScore === null ? "-" : auditScore.toFixed(2);
+const auditScoreElement = document.getElementById(`section${key}AuditScore`);
+if (auditScoreElement) {
+auditScoreElement.dataset.rawScore = auditScore === null ? "" : String(auditScore);
+auditScoreElement.textContent = auditScore === null ? "-" : auditScore.toFixed(2);
+}
 
-document.getElementById(`section${key}SelfAuditScore`).textContent =
-selfAuditScore === null ? "-" : selfAuditScore.toFixed(2);
+const selfAuditScoreElement = document.getElementById(`section${key}SelfAuditScore`);
+if (selfAuditScoreElement) {
+selfAuditScoreElement.dataset.rawScore = selfAuditScore === null ? "" : String(selfAuditScore);
+selfAuditScoreElement.textContent = selfAuditScore === null ? "-" : selfAuditScore.toFixed(2);
+}
 
 document.getElementById(`section${key}CompletedCount`).textContent =
 `${completedCount} / ${section.questions.length}`;
@@ -2778,6 +2787,8 @@ const control = document.getElementById(`section${key}SelfAuditScore`);
 if (!control) return null;
 
 if (section.scoringType === "average") {
+const rawValue = Number(control.dataset.rawScore);
+if (control.dataset.rawScore !== "" && Number.isFinite(rawValue)) return rawValue;
 const value = Number(control.textContent);
 return Number.isFinite(value) ? value : null;
 }
@@ -2790,6 +2801,12 @@ function getSectionAuditScore(section) {
 const key = safeKey(section.sectionKey);
 const scoreElement = document.getElementById(`section${key}AuditScore`);
 if (!scoreElement) return null;
+
+const rawValue = Number(scoreElement.dataset.rawScore);
+if (scoreElement.dataset.rawScore !== "" && Number.isFinite(rawValue)) {
+return rawValue;
+}
+
 const value = Number(scoreElement.textContent);
 return Number.isFinite(value) ? value : null;
 }
@@ -2832,8 +2849,14 @@ const selfAverage = averageValues(selfSectionScores);
 const auditAverage = averageValues(auditSectionScores);
 const selfElement = document.getElementById(`${departmentKey}DepartmentSelfScore`);
 const auditElement = document.getElementById(`${departmentKey}DepartmentAuditScore`);
-if (selfElement) selfElement.textContent = selfAverage === null ? "-" : selfAverage.toFixed(2);
-if (auditElement) auditElement.textContent = auditAverage === null ? "-" : auditAverage.toFixed(2);
+if (selfElement) {
+selfElement.dataset.rawScore = selfAverage === null ? "" : String(selfAverage);
+selfElement.textContent = selfAverage === null ? "-" : selfAverage.toFixed(2);
+}
+if (auditElement) {
+auditElement.dataset.rawScore = auditAverage === null ? "" : String(auditAverage);
+auditElement.textContent = auditAverage === null ? "-" : auditAverage.toFixed(2);
+}
 }
 function updateAllDepartmentScores() {
 Object.keys(departmentDefinitions).forEach(updateDepartmentScore);
@@ -3162,6 +3185,10 @@ function collectSummaryFindings() {
     const body = document.getElementById(`section${key}Body`);
     if (!body) return;
 
+    const averageSectionGap = section.scoringType === "average"
+      ? getAverageGap(getSectionAuditScore(section))
+      : "";
+
     section.questions.forEach(question => {
       const rows = Array.from(body.querySelectorAll("tr")).filter(row =>
         row.dataset.questionNumber === String(question.number) &&
@@ -3188,7 +3215,8 @@ function collectSummaryFindings() {
         const score = Number(matched[2]);
         if (!Number.isFinite(score) || score >= 5) return;
 
-        gap = getAverageGap(score);
+        // Average 제도는 개별 항목 점수가 아니라 해당 Section 전체 Average Score로 Gap을 판정한다.
+        gap = averageSectionGap;
         resultType = "부적합";
       } else {
         const selected = row.querySelector('input[type="radio"]:checked');
