@@ -886,17 +886,17 @@ margin-bottom: 8px;
   width: auto;
   min-width: 160px;
   padding: 13px 24px;
-  border: 1px solid #476b2d;
+  border: 1px solid #b7a2dc;
   border-radius: 10px;
-  color: #ffffff;
-  background: #476b2d;
+  color: #352c47;
+  background: #c9b7e8;
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
 }
 
 .check-sheet-export-button:hover {
-  background: #385623;
+  background: #b7a2dc;
 }
 
 @media (max-width: 700px) {
@@ -1402,7 +1402,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </div>
 <div class="form-group">
 <label for="mainProduct">Main Product / Business</label>
-<input id="mainProduct" type="text" placeholder="업종">
+<input id="mainProduct" type="text" placeholder="주요 생산품목">
 </div>
 <div class="form-group full">
 <div class="material-group-box">
@@ -3638,6 +3638,19 @@ function sreSetCellBlank(doc, cellRef) {
   sreClearCellContents(cell);
 }
 
+function sreClearExistingCell(doc, cellRef) {
+  const rowNumber = Number(String(cellRef).match(/\d+$/)?.[0]);
+  if (!Number.isFinite(rowNumber)) return;
+  const sheetData = sreGetSheetData(doc);
+  const row = sreDirectChildrenByTag(sheetData, "row").find(item =>
+    Number(item.getAttribute("r")) === rowNumber
+  );
+  if (!row) return;
+  const cell = sreDirectChildrenByTag(row, "c").find(item => item.getAttribute("r") === cellRef);
+  if (!cell) return;
+  sreClearCellContents(cell);
+}
+
 function sreSetCellString(doc, cellRef, value) {
   const cell = sreGetOrCreateCell(doc, cellRef);
   sreClearCellContents(cell);
@@ -3841,6 +3854,31 @@ async function srePatchAverageSection(zip, manifest, section, config) {
   sreSaveWorksheetDoc(zip, info, doc);
 }
 
+async function srePatchProfileSheet(zip, manifest) {
+  const loaded = await sreLoadWorksheetDoc(zip, manifest, "Profile");
+  if (!loaded) return;
+  const { info, doc } = loaded;
+
+  // User-approved Profile cells: clear values only.
+  // Formatting, merges, borders, fills, row/column sizes, and all other workbook structure remain untouched.
+  const individualCells = [
+    "C3", "H3", "H4", "H5", "H6", "C5", "C8", "C9",
+    "D10", "G10", "J10", "C12", "E12", "F12", "G12", "K12",
+    "C15", "E15", "G15", "E18", "F18", "C20", "C21",
+    "C24", "F24", "I24", "F26", "I26"
+  ];
+
+  individualCells.forEach(cellRef => sreClearExistingCell(doc, cellRef));
+
+  // C29:J35 - clear only existing cell values/formulas, preserving all styles and layout.
+  const columns = ["C", "D", "E", "F", "G", "H", "I", "J"];
+  for (let rowNumber = 29; rowNumber <= 35; rowNumber += 1) {
+    columns.forEach(column => sreClearExistingCell(doc, `${column}${rowNumber}`));
+  }
+
+  sreSaveWorksheetDoc(zip, info, doc);
+}
+
 async function srePatchResultSheet(zip, manifest, findingsData) {
   const loaded = await sreLoadWorksheetDoc(zip, manifest, "Result");
   if (!loaded) return;
@@ -3993,6 +4031,7 @@ async function exportSreCheckSheet() {
       await srePatchAverageSection(zip, manifest, section, config);
     }
 
+    await srePatchProfileSheet(zip, manifest);
     await srePatchResultSheet(zip, manifest, findingsData);
     await srePatchSreResultSheet(zip, manifest, findingsData.findings);
 
@@ -4009,7 +4048,7 @@ async function exportSreCheckSheet() {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = "SRE_Check_Sheet.xlsx";
+    link.download = "PP-486-R9_SRE(Supplier_Regular_Evaluation)_Check_Sheet.xlsx";
     document.body.appendChild(link);
     link.click();
     link.remove();
