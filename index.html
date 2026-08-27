@@ -1160,6 +1160,44 @@ flex-direction: column;
   overflow-x: visible;
 }
 
+
+/* Average Section table refinements */
+.average-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+.average-table th,
+.average-table td { padding: 9px 7px; }
+.average-table th:nth-child(1),
+.average-table td:nth-child(1) { width: 8%; text-align: center; }
+.average-table th:nth-child(2),
+.average-table td:nth-child(2) { width: 12%; }
+.average-table th:nth-child(3),
+.average-table td:nth-child(3) { width: 30%; }
+.average-table th:nth-child(4),
+.average-table td:nth-child(4),
+.average-table th:nth-child(5),
+.average-table td:nth-child(5) { width: 12%; text-align: center; }
+.average-table th:nth-child(6),
+.average-table td:nth-child(6) { width: 26%; }
+.average-self-score-display {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--self-audit);
+}
+.average-self-grade-select {
+  min-width: 90px;
+  padding: 9px 10px;
+  border: 1px solid #9fbbd5;
+  border-radius: 8px;
+  color: var(--self-audit);
+  background: var(--white);
+  font-weight: bold;
+  cursor: pointer;
+}
+
 </style>
 </head>
 <body>
@@ -2042,17 +2080,7 @@ return String(key).replace(/[^a-zA-Z0-9_-]/g, "-");
 function createSelfAuditControl(section) {
 const key = safeKey(section.sectionKey);
 if (section.scoringType === "average") {
-return `
-<input
-class="average-self-input"
-id="section${key}SelfAuditScore"
-type="number"
-min="0"
-max="5"
-step="0.01"
-placeholder="예: 4.25"
->
-`;
+return `<strong class="average-self-score-display" id="section${key}SelfAuditScore">-</strong>`;
 }
 const values = ["", "0.0", "1.0", "2.0", "3.0", "4.0", "5.0"];
 return `
@@ -2145,26 +2173,29 @@ question.criteria.forEach(([, grade]) => {
 if (!gradeOptions.includes(grade)) gradeOptions.push(grade);
 });
 return `
-<tr
-data-question-number="${question.number}"
-data-applicable="true"
->
+<tr data-question-number="${question.number}" data-applicable="true">
 <td class="question-cell">${question.number}</td>
-<td class="evaluation-cell"><strong>${question.content}</strong></td>
+<td class="average-contents-cell"><strong>${question.content}</strong></td>
 <td>${createAverageCriteria(question.criteria)}</td>
+<td class="result-cell">
+<select class="average-self-grade-select" id="${rowKey}SelfGrade">
+<option value="">선택 안 함</option>
+${gradeOptions.map(grade => `<option value="${grade}">${grade}</option>`).join("")}
+</select>
+</td>
 <td class="result-cell">
 <select class="average-grade-select" id="${rowKey}Grade">
 <option value="">선택 안 함</option>
 ${gradeOptions.map(grade => `<option value="${grade}">${grade}</option>`).join("")}
 </select>
 </td>
-<td class="average-score-cell" id="${rowKey}Score">-</td>
 <td class="comment-cell">
 <textarea class="comment-input" placeholder="PSK Notes / Comments 입력"></textarea>
 </td>
 </tr>
 `;
 }
+
 function createServerTypeSelectorRow() {
 return `
 <tr class="server-type-divider">
@@ -2238,8 +2269,8 @@ const tableHeader = isAverage
 <th>Question Number</th>
 <th>Contents</th>
 <th>Evaluation Contents</th>
+<th>Self Evaluation Grade</th>
 <th>Evaluation Grade</th>
-<th>Evaluation Score</th>
 <th>PSK Notes / Comments</th>
 </tr>
 `
@@ -2282,7 +2313,7 @@ const scoreRule = isAverage
 <strong>Audit Score 계산 기준 · 에버리지제도</strong><br>
 각 항목의 평가 Grade를 ${averageGradeText}으로 환산하고,
 평가 완료된 항목의 평균을 Audit Score로 계산합니다.<br>
-Self-Audit Score는 협력업체 자체평가 평균점수를 직접 입력합니다.
+Self Evaluation Grade를 점수로 환산한 뒤, 선택 완료된 항목의 평균을 Self-Audit Score로 자동 계산합니다.
 `
 : `
 <strong>Audit Score 계산 기준 · 레벨제도</strong><br>
@@ -2357,7 +2388,7 @@ ${isAverage ? `
 `}
 </div>
 <div class="table-wrap">
-<table>
+<table class="${isAverage ? "average-table" : ""}">
 <thead>${tableHeader}</thead>
 <tbody id="section${key}Body">${rows}</tbody>
 </table>
@@ -2478,15 +2509,22 @@ function updateAverageSectionResult(section) {
 const key = safeKey(section.sectionKey);
 const wrapper = document.getElementById(`section${key}Wrapper`);
 if (!wrapper || wrapper.dataset.applicable === "false") return;
+
 let totalScore = 0;
 let completedCount = 0;
+let selfTotalScore = 0;
+let selfCompletedCount = 0;
+
 section.questions.forEach(question => {
 const rowKey = `section${key}Average${question.number}`;
 const select = document.getElementById(`${rowKey}Grade`);
-const scoreCell = document.getElementById(`${rowKey}Score`);
-if (!select || !scoreCell) return;
+const selfSelect = document.getElementById(`${rowKey}SelfGrade`);
+if (!select || !selfSelect) return;
+
 const row = select.closest("tr");
 const grade = select.value;
+const selfGrade = selfSelect.value;
+
 row.classList.remove(
 "average-result-a",
 "average-result-b",
@@ -2494,25 +2532,35 @@ row.classList.remove(
 "average-result-d",
 "average-result-e"
 );
+
 const matched = question.criteria.find(([, criterionGrade]) => criterionGrade === grade);
 if (grade && matched) {
 const score = Number(matched[2]);
 totalScore += score;
 completedCount += 1;
-scoreCell.textContent = score.toFixed(1);
 row.classList.add(`average-result-${grade.toLowerCase()}`);
-} else {
-scoreCell.textContent = "-";
+}
+
+const selfMatched = question.criteria.find(([, criterionGrade]) => criterionGrade === selfGrade);
+if (selfGrade && selfMatched) {
+selfTotalScore += Number(selfMatched[2]);
+selfCompletedCount += 1;
 }
 });
-const auditScore = completedCount > 0
-? totalScore / completedCount
-: null;
+
+const auditScore = completedCount > 0 ? totalScore / completedCount : null;
+const selfAuditScore = selfCompletedCount > 0 ? selfTotalScore / selfCompletedCount : null;
+
 document.getElementById(`section${key}AuditScore`).textContent =
 auditScore === null ? "-" : auditScore.toFixed(2);
+
+document.getElementById(`section${key}SelfAuditScore`).textContent =
+selfAuditScore === null ? "-" : selfAuditScore.toFixed(2);
+
 document.getElementById(`section${key}CompletedCount`).textContent =
 `${completedCount} / ${section.questions.length}`;
 }
+
 function updateSectionResult(section) {
 if (section.scoringType === "average") {
 updateAverageSectionResult(section);
@@ -2540,7 +2588,14 @@ return wrapper && wrapper.dataset.applicable !== "false" && wrapper.style.displa
 function getSectionSelfScore(section) {
 const key = safeKey(section.sectionKey);
 const control = document.getElementById(`section${key}SelfAuditScore`);
-if (!control || control.value === "") return null;
+if (!control) return null;
+
+if (section.scoringType === "average") {
+const value = Number(control.textContent);
+return Number.isFinite(value) ? value : null;
+}
+
+if (control.value === "") return null;
 const value = Number(control.value);
 return Number.isFinite(value) ? value : null;
 }
@@ -3185,7 +3240,8 @@ content.classList.toggle("open");
 body.addEventListener("change", event => {
 if (
 event.target.matches('input[type="radio"]') ||
-event.target.matches(".average-grade-select")
+event.target.matches(".average-grade-select") ||
+event.target.matches(".average-self-grade-select")
 ) {
 updateSectionResult(section);
 }
@@ -3193,7 +3249,7 @@ updateSectionResult(section);
 updateSectionResult(section);
 });
 document
-.querySelectorAll('.self-audit-select, .average-self-input')
+.querySelectorAll('.self-audit-select')
 .forEach(control => {
 control.addEventListener("change", updateAllDepartmentScores);
 control.addEventListener("input", updateAllDepartmentScores);
