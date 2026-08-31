@@ -2976,12 +2976,22 @@ function renderSreEvaluationResult() {
   const departmentRows = sreDepartmentOrder.map(departmentKey => {
     const department = summaryDepartmentMap[departmentKey];
     const sections = getApplicableSectionsForSreTable(departmentKey);
-    const averages = getDepartmentAverages(departmentKey);
+
+    // Summary Average는 화면에 실제 표시되는 적용 Section의 Score 열을 한 번만 평균낸다.
+    // Material Group 등으로 삭제/비적용 처리된 Section은 sections에 포함되지 않으므로 자동 제외된다.
+    const selfAverage = averageValues(
+      sections.map(section => getSectionSelfScore(section)).filter(Number.isFinite)
+    );
+    const auditAverage = averageValues(
+      sections.map(section => getSectionAuditScore(section)).filter(Number.isFinite)
+    );
+
     return {
       departmentKey,
       departmentName: department?.name || departmentKey,
       sections,
-      ...averages
+      selfAverage,
+      auditAverage
     };
   }).filter(item => item.sections.length > 0);
 
@@ -2990,11 +3000,13 @@ function renderSreEvaluationResult() {
     return;
   }
 
+  // Total도 부서 평균의 평균이 아니라 Summary에 표시되는 전체 Score 열을 직접 한 번만 평균낸다.
+  const displayedSections = departmentRows.flatMap(item => item.sections);
   const totalSelfAverage = averageValues(
-    departmentRows.map(item => item.selfAverage).filter(Number.isFinite)
+    displayedSections.map(section => getSectionSelfScore(section)).filter(Number.isFinite)
   );
   const totalAuditAverage = averageValues(
-    departmentRows.map(item => item.auditAverage).filter(Number.isFinite)
+    displayedSections.map(section => getSectionAuditScore(section)).filter(Number.isFinite)
   );
 
   const bodyRows = departmentRows.map(group => {
@@ -3933,10 +3945,18 @@ async function srePatchResultSheet(zip, manifest, findingsData) {
   });
 
   const totalSelfAverage = averageValues(
-    sreDepartmentOrder.map(key => departmentAverages[key]?.selfAverage).filter(Number.isFinite)
+    SRE_RESULT_SECTION_ROWS.map(([sectionKey]) => {
+      const section = sreFindSection(sectionKey);
+      if (!sreIsSectionApplicable(section)) return null;
+      return getSectionSelfScore(section);
+    }).filter(Number.isFinite)
   );
   const totalAuditAverage = averageValues(
-    sreDepartmentOrder.map(key => departmentAverages[key]?.auditAverage).filter(Number.isFinite)
+    SRE_RESULT_SECTION_ROWS.map(([sectionKey]) => {
+      const section = sreFindSection(sectionKey);
+      if (!sreIsSectionApplicable(section)) return null;
+      return getSectionAuditScore(section);
+    }).filter(Number.isFinite)
   );
 
   if (Number.isFinite(totalSelfAverage)) {
