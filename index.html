@@ -2044,6 +2044,9 @@ const SRE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_brszXPIrUrCyoSiUkdqlRA_xapx
 const sreSupabase = window.supabase?.createClient
   ? window.supabase.createClient(SRE_SUPABASE_URL, SRE_SUPABASE_PUBLISHABLE_KEY, {
       auth: {
+        // 로그인 상태는 현재 탭에서만 유지합니다.
+        // 새로고침(F5) 시에는 유지되지만, 탭/창을 닫으면 sessionStorage가 사라져 재로그인이 필요합니다.
+        storage: window.sessionStorage,
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true
