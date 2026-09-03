@@ -1521,14 +1521,181 @@ flex-direction: column;
   }
 }
 
+
+
+/* ===== Supabase Authentication Gate ===== */
+body.auth-pending > header,
+body.auth-pending > main,
+body.auth-pending > footer,
+body.auth-logged-out > header,
+body.auth-logged-out > main,
+body.auth-logged-out > footer {
+  display: none;
+}
+
+.auth-screen {
+  display: none;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: linear-gradient(135deg, #172331 0%, #243447 100%);
+}
+
+body.auth-pending .auth-screen,
+body.auth-logged-out .auth-screen {
+  display: flex;
+}
+
+.auth-card {
+  width: min(430px, 100%);
+  padding: 34px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.22);
+}
+
+.auth-brand {
+  margin-bottom: 24px;
+}
+
+.auth-brand-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: #ffffff;
+  background: #172331;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.auth-brand h1 {
+  margin: 0;
+  color: #172331;
+  font-size: 27px;
+}
+
+.auth-brand p {
+  margin: 8px 0 0;
+  color: #697582;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.auth-form {
+  display: grid;
+  gap: 15px;
+}
+
+.auth-form label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.auth-login-button {
+  width: 100%;
+  margin-top: 5px;
+  padding: 13px 18px;
+  border: 0;
+  border-radius: 9px;
+  color: #ffffff;
+  background: #476b2d;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.auth-login-button:hover { background: #385623; }
+.auth-login-button:disabled { opacity: 0.6; cursor: wait; }
+
+.auth-message {
+  min-height: 20px;
+  margin-top: 12px;
+  color: #b44343;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-loading {
+  display: none;
+  color: #697582;
+  text-align: center;
+  font-size: 14px;
+}
+
+body.auth-pending .auth-form { display: none; }
+body.auth-pending .auth-loading { display: block; }
+
+.auth-user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.auth-user-email {
+  color: #ced7e0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.auth-logout-button {
+  width: auto;
+  padding: 8px 13px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 8px;
+  color: #ffffff;
+  background: rgba(255,255,255,0.10);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.auth-logout-button:hover { background: rgba(255,255,255,0.18); }
+
+@media (max-width: 600px) {
+  .auth-card { padding: 26px 20px; }
+  .auth-user-bar { align-items: flex-end; flex-direction: column; }
+}
+
 </style>
 </head>
-<body>
+<body class="auth-pending">
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="auth-brand-badge">PSK</span>
+      <h1>SRE Analysis System</h1>
+      <p>등록된 사용자만 시스템을 이용할 수 있습니다.<br>Supabase 계정의 이메일과 비밀번호로 로그인해 주세요.</p>
+    </div>
+    <div class="auth-loading">로그인 상태를 확인하고 있습니다...</div>
+    <form id="authLoginForm" class="auth-form">
+      <div>
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" autocomplete="username" required placeholder="Email">
+      </div>
+      <div>
+        <label for="authPassword">Password</label>
+        <input id="authPassword" type="password" autocomplete="current-password" required placeholder="Password">
+      </div>
+      <button id="authLoginButton" class="auth-login-button" type="submit">Login</button>
+    </form>
+    <div id="authMessage" class="auth-message" role="alert" aria-live="polite"></div>
+  </div>
+</div>
 <header>
 <div class="header-inner">
 <span class="header-label">PSK</span>
 <h1>SRE Analysis System</h1>
 <p>[A.I Report] Audit Result Summary &amp; Analysis</p>
+<div class="auth-user-bar">
+  <span id="authUserEmail" class="auth-user-email"></span>
+  <button id="authLogoutButton" class="auth-logout-button" type="button">Logout</button>
+</div>
 </div>
 </header>
 <main>
@@ -1867,7 +2034,113 @@ SRE Analysis System · PSK Audit Prototype
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+
+/* ===== Supabase Authentication ===== */
+const SRE_SUPABASE_URL = "https://krzngtoqubafqlrsdbqm.supabase.co";
+const SRE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_brszXPIrUrCyoSiUkdqlRA_xapxA3FN";
+
+const sreSupabase = window.supabase?.createClient
+  ? window.supabase.createClient(SRE_SUPABASE_URL, SRE_SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    })
+  : null;
+
+function sreSetAuthMessage(message = "") {
+  const element = document.getElementById("authMessage");
+  if (element) element.textContent = message;
+}
+
+function sreApplyAuthSession(session) {
+  const loggedIn = Boolean(session?.user);
+  document.body.classList.remove("auth-pending", "auth-logged-out", "auth-logged-in");
+  document.body.classList.add(loggedIn ? "auth-logged-in" : "auth-logged-out");
+
+  const emailElement = document.getElementById("authUserEmail");
+  if (emailElement) emailElement.textContent = loggedIn ? (session.user.email || "Authenticated user") : "";
+
+  if (!loggedIn) {
+    const passwordInput = document.getElementById("authPassword");
+    if (passwordInput) passwordInput.value = "";
+  }
+}
+
+async function sreInitializeAuth() {
+  if (!sreSupabase) {
+    document.body.classList.remove("auth-pending");
+    document.body.classList.add("auth-logged-out");
+    sreSetAuthMessage("Supabase 로그인 모듈을 불러오지 못했습니다. 인터넷 연결 상태를 확인해 주세요.");
+    return;
+  }
+
+  const { data, error } = await sreSupabase.auth.getSession();
+  if (error) {
+    console.error("Supabase getSession error:", error);
+    sreSetAuthMessage("로그인 상태를 확인하지 못했습니다. 다시 로그인해 주세요.");
+    sreApplyAuthSession(null);
+  } else {
+    sreApplyAuthSession(data?.session || null);
+  }
+
+  sreSupabase.auth.onAuthStateChange((_event, session) => {
+    sreApplyAuthSession(session);
+  });
+}
+
+const sreAuthLoginForm = document.getElementById("authLoginForm");
+if (sreAuthLoginForm) {
+  sreAuthLoginForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!sreSupabase) return;
+
+    const email = document.getElementById("authEmail")?.value.trim() || "";
+    const password = document.getElementById("authPassword")?.value || "";
+    const button = document.getElementById("authLoginButton");
+
+    sreSetAuthMessage("");
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Logging in...";
+    }
+
+    try {
+      const { data, error } = await sreSupabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        sreSetAuthMessage("이메일 또는 비밀번호를 확인해 주세요.");
+        return;
+      }
+      sreApplyAuthSession(data?.session || null);
+    } catch (error) {
+      console.error("Supabase signIn error:", error);
+      sreSetAuthMessage("로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Login";
+      }
+    }
+  });
+}
+
+const sreAuthLogoutButton = document.getElementById("authLogoutButton");
+if (sreAuthLogoutButton) {
+  sreAuthLogoutButton.addEventListener("click", async () => {
+    if (!sreSupabase) return;
+    const { error } = await sreSupabase.auth.signOut();
+    if (error) {
+      console.error("Supabase signOut error:", error);
+      alert("로그아웃 중 오류가 발생했습니다.");
+    }
+  });
+}
+
+sreInitializeAuth();
+
 function updateCertificationValue() {
 const selected = Array.from(document.querySelectorAll('input[name="certificationGroup"]:checked'))
 .map(input => input.value)
