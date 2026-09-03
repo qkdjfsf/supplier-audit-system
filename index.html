@@ -4906,6 +4906,283 @@ function dbToggleHistory() {
   }
 }
 
+
+/* ===== Supabase Audit Database Save ===== */
+function dbGetRawControlLocator(control, index) {
+  if (control.id) return { type: "id", value: control.id };
+
+  if (control.name) {
+    const locator = { type: "name", value: control.name };
+    if (control.type === "radio" || control.type === "checkbox") locator.optionValue = control.value;
+    return locator;
+  }
+
+  const row = control.closest("tr[data-question-number]");
+  const sectionWrapper = control.closest('[id^="section"][id$="Wrapper"]');
+  if (row && sectionWrapper) {
+    return {
+      type: "question-control",
+      sectionWrapperId: sectionWrapper.id,
+      questionNumber: row.dataset.questionNumber || "",
+      className: Array.from(control.classList || []).join(" "),
+      tagName: control.tagName.toLowerCase(),
+      index
+    };
+  }
+
+  return { type: "index", value: index };
+}
+
+function dbCaptureRawData() {
+  const main = document.querySelector("main");
+  const controls = Array.from(main?.querySelectorAll("input, select, textarea") || [])
+    .filter(control => control.id !== "dbRecordSelector")
+    .map((control, index) => {
+      const base = {
+        locator: dbGetRawControlLocator(control, index),
+        tagName: control.tagName.toLowerCase(),
+        inputType: control.type || "",
+        value: control.value ?? ""
+      };
+      if (control.type === "checkbox" || control.type === "radio") base.checked = Boolean(control.checked);
+      if (control.tagName === "SELECT") base.selectedIndex = control.selectedIndex;
+      return base;
+    });
+
+  return {
+    schemaVersion: 1,
+    capturedAt: new Date().toISOString(),
+    checkSheetVersion: document.getElementById("checkSheetVersion")?.value || "",
+    profile: {
+      companyName: document.getElementById("companyName")?.value.trim() || "",
+      sales: document.getElementById("sales")?.value || "",
+      address: document.getElementById("address")?.value || "",
+      certification: document.getElementById("certification")?.value || "",
+      auditDate: document.getElementById("auditDate")?.value || "",
+      mainProduct: document.getElementById("mainProduct")?.value || "",
+      materialGroups: dbGetSelectedMaterialGroups()
+    },
+    auditors: {
+      production: document.getElementById("productionAuditor")?.value || "",
+      quality: document.getElementById("qualityAuditor")?.value || "",
+      purchase: document.getElementById("purchaseAuditor")?.value || "",
+      security: document.getElementById("securityAuditor")?.value || "",
+      system: document.getElementById("systemAuditor")?.value || "",
+      complianceEthics: document.getElementById("complianceAuditor")?.value || ""
+    },
+    controls
+  };
+}
+
+function dbBuildAuditDetailRecords(auditId) {
+  const records = [];
+
+  sreDepartmentOrder.forEach(departmentKey => {
+    const department = summaryDepartmentMap[departmentKey];
+    if (!department) return;
+
+    getApplicableSectionsForSreTable(departmentKey).forEach(section => {
+      const selfScore = getSectionSelfScore(section);
+      const auditScore = getSectionAuditScore(section);
+      records.push({
+        audit_id: auditId,
+        section_number: Number(section.sectionNumber),
+        section_name: section.title || "",
+        category: department.name,
+        self_audit_score: Number.isFinite(selfScore) ? selfScore : null,
+        psk_audit_score: Number.isFinite(auditScore) ? auditScore : null
+      });
+    });
+  });
+
+  return records;
+}
+
+function dbBuildFindingRecords(auditId) {
+  const { findings } = collectSummaryFindings();
+  return findings.map(finding => ({
+    audit_id: auditId,
+    category: finding.category || null,
+    section: finding.section || null,
+    gap: finding.gap || null,
+    auditor: finding.auditor || null,
+    issue_date: finding.issueDate || null,
+    evaluation_contents: finding.evaluationContents || null,
+    description: finding.description || null
+  }));
+}
+
+async function dbGetAuthenticatedUser() {
+  if (!sreSupabase) return null;
+  const { data, error } = await sreSupabase.auth.getUser();
+  if (error) {
+    console.error("Supabase auth user error:", error);
+    return null;
+  }
+  return data?.user || null;
+}
+
+async function dbGetOrCreateBp(companyName, materialGroups) {
+  const { data: existingRows, error: findError } = await sreSupabase
+    .from("BP")
+    .select("bp_id, company_name")
+    .eq("company_name", companyName)
+    .order("bp_id", { ascending: true })
+    .limit(1);
+
+  if (findError) throw findError;
+
+  if (existingRows?.length) {
+    const bp = existingRows[0];
+    const { error: updateError } = await sreSupabase
+      .from("BP")
+      .update({ material_group: materialGroups })
+      .eq("bp_id", bp.bp_id);
+    if (updateError) throw updateError;
+    return bp.bp_id;
+  }
+
+  const { data: inserted, error: insertError } = await sreSupabase
+    .from("BP")
+    .insert({ company_name: companyName, material_group: materialGroups })
+    .select("bp_id")
+    .single();
+
+  if (insertError) throw insertError;
+  return inserted.bp_id;
+}
+
+async function dbHasDuplicateAudit(bpId, auditDate, checkSheetVersion) {
+  const { data, error } = await sreSupabase
+    .from("Audit_record")
+    .select("audit_id")
+    .eq("bp_id", bpId)
+    .eq("audit_date", auditDate)
+    .eq("check_sheet_version", checkSheetVersion)
+    .limit(1);
+
+  if (error) throw error;
+  return Boolean(data?.length);
+}
+
+async function dbSaveAuditToSupabase() {
+  if (!sreSupabase) {
+    alert("Supabase 연결 모듈을 불러오지 못했습니다. 인터넷 연결 상태를 확인해 주세요.");
+    return;
+  }
+
+  const user = await dbGetAuthenticatedUser();
+  if (!user) {
+    alert("로그인 세션을 확인할 수 없습니다. 다시 로그인한 후 저장해 주세요.");
+    sreApplyAuthSession(null);
+    return;
+  }
+
+  const companyName = document.getElementById("companyName")?.value.trim() || "";
+  const auditDate = document.getElementById("auditDate")?.value || "";
+  const checkSheetVersion = document.getElementById("checkSheetVersion")?.value || "";
+  const materialGroups = dbGetSelectedMaterialGroups();
+  const saveButton = document.getElementById("dbSaveButton");
+
+  if (!companyName) {
+    alert("Company Name을 입력해 주세요.");
+    document.getElementById("companyName")?.focus();
+    return;
+  }
+  if (!auditDate) {
+    alert("Audit Date를 입력해 주세요.");
+    document.getElementById("auditDate")?.focus();
+    return;
+  }
+  if (!checkSheetVersion) {
+    alert("Check Sheet Version을 선택해 주세요.");
+    return;
+  }
+  if (materialGroups.length === 0) {
+    alert("Material Group을 하나 이상 선택해 주세요.");
+    return;
+  }
+
+  applyMaterialGroupRules();
+  updateAllDepartmentScores();
+
+  if (saveButton) {
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+  }
+
+  let createdAuditId = null;
+
+  try {
+    const bpId = await dbGetOrCreateBp(companyName, materialGroups);
+
+    if (await dbHasDuplicateAudit(bpId, auditDate, checkSheetVersion)) {
+      alert("같은 BP / Audit Date / Check Sheet Version의 심사 기록이 이미 있습니다.\n중복 저장을 방지하기 위해 Save를 중단했습니다. 추후 Edit 기능에서 기존 기록을 수정할 수 있습니다.");
+      return;
+    }
+
+    const totalScores = dbGetTotalScores();
+    const rawData = dbCaptureRawData();
+
+    const { data: auditRecord, error: auditError } = await sreSupabase
+      .from("Audit_record")
+      .insert({
+        bp_id: bpId,
+        audit_date: auditDate,
+        check_sheet_version: checkSheetVersion,
+        material_group_snapshot: materialGroups,
+        self_audit_score: Number.isFinite(totalScores.selfScore) ? totalScores.selfScore : null,
+        psk_audit_score: Number.isFinite(totalScores.auditScore) ? totalScores.auditScore : null,
+        raw_data: rawData
+      })
+      .select("audit_id")
+      .single();
+
+    if (auditError) throw auditError;
+    createdAuditId = auditRecord.audit_id;
+
+    const detailRecords = dbBuildAuditDetailRecords(createdAuditId);
+    if (detailRecords.length) {
+      const { error: detailError } = await sreSupabase
+        .from("Audit_detail")
+        .insert(detailRecords);
+      if (detailError) throw detailError;
+    }
+
+    const findingRecords = dbBuildFindingRecords(createdAuditId);
+    if (findingRecords.length) {
+      const { error: findingError } = await sreSupabase
+        .from("Findings")
+        .insert(findingRecords);
+      if (findingError) throw findingError;
+    }
+
+    alert(`저장 완료!\nAudit ID: ${createdAuditId}\n\nBP / Audit Record / Audit Detail / Findings가 Supabase에 저장되었습니다.`);
+
+    if (document.getElementById("dbHistoryPanel")?.classList.contains("visible")) {
+      dbRenderHistoryPreview();
+    }
+  } catch (error) {
+    console.error("Supabase Audit Save error:", error);
+
+    if (createdAuditId) {
+      try {
+        await sreSupabase.from("Audit_record").delete().eq("audit_id", createdAuditId);
+      } catch (rollbackError) {
+        console.error("Audit save rollback error:", rollbackError);
+      }
+    }
+
+    const message = error?.message || String(error);
+    alert(`DB 저장 중 오류가 발생했습니다.\n${message}\n\n저장 도중 생성된 Audit Record는 가능한 경우 자동으로 롤백했습니다.`);
+  } finally {
+    if (saveButton) {
+      saveButton.disabled = false;
+      saveButton.textContent = "Save";
+    }
+  }
+}
+
 function dbShowConnectionNotice(action) {
   alert(`${action} 기능의 화면 구조까지 반영했습니다.\n실제 DB 저장/수정/삭제는 DB 연결 단계에서 활성화합니다.`);
 }
@@ -4927,7 +5204,7 @@ if (dbVersionSelect) {
 }
 
 document.getElementById("dbHistoryButton")?.addEventListener("click", dbToggleHistory);
-document.getElementById("dbSaveButton")?.addEventListener("click", () => dbShowConnectionNotice("Save"));
+document.getElementById("dbSaveButton")?.addEventListener("click", dbSaveAuditToSupabase);
 document.getElementById("dbEditButton")?.addEventListener("click", () => dbShowConnectionNotice("Edit"));
 document.getElementById("dbDeleteButton")?.addEventListener("click", () => dbShowConnectionNotice("Delete"));
 
