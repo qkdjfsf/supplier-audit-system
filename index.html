@@ -1792,6 +1792,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
       <select id="checkSheetVersion">
         <option value="Y2023">Y2023</option>
         <option value="Y2024">Y2024</option>
+        <option value="Y2025">Y2025</option>
         <option value="Y2026">Y2026</option>
         <option value="Y2027">Y2027</option>
         <option value="Y2028">Y2028</option>
@@ -4817,91 +4818,187 @@ function dbBuildAuditDetailRows() {
   return rows;
 }
 
-function dbRenderHistoryPreview() {
-  const companyName = document.getElementById("companyName")?.value.trim() || "-";
-  const materialGroups = dbGetSelectedMaterialGroups();
-  const auditDate = document.getElementById("auditDate")?.value || "-";
-  const checkSheetVersion = document.getElementById("checkSheetVersion")?.value || "-";
-  const totalScores = dbGetTotalScores();
+let dbHistorySelectedBpId = null;
+let dbHistorySelectedAuditId = null;
 
+function dbHistorySetLoading(message = "불러오는 중...") {
   const supplierBody = document.getElementById("dbSupplierBody");
-  if (supplierBody) {
-    supplierBody.innerHTML = `
-      <tr>
-        <td class="db-left">${escapeHtml(companyName)}</td>
-        <td class="db-left">${escapeHtml(materialGroups.length ? materialGroups.join(", ") : "-")}</td>
-      </tr>`;
-  }
-
   const recordBody = document.getElementById("dbAuditRecordBody");
-  if (recordBody) {
-    recordBody.innerHTML = `
-      <tr class="db-record-row selected">
-        <td><input id="dbRecordSelector" type="checkbox" checked aria-label="Audit Record 선택"></td>
-        <td>${escapeHtml(auditDate)}</td>
-        <td>${escapeHtml(checkSheetVersion)}</td>
-        <td>${formatScore(totalScores.selfScore, 1)}</td>
-        <td>${formatScore(totalScores.auditScore, 1)}</td>
-      </tr>`;
-  }
-
   const detailBody = document.getElementById("dbAuditDetailBody");
-  if (detailBody) {
-    detailBody.innerHTML = dbBuildAuditDetailRows()
-      || '<tr><td colspan="5">표시할 적용 Section이 없습니다.</td></tr>';
+  const findingsBody = document.getElementById("dbFindingsBody");
+  if (supplierBody) supplierBody.innerHTML = `<tr><td colspan="2">${escapeHtml(message)}</td></tr>`;
+  if (recordBody) recordBody.innerHTML = '<tr><td colspan="5">-</td></tr>';
+  if (detailBody) detailBody.innerHTML = '<tr><td colspan="5">-</td></tr>';
+  if (findingsBody) findingsBody.innerHTML = '<div class="db-empty">-</div>';
+}
+
+function dbHistoryRenderEmptyDetail(message = "Audit Record를 선택해 주세요.") {
+  const detailBody = document.getElementById("dbAuditDetailBody");
+  const findingsBody = document.getElementById("dbFindingsBody");
+  if (detailBody) detailBody.innerHTML = `<tr><td colspan="5">${escapeHtml(message)}</td></tr>`;
+  if (findingsBody) findingsBody.innerHTML = `<div class="db-empty">${escapeHtml(message)}</div>`;
+  const deleteButton = document.getElementById("dbDeleteButton");
+  if (deleteButton) deleteButton.disabled = true;
+}
+
+async function dbLoadAuditHistory() {
+  if (!sreSupabase) {
+    alert("Supabase 연결 모듈을 불러오지 못했습니다.");
+    return;
   }
 
-  const findingsBody = document.getElementById("dbFindingsBody");
-  if (findingsBody) {
-    const { findings, gapCounts } = collectSummaryFindings();
+  dbHistorySetLoading();
+  try {
+    const { data: bpRows, error } = await sreSupabase
+      .from("BP")
+      .select("bp_id, company_name, material_group")
+      .order("company_name", { ascending: true });
+    if (error) throw error;
 
+    const supplierBody = document.getElementById("dbSupplierBody");
+    if (!bpRows?.length) {
+      if (supplierBody) supplierBody.innerHTML = '<tr><td colspan="2">저장된 BP사가 없습니다.</td></tr>';
+      const recordBody = document.getElementById("dbAuditRecordBody");
+      if (recordBody) recordBody.innerHTML = '<tr><td colspan="5">저장된 Audit Record가 없습니다.</td></tr>';
+      dbHistoryRenderEmptyDetail("저장된 심사 이력이 없습니다.");
+      return;
+    }
+
+    if (!bpRows.some(row => Number(row.bp_id) === Number(dbHistorySelectedBpId))) {
+      dbHistorySelectedBpId = bpRows[0].bp_id;
+    }
+
+    if (supplierBody) {
+      supplierBody.innerHTML = bpRows.map(row => {
+        const selected = Number(row.bp_id) === Number(dbHistorySelectedBpId);
+        const groups = Array.isArray(row.material_group) ? row.material_group.join(", ") : (row.material_group || "-");
+        return `<tr class="db-record-row${selected ? " selected" : ""}" data-bp-id="${row.bp_id}" style="cursor:pointer;">
+          <td class="db-left">${escapeHtml(row.company_name || "-")}</td>
+          <td class="db-left">${escapeHtml(groups)}</td>
+        </tr>`;
+      }).join("");
+
+      supplierBody.querySelectorAll("tr[data-bp-id]").forEach(row => {
+        row.addEventListener("click", async () => {
+          dbHistorySelectedBpId = Number(row.dataset.bpId);
+          dbHistorySelectedAuditId = null;
+          await dbLoadAuditHistory();
+        });
+      });
+    }
+
+    await dbLoadAuditRecordsForBp(dbHistorySelectedBpId);
+  } catch (error) {
+    console.error("Audit History load error:", error);
+    alert(`Audit History 조회 중 오류가 발생했습니다.\n${error?.message || error}`);
+  }
+}
+
+async function dbLoadAuditRecordsForBp(bpId) {
+  const recordBody = document.getElementById("dbAuditRecordBody");
+  const { data: records, error } = await sreSupabase
+    .from("Audit_record")
+    .select("audit_id, audit_date, check_sheet_version, self_audit_score, psk_audit_score")
+    .eq("bp_id", bpId)
+    .order("audit_date", { ascending: false })
+    .order("audit_id", { ascending: false });
+  if (error) throw error;
+
+  if (!records?.length) {
+    if (recordBody) recordBody.innerHTML = '<tr><td colspan="5">이 BP사의 저장된 Audit Record가 없습니다.</td></tr>';
+    dbHistorySelectedAuditId = null;
+    dbHistoryRenderEmptyDetail("저장된 심사 이력이 없습니다.");
+    return;
+  }
+
+  if (!records.some(row => Number(row.audit_id) === Number(dbHistorySelectedAuditId))) {
+    dbHistorySelectedAuditId = records[0].audit_id;
+  }
+
+  if (recordBody) {
+    recordBody.innerHTML = records.map(row => {
+      const selected = Number(row.audit_id) === Number(dbHistorySelectedAuditId);
+      return `<tr class="db-record-row${selected ? " selected" : ""}" data-audit-id="${row.audit_id}" style="cursor:pointer;">
+        <td><input class="db-audit-selector" type="radio" name="dbAuditRecordSelector" value="${row.audit_id}" ${selected ? "checked" : ""} aria-label="Audit Record 선택"></td>
+        <td>${escapeHtml(row.audit_date || "-")}</td>
+        <td>${escapeHtml(row.check_sheet_version || "-")}</td>
+        <td>${formatScore(Number(row.self_audit_score), 1)}</td>
+        <td>${formatScore(Number(row.psk_audit_score), 1)}</td>
+      </tr>`;
+    }).join("");
+
+    recordBody.querySelectorAll("tr[data-audit-id]").forEach(row => {
+      row.addEventListener("click", async event => {
+        if (event.target.matches('input[type="radio"]')) event.stopPropagation();
+        dbHistorySelectedAuditId = Number(row.dataset.auditId);
+        recordBody.querySelectorAll("tr[data-audit-id]").forEach(item => item.classList.toggle("selected", item === row));
+        recordBody.querySelectorAll('.db-audit-selector').forEach(input => input.checked = Number(input.value) === dbHistorySelectedAuditId);
+        await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+      });
+      row.querySelector('.db-audit-selector')?.addEventListener("change", async () => {
+        dbHistorySelectedAuditId = Number(row.dataset.auditId);
+        recordBody.querySelectorAll("tr[data-audit-id]").forEach(item => item.classList.toggle("selected", item === row));
+        await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+      });
+    });
+  }
+
+  await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+}
+
+async function dbLoadAuditDetailAndFindings(auditId) {
+  const detailBody = document.getElementById("dbAuditDetailBody");
+  const findingsBody = document.getElementById("dbFindingsBody");
+
+  const [detailResult, findingsResult] = await Promise.all([
+    sreSupabase.from("Audit_detail").select("detail_id, section_number, section_name, category, self_audit_score, psk_audit_score").eq("audit_id", auditId).order("detail_id", { ascending: true }),
+    sreSupabase.from("Findings").select("finding_id, category, section, gap, auditor, issue_date, evaluation_contents, description").eq("audit_id", auditId).order("finding_id", { ascending: true })
+  ]);
+  if (detailResult.error) throw detailResult.error;
+  if (findingsResult.error) throw findingsResult.error;
+
+  const details = detailResult.data || [];
+  if (detailBody) {
+    detailBody.innerHTML = details.length ? details.map((row, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td class="db-left">Section ${escapeHtml(row.section_number ?? "")} ${escapeHtml(row.section_name || "")}</td>
+        <td>${escapeHtml(row.category || "-")}</td>
+        <td>${formatScore(Number(row.self_audit_score), 1)}</td>
+        <td>${formatScore(Number(row.psk_audit_score), 1)}</td>
+      </tr>`).join("") : '<tr><td colspan="5">저장된 Audit Detail이 없습니다.</td></tr>';
+  }
+
+  const findings = findingsResult.data || [];
+  const gapCounts = { "Major Gap": 0, "Minor Gap": 0, "Opportunity": 0, "-": 0 };
+  findings.forEach(item => { if (Object.prototype.hasOwnProperty.call(gapCounts, item.gap)) gapCounts[item.gap] += 1; });
+
+  if (findingsBody) {
     findingsBody.innerHTML = `
       <div class="db-findings-counts">
-        <div class="db-findings-count"><span>Major Gap</span><strong>${gapCounts["Major Gap"] || 0}</strong></div>
-        <div class="db-findings-count"><span>Minor Gap</span><strong>${gapCounts["Minor Gap"] || 0}</strong></div>
-        <div class="db-findings-count"><span>Opportunity</span><strong>${gapCounts["Opportunity"] || 0}</strong></div>
-        <div class="db-findings-count"><span>-</span><strong>${gapCounts["-"] || 0}</strong></div>
+        <div class="db-findings-count"><span>Major Gap</span><strong>${gapCounts["Major Gap"]}</strong></div>
+        <div class="db-findings-count"><span>Minor Gap</span><strong>${gapCounts["Minor Gap"]}</strong></div>
+        <div class="db-findings-count"><span>Opportunity</span><strong>${gapCounts["Opportunity"]}</strong></div>
+        <div class="db-findings-count"><span>-</span><strong>${gapCounts["-"]}</strong></div>
       </div>
-      ${findings.length ? `
-        <div class="db-table-wrap">
-          <table class="db-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Category</th>
-                <th>Section</th>
-                <th>Gap</th>
-                <th>Evaluation Contents</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${findings.map((finding, index) => `
-                <tr>
-                  <td>${index + 1}</td>
-                  <td>${escapeHtml(finding.category)}</td>
-                  <td class="db-left">${escapeHtml(finding.section)}</td>
-                  <td>${escapeHtml(finding.gap)}</td>
-                  <td class="db-left">${escapeHtml(finding.evaluationContents)}</td>
-                  <td class="db-left">${escapeHtml(finding.description)}</td>
-                </tr>`).join("")}
-            </tbody>
-          </table>
-        </div>`
-        : '<div class="db-empty">현재 입력값 기준 Findings가 없습니다.</div>'}`;
+      ${findings.length ? `<div class="db-table-wrap"><table class="db-table"><thead><tr>
+        <th>No</th><th>Category</th><th>Section</th><th>Gap</th><th>Evaluation Contents</th><th>Description</th>
+      </tr></thead><tbody>${findings.map((item, index) => `<tr>
+        <td>${index + 1}</td><td>${escapeHtml(item.category || "-")}</td><td class="db-left">${escapeHtml(item.section || "-")}</td>
+        <td>${escapeHtml(item.gap || "-")}</td><td class="db-left">${escapeHtml(item.evaluation_contents || "")}</td><td class="db-left">${escapeHtml(item.description || "")}</td>
+      </tr>`).join("")}</tbody></table></div>` : '<div class="db-empty">선택한 Audit Record의 Findings가 없습니다.</div>'}`;
   }
 
   const deleteButton = document.getElementById("dbDeleteButton");
   if (deleteButton) deleteButton.disabled = false;
 }
 
-function dbToggleHistory() {
+async function dbToggleHistory() {
   const panel = document.getElementById("dbHistoryPanel");
   if (!panel) return;
-
   panel.classList.toggle("visible");
   if (panel.classList.contains("visible")) {
-    dbRenderHistoryPreview();
+    await dbLoadAuditHistory();
     panel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
@@ -5160,7 +5257,9 @@ async function dbSaveAuditToSupabase() {
     alert(`저장 완료!\nAudit ID: ${createdAuditId}\n\nBP / Audit Record / Audit Detail / Findings가 Supabase에 저장되었습니다.`);
 
     if (document.getElementById("dbHistoryPanel")?.classList.contains("visible")) {
-      dbRenderHistoryPreview();
+      dbHistorySelectedBpId = bpId;
+      dbHistorySelectedAuditId = createdAuditId;
+      await dbLoadAuditHistory();
     }
   } catch (error) {
     console.error("Supabase Audit Save error:", error);
@@ -5195,10 +5294,10 @@ if (dbVersionSelect) {
 
   if (currentOptionExists) dbVersionSelect.value = currentVersion;
 
-  dbVersionSelect.addEventListener("change", () => {
+  dbVersionSelect.addEventListener("change", async () => {
     dbUpdateVersionMode();
     if (document.getElementById("dbHistoryPanel")?.classList.contains("visible")) {
-      dbRenderHistoryPreview();
+      await dbLoadAuditHistory();
     }
   });
 }
