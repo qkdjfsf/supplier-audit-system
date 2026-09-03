@@ -1329,6 +1329,198 @@ flex-direction: column;
   cursor: pointer;
 }
 
+
+/* ===== Audit Database UI (DB backend connection will be added later) ===== */
+.db-version-card,
+.db-history-card {
+  margin-bottom: 22px;
+}
+
+.db-version-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 18px;
+  align-items: end;
+}
+
+.db-current-version-box {
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #f7f9fb;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.db-current-version-box strong {
+  color: var(--self-audit);
+}
+
+.db-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.db-action-button {
+  width: auto;
+  min-width: 130px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 9px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.db-save-button {
+  background: #476b2d;
+}
+.db-save-button:hover {
+  background: #385623;
+}
+
+.db-edit-button {
+  background: #2f6fb2;
+}
+.db-edit-button:hover {
+  background: #255a91;
+}
+
+.db-history-button {
+  color: #263445;
+  background: #e8edf3;
+  border: 1px solid #cfd7e1;
+}
+.db-history-button:hover {
+  background: #dce3eb;
+}
+
+.db-delete-button {
+  background: #b44343;
+}
+.db-delete-button:hover {
+  background: #963535;
+}
+.db-delete-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.db-history-panel {
+  display: none;
+  margin-top: 24px;
+}
+.db-history-panel.visible {
+  display: block;
+}
+
+.db-block-title {
+  margin: 24px 0 10px;
+  color: var(--text);
+  font-size: 17px;
+}
+
+.db-table-wrap {
+  overflow-x: auto;
+}
+
+.db-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.db-table th,
+.db-table td {
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.db-table th {
+  color: #ffffff;
+  background: var(--navy-light);
+}
+
+.db-table td.db-left {
+  text-align: left;
+}
+
+.db-select-col {
+  width: 64px;
+}
+
+.db-record-row {
+  cursor: pointer;
+}
+.db-record-row.selected td {
+  background: #edf4fc;
+}
+
+.db-category-cell {
+  font-weight: bold;
+  background: #f5f7f9;
+}
+
+.db-findings-counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.db-findings-count {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fafbfc;
+  text-align: center;
+}
+
+.db-findings-count span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: bold;
+}
+.db-findings-count strong {
+  font-size: 22px;
+}
+
+.db-empty {
+  padding: 22px;
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  color: var(--muted);
+  background: #fafbfc;
+  text-align: center;
+}
+
+.db-preview-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 750px) {
+  .db-version-layout {
+    grid-template-columns: 1fr;
+  }
+  .db-action-button {
+    width: 100%;
+  }
+  .db-findings-counts {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1417,6 +1609,105 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </div>
 </div>
 </div>
+</section>
+
+
+<section class="card db-version-card">
+  <div class="section-heading">
+    <div>
+      <h2>Check Sheet Version</h2>
+      <p>심사 데이터의 Check Sheet Version을 선택합니다.</p>
+    </div>
+  </div>
+  <div class="db-version-layout">
+    <div class="form-group">
+      <label for="checkSheetVersion">Check Sheet Ver</label>
+      <select id="checkSheetVersion">
+        <option value="Y2023">Y2023</option>
+        <option value="Y2024">Y2024</option>
+        <option value="Y2026">Y2026</option>
+        <option value="Y2027">Y2027</option>
+        <option value="Y2028">Y2028</option>
+        <option value="Y2029">Y2029</option>
+      </select>
+    </div>
+    <div class="db-current-version-box">
+      한국시간 기준 Current Version: <strong id="dbCurrentVersionText">-</strong><br>
+      <span id="dbVersionModeText">버전을 확인하고 있습니다.</span>
+    </div>
+  </div>
+</section>
+
+<section class="card db-history-card">
+  <div class="section-heading">
+    <div>
+      <h2>Audit Database</h2>
+      <p>Supplier별 Audit Record와 Audit Detail 관리</p>
+    </div>
+  </div>
+
+  <div class="db-action-row">
+    <button id="dbSaveButton" class="db-action-button db-save-button" type="button">Save</button>
+    <button id="dbEditButton" class="db-action-button db-edit-button" type="button">Edit</button>
+    <button id="dbHistoryButton" class="db-action-button db-history-button" type="button">Audit History</button>
+  </div>
+
+  <div id="dbHistoryPanel" class="db-history-panel">
+    <h3 class="db-block-title">1. Supplier</h3>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Company Name</th>
+            <th>Material Group</th>
+          </tr>
+        </thead>
+        <tbody id="dbSupplierBody"></tbody>
+      </table>
+    </div>
+
+    <h3 class="db-block-title">2. Audit Record</h3>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th class="db-select-col">선택</th>
+            <th>Audit Date</th>
+            <th>Check Sheet Ver</th>
+            <th>Self-Audit Score</th>
+            <th>PSK Audit Score</th>
+          </tr>
+        </thead>
+        <tbody id="dbAuditRecordBody"></tbody>
+      </table>
+    </div>
+    <div class="db-action-row" style="margin-top:10px;">
+      <button id="dbDeleteButton" class="db-action-button db-delete-button" type="button" disabled>Delete</button>
+    </div>
+
+    <h3 class="db-block-title">3. Audit Detail</h3>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th style="width:65px;">No</th>
+            <th>Section</th>
+            <th>Category</th>
+            <th>Self-Audit Score</th>
+            <th>PSK Audit Score</th>
+          </tr>
+        </thead>
+        <tbody id="dbAuditDetailBody"></tbody>
+      </table>
+    </div>
+
+    <h3 class="db-block-title">4. Findings</h3>
+    <div id="dbFindingsBody"></div>
+
+    <div class="db-preview-note">
+      현재 버전은 DB 화면 및 저장 구조 확인용입니다. 실제 서버 DB Save / Edit / Delete 연결은 DB 서비스와 테이블을 확정한 뒤 연결합니다.
+    </div>
+  </div>
 </section>
 
 <section class="card auditors-card">
@@ -4161,6 +4452,211 @@ updateCertificationValue();
 
 applyMaterialGroupRules();
 updateAllDepartmentScores();
+
+
+/* ===== Audit Database UI ===== */
+function dbGetKoreaCurrentYear() {
+  const yearText = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric"
+  }).format(new Date());
+  return Number(yearText);
+}
+
+function dbGetKoreaCurrentVersion() {
+  return `Y${dbGetKoreaCurrentYear()}`;
+}
+
+function dbUpdateVersionMode() {
+  const versionSelect = document.getElementById("checkSheetVersion");
+  if (!versionSelect) return;
+
+  const currentVersion = dbGetKoreaCurrentVersion();
+  const selectedVersion = versionSelect.value;
+  const isCurrentVersion = selectedVersion === currentVersion;
+
+  const currentText = document.getElementById("dbCurrentVersionText");
+  const modeText = document.getElementById("dbVersionModeText");
+  if (currentText) currentText.textContent = currentVersion;
+  if (modeText) {
+    modeText.textContent = isCurrentVersion
+      ? `${selectedVersion}은 현재 운영 Version입니다.`
+      : `${selectedVersion}은 과거/미래 데이터 입력 Version입니다.`;
+  }
+
+  // 기존 Summary / ZQMR0270 / Check Sheet 기능 자체는 수정하지 않고,
+  // 현재 Version이 아닐 때 해당 카드의 표시만 제어한다.
+  ["generateSummaryButton", "exportZQMR0270Button", "exportCheckSheetButton"].forEach(buttonId => {
+    const button = document.getElementById(buttonId);
+    const card = button?.closest(".summary-action-card");
+    if (card) card.style.display = isCurrentVersion ? "" : "none";
+  });
+}
+
+function dbGetSelectedMaterialGroups() {
+  return Array.from(document.querySelectorAll('input[name="materialGroup"]:checked'))
+    .map(input => input.value);
+}
+
+function dbGetTotalScores() {
+  const sections = sreDepartmentOrder.flatMap(departmentKey =>
+    getApplicableSectionsForSreTable(departmentKey)
+  );
+
+  return {
+    selfScore: averageValues(
+      sections.map(section => getSectionSelfScore(section)).filter(Number.isFinite)
+    ),
+    auditScore: averageValues(
+      sections.map(section => getSectionAuditScore(section)).filter(Number.isFinite)
+    )
+  };
+}
+
+function dbBuildAuditDetailRows() {
+  let number = 1;
+  let rows = "";
+
+  sreDepartmentOrder.forEach(departmentKey => {
+    const department = summaryDepartmentMap[departmentKey];
+    const sections = getApplicableSectionsForSreTable(departmentKey);
+    if (!department || sections.length === 0) return;
+
+    sections.forEach((section, index) => {
+      const categoryCell = index === 0
+        ? `<td class="db-category-cell" rowspan="${sections.length}">${escapeHtml(department.name)}</td>`
+        : "";
+
+      rows += `
+        <tr>
+          <td>${number++}</td>
+          <td class="db-left">Section ${escapeHtml(section.sectionNumber)} ${escapeHtml(section.title || "")}</td>
+          ${categoryCell}
+          <td>${formatScore(getSectionSelfScore(section), 1)}</td>
+          <td>${formatScore(getSectionAuditScore(section), 1)}</td>
+        </tr>`;
+    });
+  });
+
+  return rows;
+}
+
+function dbRenderHistoryPreview() {
+  const companyName = document.getElementById("companyName")?.value.trim() || "-";
+  const materialGroups = dbGetSelectedMaterialGroups();
+  const auditDate = document.getElementById("auditDate")?.value || "-";
+  const checkSheetVersion = document.getElementById("checkSheetVersion")?.value || "-";
+  const totalScores = dbGetTotalScores();
+
+  const supplierBody = document.getElementById("dbSupplierBody");
+  if (supplierBody) {
+    supplierBody.innerHTML = `
+      <tr>
+        <td class="db-left">${escapeHtml(companyName)}</td>
+        <td class="db-left">${escapeHtml(materialGroups.length ? materialGroups.join(", ") : "-")}</td>
+      </tr>`;
+  }
+
+  const recordBody = document.getElementById("dbAuditRecordBody");
+  if (recordBody) {
+    recordBody.innerHTML = `
+      <tr class="db-record-row selected">
+        <td><input id="dbRecordSelector" type="checkbox" checked aria-label="Audit Record 선택"></td>
+        <td>${escapeHtml(auditDate)}</td>
+        <td>${escapeHtml(checkSheetVersion)}</td>
+        <td>${formatScore(totalScores.selfScore, 1)}</td>
+        <td>${formatScore(totalScores.auditScore, 1)}</td>
+      </tr>`;
+  }
+
+  const detailBody = document.getElementById("dbAuditDetailBody");
+  if (detailBody) {
+    detailBody.innerHTML = dbBuildAuditDetailRows()
+      || '<tr><td colspan="5">표시할 적용 Section이 없습니다.</td></tr>';
+  }
+
+  const findingsBody = document.getElementById("dbFindingsBody");
+  if (findingsBody) {
+    const { findings, gapCounts } = collectSummaryFindings();
+
+    findingsBody.innerHTML = `
+      <div class="db-findings-counts">
+        <div class="db-findings-count"><span>Major Gap</span><strong>${gapCounts["Major Gap"] || 0}</strong></div>
+        <div class="db-findings-count"><span>Minor Gap</span><strong>${gapCounts["Minor Gap"] || 0}</strong></div>
+        <div class="db-findings-count"><span>Opportunity</span><strong>${gapCounts["Opportunity"] || 0}</strong></div>
+        <div class="db-findings-count"><span>-</span><strong>${gapCounts["-"] || 0}</strong></div>
+      </div>
+      ${findings.length ? `
+        <div class="db-table-wrap">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Category</th>
+                <th>Section</th>
+                <th>Gap</th>
+                <th>Evaluation Contents</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${findings.map((finding, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${escapeHtml(finding.category)}</td>
+                  <td class="db-left">${escapeHtml(finding.section)}</td>
+                  <td>${escapeHtml(finding.gap)}</td>
+                  <td class="db-left">${escapeHtml(finding.evaluationContents)}</td>
+                  <td class="db-left">${escapeHtml(finding.description)}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`
+        : '<div class="db-empty">현재 입력값 기준 Findings가 없습니다.</div>'}`;
+  }
+
+  const deleteButton = document.getElementById("dbDeleteButton");
+  if (deleteButton) deleteButton.disabled = false;
+}
+
+function dbToggleHistory() {
+  const panel = document.getElementById("dbHistoryPanel");
+  if (!panel) return;
+
+  panel.classList.toggle("visible");
+  if (panel.classList.contains("visible")) {
+    dbRenderHistoryPreview();
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function dbShowConnectionNotice(action) {
+  alert(`${action} 기능의 화면 구조까지 반영했습니다.\n실제 DB 저장/수정/삭제는 DB 연결 단계에서 활성화합니다.`);
+}
+
+const dbVersionSelect = document.getElementById("checkSheetVersion");
+if (dbVersionSelect) {
+  const currentVersion = dbGetKoreaCurrentVersion();
+  const currentOptionExists = Array.from(dbVersionSelect.options)
+    .some(option => option.value === currentVersion);
+
+  if (currentOptionExists) dbVersionSelect.value = currentVersion;
+
+  dbVersionSelect.addEventListener("change", () => {
+    dbUpdateVersionMode();
+    if (document.getElementById("dbHistoryPanel")?.classList.contains("visible")) {
+      dbRenderHistoryPreview();
+    }
+  });
+}
+
+document.getElementById("dbHistoryButton")?.addEventListener("click", dbToggleHistory);
+document.getElementById("dbSaveButton")?.addEventListener("click", () => dbShowConnectionNotice("Save"));
+document.getElementById("dbEditButton")?.addEventListener("click", () => dbShowConnectionNotice("Edit"));
+document.getElementById("dbDeleteButton")?.addEventListener("click", () => dbShowConnectionNotice("Delete"));
+
+dbUpdateVersionMode();
+
 </script>
 </body>
 </html>
