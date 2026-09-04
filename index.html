@@ -1460,6 +1460,16 @@ flex-direction: column;
   display: block;
 }
 
+.db-stage-section {
+  display: none;
+}
+.db-stage-section.visible {
+  display: block;
+}
+.db-selection-action-hidden {
+  display: none !important;
+}
+
 .db-block-title {
   margin: 24px 0 10px;
   color: var(--text);
@@ -1859,7 +1869,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 
   <div class="db-action-row">
     <button id="dbSaveButton" class="db-action-button db-save-button" type="button">Save</button>
-    <button id="dbEditButton" class="db-action-button db-edit-button" type="button">Edit</button>
+    <button id="dbEditButton" class="db-action-button db-edit-button db-selection-action-hidden" type="button">Edit</button>
     <button id="dbHistoryButton" class="db-action-button db-history-button" type="button">Audit History</button>
   </div>
 
@@ -1882,46 +1892,37 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
       </table>
     </div>
 
-    <h3 class="db-block-title">2. Audit Record</h3>
-    <div class="db-table-wrap">
-      <table class="db-table">
-        <thead>
-          <tr>
-            <th class="db-select-col">선택</th>
-            <th>Audit Date</th>
-            <th>Check Sheet Ver</th>
-            <th>Self-Audit Score</th>
-            <th>PSK Audit Score</th>
-          </tr>
-        </thead>
-        <tbody id="dbAuditRecordBody"></tbody>
-      </table>
-    </div>
-    <div class="db-action-row" style="margin-top:10px;">
-      <button id="dbDeleteButton" class="db-action-button db-delete-button" type="button" disabled>Delete</button>
-    </div>
-
-    <h3 class="db-block-title">3. Audit Detail</h3>
-    <div class="db-table-wrap">
-      <table class="db-table">
-        <thead>
-          <tr>
-            <th style="width:65px;">No</th>
-            <th>Section</th>
-            <th>Category</th>
-            <th>Self-Audit Score</th>
-            <th>PSK Audit Score</th>
-          </tr>
-        </thead>
-        <tbody id="dbAuditDetailBody"></tbody>
-      </table>
+    <div id="dbAuditRecordSection" class="db-stage-section">
+      <h3 class="db-block-title">2. Audit Record</h3>
+      <div class="db-table-wrap">
+        <table class="db-table">
+          <thead>
+            <tr>
+              <th class="db-select-col">선택</th>
+              <th>Audit Date</th>
+              <th>Check Sheet Ver</th>
+              <th>Self-Audit Score</th>
+              <th>PSK Audit Score</th>
+            </tr>
+          </thead>
+          <tbody id="dbAuditRecordBody"></tbody>
+        </table>
+      </div>
+      <div class="db-action-row" style="margin-top:10px;">
+        <button id="dbDeleteButton" class="db-action-button db-delete-button db-selection-action-hidden" type="button" disabled>Delete</button>
+      </div>
     </div>
 
-    <h3 class="db-block-title">4. Findings</h3>
-    <div id="dbFindingsBody"></div>
+    <div id="dbAuditResultSection" class="db-stage-section">
+      <h3 class="db-block-title">3. Audit Detail</h3>
+      <div id="dbAuditDetailSummaryContainer"></div>
+
+      <h3 class="db-block-title">4. Findings</h3>
+      <div id="dbFindingsBody"></div>
+    </div>
 
     <div class="db-preview-note">
-      현재 버전은 DB 화면 및 저장 구조 확인용입니다. 실제 서버 DB Save / Edit / Delete 연결은 DB 서비스와 테이블을 확정한 뒤 연결합니다.
+      Audit History는 Supabase에 저장된 심사 이력을 기준으로 표시합니다.
     </div>
   </div>
 </section>
@@ -4884,24 +4885,37 @@ function dbRenderHistorySearchInfo(count, term) {
   }
 }
 
+function dbHistorySetStageVisibility(showRecord = false, showResult = false) {
+  const recordSection = document.getElementById("dbAuditRecordSection");
+  const resultSection = document.getElementById("dbAuditResultSection");
+  const editButton = document.getElementById("dbEditButton");
+  const deleteButton = document.getElementById("dbDeleteButton");
+
+  recordSection?.classList.toggle("visible", showRecord);
+  resultSection?.classList.toggle("visible", showResult);
+  editButton?.classList.toggle("db-selection-action-hidden", !showResult);
+  deleteButton?.classList.toggle("db-selection-action-hidden", !showResult);
+  if (deleteButton) deleteButton.disabled = !showResult;
+}
+
 function dbHistorySetLoading(message = "불러오는 중...") {
   const supplierBody = document.getElementById("dbSupplierBody");
   const recordBody = document.getElementById("dbAuditRecordBody");
-  const detailBody = document.getElementById("dbAuditDetailBody");
+  const detailContainer = document.getElementById("dbAuditDetailSummaryContainer");
   const findingsBody = document.getElementById("dbFindingsBody");
   if (supplierBody) supplierBody.innerHTML = `<tr><td colspan="2">${escapeHtml(message)}</td></tr>`;
   if (recordBody) recordBody.innerHTML = '<tr><td colspan="5">-</td></tr>';
-  if (detailBody) detailBody.innerHTML = '<tr><td colspan="5">-</td></tr>';
+  if (detailContainer) detailContainer.innerHTML = '<div class="db-empty">-</div>';
   if (findingsBody) findingsBody.innerHTML = '<div class="db-empty">-</div>';
+  dbHistorySetStageVisibility(false, false);
 }
 
 function dbHistoryRenderEmptyDetail(message = "Audit Record를 선택해 주세요.") {
-  const detailBody = document.getElementById("dbAuditDetailBody");
+  const detailContainer = document.getElementById("dbAuditDetailSummaryContainer");
   const findingsBody = document.getElementById("dbFindingsBody");
-  if (detailBody) detailBody.innerHTML = `<tr><td colspan="5">${escapeHtml(message)}</td></tr>`;
+  if (detailContainer) detailContainer.innerHTML = `<div class="db-empty">${escapeHtml(message)}</div>`;
   if (findingsBody) findingsBody.innerHTML = `<div class="db-empty">${escapeHtml(message)}</div>`;
-  const deleteButton = document.getElementById("dbDeleteButton");
-  if (deleteButton) deleteButton.disabled = true;
+  dbHistorySetStageVisibility(Boolean(dbHistorySelectedBpId), false);
 }
 
 async function dbLoadAuditHistory() {
@@ -4910,44 +4924,41 @@ async function dbLoadAuditHistory() {
     return;
   }
 
-  dbHistorySetLoading();
+  const searchTerm = dbGetHistorySearchTerm();
+  const supplierBody = document.getElementById("dbSupplierBody");
+
+  dbHistorySelectedBpId = null;
+  dbHistorySelectedAuditId = null;
+  dbHistorySetStageVisibility(false, false);
+
+  if (!searchTerm) {
+    if (supplierBody) supplierBody.innerHTML = '<tr><td colspan="2">회사명을 검색해 주세요.</td></tr>';
+    const info = document.getElementById("dbBpSearchInfo");
+    if (info) info.textContent = "회사명을 입력하면 저장된 BP사를 검색합니다.";
+    return;
+  }
+
+  if (supplierBody) supplierBody.innerHTML = '<tr><td colspan="2">검색 중...</td></tr>';
+
   try {
-    const searchTerm = dbGetHistorySearchTerm();
-    let query = sreSupabase
+    const { data: bpRows, error } = await sreSupabase
       .from("BP")
       .select("bp_id, company_name, material_group")
+      .ilike("company_name", `%${searchTerm}%`)
       .order("company_name", { ascending: true });
 
-    if (searchTerm) {
-      query = query.ilike("company_name", `%${searchTerm}%`);
-    }
-
-    const { data: bpRows, error } = await query;
     if (error) throw error;
-
-    const supplierBody = document.getElementById("dbSupplierBody");
     dbRenderHistorySearchInfo(bpRows?.length || 0, searchTerm);
 
     if (!bpRows?.length) {
-      if (supplierBody) supplierBody.innerHTML = `<tr><td colspan="2">${searchTerm ? "검색 결과가 없습니다." : "저장된 BP사가 없습니다."}</td></tr>`;
-      const recordBody = document.getElementById("dbAuditRecordBody");
-      if (recordBody) recordBody.innerHTML = '<tr><td colspan="5">저장된 Audit Record가 없습니다.</td></tr>';
-      dbHistorySelectedBpId = null;
-      dbHistorySelectedAuditId = null;
-      dbHistoryRenderEmptyDetail(searchTerm ? "검색된 BP사가 없습니다." : "저장된 심사 이력이 없습니다.");
+      if (supplierBody) supplierBody.innerHTML = '<tr><td colspan="2">검색 결과가 없습니다.</td></tr>';
       return;
-    }
-
-    if (!bpRows.some(row => Number(row.bp_id) === Number(dbHistorySelectedBpId))) {
-      dbHistorySelectedBpId = bpRows[0].bp_id;
-      dbHistorySelectedAuditId = null;
     }
 
     if (supplierBody) {
       supplierBody.innerHTML = bpRows.map(row => {
-        const selected = Number(row.bp_id) === Number(dbHistorySelectedBpId);
         const groups = Array.isArray(row.material_group) ? row.material_group.join(", ") : (row.material_group || "-");
-        return `<tr class="db-record-row${selected ? " selected" : ""}" data-bp-id="${row.bp_id}" style="cursor:pointer;">
+        return `<tr class="db-record-row" data-bp-id="${row.bp_id}" style="cursor:pointer;">
           <td class="db-left">${escapeHtml(row.company_name || "-")}</td>
           <td class="db-left">${escapeHtml(groups)}</td>
         </tr>`;
@@ -4958,12 +4969,11 @@ async function dbLoadAuditHistory() {
           dbHistorySelectedBpId = Number(row.dataset.bpId);
           dbHistorySelectedAuditId = null;
           supplierBody.querySelectorAll("tr[data-bp-id]").forEach(item => item.classList.toggle("selected", item === row));
+          dbHistorySetStageVisibility(true, false);
           await dbLoadAuditRecordsForBp(dbHistorySelectedBpId);
         });
       });
     }
-
-    await dbLoadAuditRecordsForBp(dbHistorySelectedBpId);
   } catch (error) {
     console.error("Audit History load error:", error);
     alert(`Audit History 조회 중 오류가 발생했습니다.\n${error?.message || error}`);
@@ -4972,6 +4982,8 @@ async function dbLoadAuditHistory() {
 
 async function dbLoadAuditRecordsForBp(bpId) {
   const recordBody = document.getElementById("dbAuditRecordBody");
+  dbHistorySetStageVisibility(true, false);
+
   const { data: records, error } = await sreSupabase
     .from("Audit_record")
     .select("audit_id, audit_date, check_sheet_version, self_audit_score, psk_audit_score")
@@ -4987,9 +4999,8 @@ async function dbLoadAuditRecordsForBp(bpId) {
     return;
   }
 
-  if (!records.some(row => Number(row.audit_id) === Number(dbHistorySelectedAuditId))) {
-    dbHistorySelectedAuditId = records[0].audit_id;
-  }
+  const keepSelected = records.some(row => Number(row.audit_id) === Number(dbHistorySelectedAuditId));
+  if (!keepSelected) dbHistorySelectedAuditId = null;
 
   if (recordBody) {
     recordBody.innerHTML = records.map(row => {
@@ -5003,27 +5014,36 @@ async function dbLoadAuditRecordsForBp(bpId) {
       </tr>`;
     }).join("");
 
+    const selectAudit = async row => {
+      dbHistorySelectedAuditId = Number(row.dataset.auditId);
+      recordBody.querySelectorAll("tr[data-audit-id]").forEach(item => item.classList.toggle("selected", item === row));
+      recordBody.querySelectorAll('.db-audit-selector').forEach(input => input.checked = Number(input.value) === dbHistorySelectedAuditId);
+      dbHistorySetStageVisibility(true, true);
+      await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+    };
+
     recordBody.querySelectorAll("tr[data-audit-id]").forEach(row => {
       row.addEventListener("click", async event => {
-        if (event.target.matches('input[type="radio"]')) event.stopPropagation();
-        dbHistorySelectedAuditId = Number(row.dataset.auditId);
-        recordBody.querySelectorAll("tr[data-audit-id]").forEach(item => item.classList.toggle("selected", item === row));
-        recordBody.querySelectorAll('.db-audit-selector').forEach(input => input.checked = Number(input.value) === dbHistorySelectedAuditId);
-        await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+        if (event.target.matches('input[type="radio"]')) return;
+        await selectAudit(row);
       });
       row.querySelector('.db-audit-selector')?.addEventListener("change", async () => {
-        dbHistorySelectedAuditId = Number(row.dataset.auditId);
-        recordBody.querySelectorAll("tr[data-audit-id]").forEach(item => item.classList.toggle("selected", item === row));
-        await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+        await selectAudit(row);
       });
     });
   }
 
-  await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+  if (dbHistorySelectedAuditId) {
+    dbHistorySetStageVisibility(true, true);
+    await dbLoadAuditDetailAndFindings(dbHistorySelectedAuditId);
+  } else {
+    dbHistoryRenderEmptyDetail("Audit Record를 선택해 주세요.");
+  }
 }
 
 async function dbLoadAuditDetailAndFindings(auditId) {
-  const detailBody = document.getElementById("dbAuditDetailBody");
+  dbHistorySetStageVisibility(true, true);
+  const detailContainer = document.getElementById("dbAuditDetailSummaryContainer");
   const findingsBody = document.getElementById("dbFindingsBody");
 
   const [detailResult, findingsResult] = await Promise.all([
@@ -5034,15 +5054,91 @@ async function dbLoadAuditDetailAndFindings(auditId) {
   if (findingsResult.error) throw findingsResult.error;
 
   const details = detailResult.data || [];
-  if (detailBody) {
-    detailBody.innerHTML = details.length ? details.map((row, index) => `
-      <tr>
-        <td>${index + 1}</td>
-        <td class="db-left">Section ${escapeHtml(row.section_number ?? "")} ${escapeHtml(row.section_name || "")}</td>
-        <td>${escapeHtml(row.category || "-")}</td>
-        <td>${formatScore(Number(row.self_audit_score), 1)}</td>
-        <td>${formatScore(Number(row.psk_audit_score), 1)}</td>
-      </tr>`).join("") : '<tr><td colspan="5">저장된 Audit Detail이 없습니다.</td></tr>';
+  if (detailContainer) {
+    if (!details.length) {
+      detailContainer.innerHTML = '<div class="db-empty">저장된 Audit Detail이 없습니다.</div>';
+    } else {
+      const categoryOrder = [];
+      const grouped = new Map();
+
+      details.forEach(row => {
+        const category = row.category || "-";
+        if (!grouped.has(category)) {
+          grouped.set(category, []);
+          categoryOrder.push(category);
+        }
+        grouped.get(category).push(row);
+      });
+
+      const findSectionDefinition = row => {
+        const sameNumber = auditSections.filter(section => Number(section.sectionNumber) === Number(row.section_number));
+        if (!sameNumber.length) return null;
+        const exactTitle = sameNumber.find(section => String(section.title || "").trim() === String(row.section_name || "").trim());
+        return exactTitle || sameNumber[0];
+      };
+
+      const bodyRows = categoryOrder.map(category => {
+        const rows = grouped.get(category) || [];
+        const selfAverage = averageValues(rows.map(row => Number(row.self_audit_score)).filter(Number.isFinite));
+        const auditAverage = averageValues(rows.map(row => Number(row.psk_audit_score)).filter(Number.isFinite));
+
+        return rows.map((row, index) => {
+          const section = findSectionDefinition(row);
+          const method = section ? getSectionMethodLabel(section) : ([14, 27, 28].includes(Number(row.section_number)) ? "Average" : "Level");
+          const material = section ? getSectionMaterialLabel(section) : "-";
+          const categoryCell = index === 0
+            ? `<td class="sre-category" rowspan="${rows.length}">${escapeHtml(category)}</td>`
+            : "";
+          const selfAverageCell = index === 0
+            ? `<td class="sre-dept-average" rowspan="${rows.length}">${formatScore(selfAverage, 1)}</td>`
+            : "";
+          const auditAverageCell = index === 0
+            ? `<td class="sre-dept-average" rowspan="${rows.length}">${formatScore(auditAverage, 1)}</td>`
+            : "";
+
+          return `
+            <tr>
+              ${categoryCell}
+              <td class="sre-section-no">${escapeHtml(row.section_number ?? "")} (${escapeHtml(method)})</td>
+              <td class="sre-material">${escapeHtml(material)}</td>
+              <td class="sre-section-title">${escapeHtml(row.section_name || "")}</td>
+              <td class="sre-score">${formatScore(Number(row.self_audit_score), 1)}</td>
+              <td class="sre-score">${formatScore(Number(row.psk_audit_score), 1)}</td>
+              ${selfAverageCell}
+              ${auditAverageCell}
+            </tr>`;
+        }).join("");
+      }).join("");
+
+      const totalSelfAverage = averageValues(details.map(row => Number(row.self_audit_score)).filter(Number.isFinite));
+      const totalAuditAverage = averageValues(details.map(row => Number(row.psk_audit_score)).filter(Number.isFinite));
+
+      detailContainer.innerHTML = `
+        <div class="sre-table-wrap">
+          <table class="sre-result-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Section No.</th>
+                <th>Material Group</th>
+                <th>Section</th>
+                <th class="sre-self-head">Self-Audit<br>Score</th>
+                <th>PSK-Audit<br>Score</th>
+                <th class="sre-self-head">Self-Audit<br>Average</th>
+                <th>PSK-Audit<br>Average</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${bodyRows}
+              <tr>
+                <td class="sre-total-label" colspan="6">Total</td>
+                <td class="sre-total-score">${formatScore(totalSelfAverage, 1)}</td>
+                <td class="sre-total-score">${formatScore(totalAuditAverage, 1)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>`;
+    }
   }
 
   const findings = findingsResult.data || [];
@@ -5777,6 +5873,7 @@ document.getElementById("dbSaveButton")?.addEventListener("click", dbSaveAuditTo
 document.getElementById("dbEditButton")?.addEventListener("click", dbEditSelectedAudit);
 document.getElementById("dbDeleteButton")?.addEventListener("click", dbDeleteSelectedAudit);
 
+dbHistorySetStageVisibility(false, false);
 dbUpdateVersionMode();
 
 </script>
