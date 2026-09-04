@@ -1409,6 +1409,49 @@ flex-direction: column;
   cursor: not-allowed;
 }
 
+.db-history-search-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 12px 0 10px;
+}
+
+.db-history-search-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 11px 13px;
+  border: 1px solid #cfd7e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.db-history-search-input:focus {
+  outline: 2px solid #9fbbd5;
+  outline-offset: 1px;
+}
+
+.db-history-search-clear {
+  min-width: 86px;
+  padding: 10px 14px;
+  border: 1px solid #cfd7e1;
+  border-radius: 8px;
+  background: #f3f5f8;
+  color: #263445;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.db-history-search-clear:hover {
+  background: #e6ebf1;
+}
+
+.db-history-search-info {
+  margin: -2px 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .db-history-panel {
   display: none;
   margin-top: 24px;
@@ -1822,6 +1865,11 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 
   <div id="dbHistoryPanel" class="db-history-panel">
     <h3 class="db-block-title">1. Supplier</h3>
+    <div class="db-history-search-row">
+      <input id="dbBpSearchInput" class="db-history-search-input" type="search" placeholder="회사명 검색 (일부 이름 입력 가능)" autocomplete="off">
+      <button id="dbBpSearchClearButton" class="db-history-search-clear" type="button">초기화</button>
+    </div>
+    <div id="dbBpSearchInfo" class="db-history-search-info">회사명을 입력하면 저장된 BP사를 검색합니다.</div>
     <div class="db-table-wrap">
       <table class="db-table">
         <thead>
@@ -4820,6 +4868,21 @@ function dbBuildAuditDetailRows() {
 
 let dbHistorySelectedBpId = null;
 let dbHistorySelectedAuditId = null;
+let dbHistorySearchTimer = null;
+
+function dbGetHistorySearchTerm() {
+  return (document.getElementById("dbBpSearchInput")?.value || "").trim();
+}
+
+function dbRenderHistorySearchInfo(count, term) {
+  const info = document.getElementById("dbBpSearchInfo");
+  if (!info) return;
+  if (term) {
+    info.textContent = `“${term}” 검색 결과: ${count}개 BP사`;
+  } else {
+    info.textContent = `저장된 BP사: ${count}개`;
+  }
+}
 
 function dbHistorySetLoading(message = "불러오는 중...") {
   const supplierBody = document.getElementById("dbSupplierBody");
@@ -4849,23 +4912,35 @@ async function dbLoadAuditHistory() {
 
   dbHistorySetLoading();
   try {
-    const { data: bpRows, error } = await sreSupabase
+    const searchTerm = dbGetHistorySearchTerm();
+    let query = sreSupabase
       .from("BP")
       .select("bp_id, company_name, material_group")
       .order("company_name", { ascending: true });
+
+    if (searchTerm) {
+      query = query.ilike("company_name", `%${searchTerm}%`);
+    }
+
+    const { data: bpRows, error } = await query;
     if (error) throw error;
 
     const supplierBody = document.getElementById("dbSupplierBody");
+    dbRenderHistorySearchInfo(bpRows?.length || 0, searchTerm);
+
     if (!bpRows?.length) {
-      if (supplierBody) supplierBody.innerHTML = '<tr><td colspan="2">저장된 BP사가 없습니다.</td></tr>';
+      if (supplierBody) supplierBody.innerHTML = `<tr><td colspan="2">${searchTerm ? "검색 결과가 없습니다." : "저장된 BP사가 없습니다."}</td></tr>`;
       const recordBody = document.getElementById("dbAuditRecordBody");
       if (recordBody) recordBody.innerHTML = '<tr><td colspan="5">저장된 Audit Record가 없습니다.</td></tr>';
-      dbHistoryRenderEmptyDetail("저장된 심사 이력이 없습니다.");
+      dbHistorySelectedBpId = null;
+      dbHistorySelectedAuditId = null;
+      dbHistoryRenderEmptyDetail(searchTerm ? "검색된 BP사가 없습니다." : "저장된 심사 이력이 없습니다.");
       return;
     }
 
     if (!bpRows.some(row => Number(row.bp_id) === Number(dbHistorySelectedBpId))) {
       dbHistorySelectedBpId = bpRows[0].bp_id;
+      dbHistorySelectedAuditId = null;
     }
 
     if (supplierBody) {
@@ -4882,7 +4957,8 @@ async function dbLoadAuditHistory() {
         row.addEventListener("click", async () => {
           dbHistorySelectedBpId = Number(row.dataset.bpId);
           dbHistorySelectedAuditId = null;
-          await dbLoadAuditHistory();
+          supplierBody.querySelectorAll("tr[data-bp-id]").forEach(item => item.classList.toggle("selected", item === row));
+          await dbLoadAuditRecordsForBp(dbHistorySelectedBpId);
         });
       });
     }
@@ -5666,6 +5742,35 @@ if (dbVersionSelect) {
     }
   });
 }
+
+document.getElementById("dbBpSearchInput")?.addEventListener("input", () => {
+  clearTimeout(dbHistorySearchTimer);
+  dbHistorySearchTimer = setTimeout(() => {
+    dbHistorySelectedBpId = null;
+    dbHistorySelectedAuditId = null;
+    dbLoadAuditHistory();
+  }, 300);
+});
+
+document.getElementById("dbBpSearchInput")?.addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    clearTimeout(dbHistorySearchTimer);
+    dbHistorySelectedBpId = null;
+    dbHistorySelectedAuditId = null;
+    dbLoadAuditHistory();
+  }
+});
+
+document.getElementById("dbBpSearchClearButton")?.addEventListener("click", () => {
+  const input = document.getElementById("dbBpSearchInput");
+  if (input) input.value = "";
+  clearTimeout(dbHistorySearchTimer);
+  dbHistorySelectedBpId = null;
+  dbHistorySelectedAuditId = null;
+  dbLoadAuditHistory();
+  input?.focus();
+});
 
 document.getElementById("dbHistoryButton")?.addEventListener("click", dbToggleHistory);
 document.getElementById("dbSaveButton")?.addEventListener("click", dbSaveAuditToSupabase);
