@@ -5572,6 +5572,81 @@ async function dbSaveAuditToSupabase() {
   }
 }
 
+async function dbDeleteSelectedAudit() {
+  if (!sreSupabase) {
+    alert("Supabase 연결 모듈을 불러오지 못했습니다.");
+    return;
+  }
+
+  const auditId = Number(dbHistorySelectedAuditId);
+  const bpId = Number(dbHistorySelectedBpId);
+  if (!Number.isFinite(auditId) || !Number.isFinite(bpId)) {
+    alert("삭제할 Audit Record를 먼저 선택해 주세요.");
+    return;
+  }
+
+  try {
+    const { count, error: countError } = await sreSupabase
+      .from("Audit_record")
+      .select("audit_id", { count: "exact", head: true })
+      .eq("bp_id", bpId);
+    if (countError) throw countError;
+
+    const isLastAudit = Number(count) === 1;
+    const confirmMessage = isLastAudit
+      ? "이 BP사의 마지막 Audit Record입니다.\n\n삭제하면 선택한 Audit Record와 연결된 Audit Detail / Findings뿐 아니라 BP 정보도 함께 삭제됩니다.\n\n정말 삭제하시겠습니까?"
+      : "선택한 Audit Record를 삭제하시겠습니까?\n\n연결된 Audit Detail / Findings도 함께 삭제됩니다.";
+
+    if (!window.confirm(confirmMessage)) return;
+
+    const deleteButton = document.getElementById("dbDeleteButton");
+    if (deleteButton) {
+      deleteButton.disabled = true;
+      deleteButton.textContent = "Deleting...";
+    }
+
+    const { error: auditDeleteError } = await sreSupabase
+      .from("Audit_record")
+      .delete()
+      .eq("audit_id", auditId)
+      .eq("bp_id", bpId);
+    if (auditDeleteError) throw auditDeleteError;
+
+    if (isLastAudit) {
+      const { count: remainingCount, error: remainingError } = await sreSupabase
+        .from("Audit_record")
+        .select("audit_id", { count: "exact", head: true })
+        .eq("bp_id", bpId);
+      if (remainingError) throw remainingError;
+
+      if (Number(remainingCount) === 0) {
+        const { error: bpDeleteError } = await sreSupabase
+          .from("BP")
+          .delete()
+          .eq("bp_id", bpId);
+        if (bpDeleteError) throw bpDeleteError;
+      }
+    }
+
+    if (Number(dbEditingAuditId) === auditId) dbSetEditMode(null, null);
+    dbHistorySelectedAuditId = null;
+    if (isLastAudit) dbHistorySelectedBpId = null;
+
+    alert(isLastAudit
+      ? "삭제 완료!\n마지막 심사이력이 삭제되어 BP 정보도 함께 삭제되었습니다."
+      : "삭제 완료!\n선택한 Audit Record가 삭제되었습니다.");
+
+    await dbLoadAuditHistory();
+  } catch (error) {
+    console.error("Supabase Audit Delete error:", error);
+    alert(`DB 삭제 중 오류가 발생했습니다.\n${error?.message || error}`);
+    try { await dbLoadAuditHistory(); } catch (_) {}
+  } finally {
+    const deleteButton = document.getElementById("dbDeleteButton");
+    if (deleteButton) deleteButton.textContent = "Delete";
+  }
+}
+
 function dbShowConnectionNotice(action) {
   alert(`${action} 기능의 화면 구조까지 반영했습니다.\n실제 DB 저장/수정/삭제는 DB 연결 단계에서 활성화합니다.`);
 }
@@ -5595,7 +5670,7 @@ if (dbVersionSelect) {
 document.getElementById("dbHistoryButton")?.addEventListener("click", dbToggleHistory);
 document.getElementById("dbSaveButton")?.addEventListener("click", dbSaveAuditToSupabase);
 document.getElementById("dbEditButton")?.addEventListener("click", dbEditSelectedAudit);
-document.getElementById("dbDeleteButton")?.addEventListener("click", () => dbShowConnectionNotice("Delete"));
+document.getElementById("dbDeleteButton")?.addEventListener("click", dbDeleteSelectedAudit);
 
 dbUpdateVersionMode();
 
