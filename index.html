@@ -5147,18 +5147,61 @@ async function dbLoadAuditDetailAndFindings(auditId) {
 
   if (findingsBody) {
     findingsBody.innerHTML = `
-      <div class="db-findings-counts">
-        <div class="db-findings-count"><span>Major Gap</span><strong>${gapCounts["Major Gap"]}</strong></div>
-        <div class="db-findings-count"><span>Minor Gap</span><strong>${gapCounts["Minor Gap"]}</strong></div>
-        <div class="db-findings-count"><span>Opportunity</span><strong>${gapCounts["Opportunity"]}</strong></div>
-        <div class="db-findings-count"><span>-</span><strong>${gapCounts["-"]}</strong></div>
+      <h3 class="summary-subtitle">Recommendation &amp; Nonconformity Summary</h3>
+      <div class="summary-overview">
+        <div class="summary-count-card major">
+          <span>Major Gap</span>
+          <strong>${gapCounts["Major Gap"]}</strong>
+        </div>
+        <div class="summary-count-card minor">
+          <span>Minor Gap</span>
+          <strong>${gapCounts["Minor Gap"]}</strong>
+        </div>
+        <div class="summary-count-card opportunity">
+          <span>Opportunity</span>
+          <strong>${gapCounts["Opportunity"]}</strong>
+        </div>
+        <div class="summary-count-card recommendation">
+          <span>-</span>
+          <strong>${gapCounts["-"]}</strong>
+        </div>
       </div>
-      ${findings.length ? `<div class="db-table-wrap"><table class="db-table"><thead><tr>
-        <th>No</th><th>Category</th><th>Section</th><th>Gap</th><th>Evaluation Contents</th><th>Description</th>
-      </tr></thead><tbody>${findings.map((item, index) => `<tr>
-        <td>${index + 1}</td><td>${escapeHtml(item.category || "-")}</td><td class="db-left">${escapeHtml(item.section || "-")}</td>
-        <td>${escapeHtml(item.gap || "-")}</td><td class="db-left">${escapeHtml(item.evaluation_contents || "")}</td><td class="db-left">${escapeHtml(item.description || "")}</td>
-      </tr>`).join("")}</tbody></table></div>` : '<div class="db-empty">선택한 Audit Record의 Findings가 없습니다.</div>'}`;
+      ${findings.length ? `
+        <div class="summary-table-wrap">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Category</th>
+                <th>Section</th>
+                <th>Gap</th>
+                <th>Auditor</th>
+                <th>Issue Date</th>
+                <th>Evaluation Contents</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${findings.map((item, index) => `
+                <tr>
+                  <td class="summary-no">${index + 1}</td>
+                  <td class="summary-category">${escapeHtml(item.category || "-")}</td>
+                  <td class="summary-section">${escapeHtml(item.section || "-")}</td>
+                  <td class="summary-gap">${escapeHtml(item.gap || "-")}</td>
+                  <td class="summary-auditor">${escapeHtml(item.auditor || "")}</td>
+                  <td class="summary-date">${escapeHtml(item.issue_date || "")}</td>
+                  <td class="summary-evaluation">${escapeHtml(item.evaluation_contents || "")}</td>
+                  <td class="summary-description">${escapeHtml(item.description || "")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div class="summary-empty">
+          현재 기록할 부적합 또는 권고 항목이 없습니다.
+        </div>
+      `}`;
   }
 
   const deleteButton = document.getElementById("dbDeleteButton");
