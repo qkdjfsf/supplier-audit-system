@@ -916,7 +916,7 @@ margin-bottom: 8px;
 }
 .summary-overview {
   display: grid;
-  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
   gap: 12px;
   margin-bottom: 20px;
 }
@@ -1525,7 +1525,7 @@ flex-direction: column;
 
 .db-findings-counts {
   display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -2107,10 +2107,6 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
     <div class="summary-count-card opportunity">
       <span>Opportunity</span>
       <strong id="summaryOpportunityCount">0</strong>
-    </div>
-    <div class="summary-count-card recommendation">
-      <span>-</span>
-      <strong id="summaryRecommendationCount">0</strong>
     </div>
   </div>
 
@@ -3081,7 +3077,7 @@ ${criteria.map(([condition, grade, score]) => `
 </div>
 `;
 }
-function createAverageQuestionRow(section, question, categoryCell = null) {
+function createAverageQuestionRow(section, question, categoryCellHtml = null) {
 const key = safeKey(section.sectionKey);
 const rowKey = `section${key}Average${question.number}`;
 const gradeOptions = [];
@@ -3089,19 +3085,13 @@ question.criteria.forEach(([, grade]) => {
 if (!gradeOptions.includes(grade)) gradeOptions.push(grade);
 });
 const hasCategory = section.questions.some(item => item.category);
-let categoryHtml = "";
-if (hasCategory) {
-  if (categoryCell && categoryCell.show === false) {
-    categoryHtml = "";
-  } else {
-    const rowspan = categoryCell && Number(categoryCell.rowspan) > 1 ? ` rowspan="${categoryCell.rowspan}"` : "";
-    categoryHtml = `<td class="average-category-cell"${rowspan}>${question.category || ""}</td>`;
-  }
-}
+const resolvedCategoryCell = hasCategory
+  ? (categoryCellHtml !== null ? categoryCellHtml : `<td class="average-category-cell">${question.category || ""}</td>`)
+  : "";
 return `
 <tr data-question-number="${question.number}" data-applicable="true">
 <td class="question-cell">${question.number}</td>
-${categoryHtml}
+${resolvedCategoryCell}
 <td class="average-contents-cell"><strong>${question.content}</strong></td>
 <td>${createAverageCriteria(question.criteria)}</td>
 <td class="result-cell">
@@ -3213,26 +3203,28 @@ ${hasAverageCategory ? "<th>Category</th>" : ""}
 <th>PSK Notes / Comments</th>
 </tr>
 `;
-let categoryMergeMap = null;
-if (isAverage && hasAverageCategory && (section.sectionKey === "19" || section.sectionKey === "20")) {
-  categoryMergeMap = new Map();
-  let index = 0;
-  while (index < section.questions.length) {
-    const category = section.questions[index].category || "";
-    let end = index + 1;
-    while (end < section.questions.length && (section.questions[end].category || "") === category) end += 1;
-    categoryMergeMap.set(section.questions[index], { show: true, rowspan: end - index });
-    for (let hiddenIndex = index + 1; hiddenIndex < end; hiddenIndex += 1) {
-      categoryMergeMap.set(section.questions[hiddenIndex], { show: false, rowspan: 0 });
+let rows;
+if (isAverage && hasAverageCategory) {
+  rows = section.questions.map((question, index, questions) => {
+    const category = question.category || "";
+    const previousCategory = index > 0 ? (questions[index - 1].category || "") : null;
+    let categoryCellHtml = "";
+    if (index === 0 || category !== previousCategory) {
+      let rowspan = 1;
+      while (index + rowspan < questions.length && (questions[index + rowspan].category || "") === category) {
+        rowspan += 1;
+      }
+      categoryCellHtml = `<td class="average-category-cell" rowspan="${rowspan}">${category}</td>`;
     }
-    index = end;
-  }
+    return createAverageQuestionRow(section, question, categoryCellHtml);
+  }).join("");
+} else {
+  rows = section.questions.map(question =>
+    isAverage
+      ? createAverageQuestionRow(section, question)
+      : createLevelQuestionRow(section, question)
+  ).join("");
 }
-let rows = section.questions.map(question =>
-isAverage
-? createAverageQuestionRow(section, question, categoryMergeMap ? categoryMergeMap.get(question) : null)
-: createLevelQuestionRow(section, question)
-).join("");
 
 if (section.sectionKey === "24") {
 const marker = section.questions.find(question => question.number === "3.3");
@@ -4041,7 +4033,6 @@ function renderAuditSummary() {
   const majorCountElement = document.getElementById("summaryMajorGapCount");
   const minorCountElement = document.getElementById("summaryMinorGapCount");
   const opportunityCountElement = document.getElementById("summaryOpportunityCount");
-  const recommendationCountElement = document.getElementById("summaryRecommendationCount");
 
   const { findings, gapCounts } = collectSummaryFindings();
 
@@ -4050,8 +4041,8 @@ function renderAuditSummary() {
 
   majorCountElement.textContent = gapCounts["Major Gap"];
   minorCountElement.textContent = gapCounts["Minor Gap"];
-  opportunityCountElement.textContent = gapCounts["Opportunity"];
-  recommendationCountElement.textContent = gapCounts["-"];
+  // 권고(Gap "-")는 표/DB 원본에는 그대로 유지하고, 집계에서만 Opportunity에 포함한다.
+  opportunityCountElement.textContent = (gapCounts["Opportunity"] || 0) + (gapCounts["-"] || 0);
 
   if (findings.length === 0) {
     tableContainer.innerHTML = `
@@ -4772,7 +4763,7 @@ async function srePatchResultSheet(zip, manifest, findingsData) {
   const gapCounts = findingsData.gapCounts;
   sreSetCellString(doc, "H6", `${gapCounts["Major Gap"] || 0}ea`);
   sreSetCellString(doc, "I6", `${gapCounts["Minor Gap"] || 0}ea`);
-  sreSetCellString(doc, "J6", `${gapCounts["Opportunity"] || 0}ea`);
+  sreSetCellString(doc, "J6", `${(gapCounts["Opportunity"] || 0) + (gapCounts["-"] || 0)}ea`);
 
   const environmentSafetyExcluded = isEnvironmentSafetyExcluded();
 
@@ -5034,6 +5025,12 @@ const header = document.getElementById(`section${key}Header`);
 const content = document.getElementById(`section${key}Content`);
 const body = document.getElementById(`section${key}Body`);
 header.addEventListener("click", () => {
+// Environment & Safety가 미반영이면 Section 19/20은 강제로 접힌 상태를 유지한다.
+if ((section.sectionNumber === 19 || section.sectionNumber === 20) && isEnvironmentSafetyExcluded()) {
+  header.classList.remove("open");
+  content.classList.remove("open");
+  return;
+}
 header.classList.toggle("open");
 content.classList.toggle("open");
 });
@@ -5466,11 +5463,7 @@ async function dbLoadAuditDetailAndFindings(auditId) {
         </div>
         <div class="summary-count-card opportunity">
           <span>Opportunity</span>
-          <strong>${gapCounts["Opportunity"]}</strong>
-        </div>
-        <div class="summary-count-card recommendation">
-          <span>-</span>
-          <strong>${gapCounts["-"]}</strong>
+          <strong>${(gapCounts["Opportunity"] || 0) + (gapCounts["-"] || 0)}</strong>
         </div>
       </div>
       ${findings.length ? `
