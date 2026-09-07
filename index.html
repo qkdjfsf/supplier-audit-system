@@ -161,6 +161,68 @@ border: 1px solid var(--border);
 border-radius: 10px;
 background: #fbfcfd;
 }
+
+.audit-type-title {
+display: block;
+color: #3f4d5b;
+font-size: 13px;
+font-weight: bold;
+}
+
+.audit-type-options {
+display: flex;
+gap: 10px;
+min-height: 45px;
+align-items: stretch;
+}
+
+.audit-type-option {
+position: relative;
+flex: 1 1 0;
+}
+
+.audit-type-option input {
+position: absolute;
+opacity: 0;
+pointer-events: none;
+}
+
+.audit-type-option label {
+display: flex;
+height: 100%;
+min-height: 45px;
+align-items: center;
+justify-content: center;
+padding: 11px 14px;
+border: 1px solid var(--border);
+border-radius: 9px;
+color: #45525f;
+background: #fbfcfd;
+cursor: pointer;
+transition: 0.2s;
+}
+
+.audit-type-option label::before {
+width: 16px;
+height: 16px;
+margin-right: 8px;
+border: 1px solid #9aa6b2;
+border-radius: 50%;
+content: "";
+background: var(--white);
+}
+
+.audit-type-option input:checked + label {
+border-color: var(--green);
+color: var(--green);
+background: var(--green-soft);
+font-weight: bold;
+}
+
+.audit-type-option input:checked + label::before {
+border: 5px solid var(--green);
+background: var(--white);
+}
 .material-group-title {
 display: block;
 margin-bottom: 12px;
@@ -1879,6 +1941,19 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 <label for="auditDate">Audit Date</label>
 <input id="auditDate" type="date">
 </div>
+<div class="form-group">
+<span class="audit-type-title">Audit Type</span>
+<div class="audit-type-options" role="radiogroup" aria-label="Audit Type">
+<div class="audit-type-option">
+<input id="auditTypeOnsite" name="auditType" type="radio" value="현장">
+<label for="auditTypeOnsite">현장심사</label>
+</div>
+<div class="audit-type-option">
+<input id="auditTypeDocument" name="auditType" type="radio" value="문서">
+<label for="auditTypeDocument">문서심사</label>
+</div>
+</div>
+</div>
 <div class="form-group full">
 <div class="material-group-box">
 <span class="material-group-title">Material Group</span>
@@ -1963,6 +2038,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
             <tr>
               <th class="db-select-col">선택</th>
               <th>Audit Date</th>
+              <th>Audit Type</th>
               <th>Check Sheet Ver</th>
               <th>Self-Audit Score</th>
               <th>PSK Audit Score</th>
@@ -5352,14 +5428,14 @@ async function dbLoadAuditRecordsForBp(bpId) {
 
   const { data: records, error } = await sreSupabase
     .from("Audit_record")
-    .select("audit_id, audit_date, check_sheet_version, self_audit_score, psk_audit_score")
+    .select("audit_id, audit_date, audit_type, check_sheet_version, self_audit_score, psk_audit_score")
     .eq("bp_id", bpId)
     .order("audit_date", { ascending: false })
     .order("audit_id", { ascending: false });
   if (error) throw error;
 
   if (!records?.length) {
-    if (recordBody) recordBody.innerHTML = '<tr><td colspan="5">이 BP사의 저장된 Audit Record가 없습니다.</td></tr>';
+    if (recordBody) recordBody.innerHTML = '<tr><td colspan="6">이 BP사의 저장된 Audit Record가 없습니다.</td></tr>';
     dbHistorySelectedAuditId = null;
     dbHistoryRenderEmptyDetail("저장된 심사 이력이 없습니다.");
     return;
@@ -5374,6 +5450,7 @@ async function dbLoadAuditRecordsForBp(bpId) {
       return `<tr class="db-record-row${selected ? " selected" : ""}" data-audit-id="${row.audit_id}" style="cursor:pointer;">
         <td><input class="db-audit-selector" type="radio" name="dbAuditRecordSelector" value="${row.audit_id}" ${selected ? "checked" : ""} aria-label="Audit Record 선택"></td>
         <td>${escapeHtml(row.audit_date || "-")}</td>
+        <td>${escapeHtml(row.audit_type || "-")}</td>
         <td>${escapeHtml(row.check_sheet_version || "-")}</td>
         <td>${formatScore(Number(row.self_audit_score), 1)}</td>
         <td>${formatScore(Number(row.psk_audit_score), 1)}</td>
@@ -5687,6 +5764,12 @@ function dbRestoreRawData(rawData) {
     if (element && profile[key] !== undefined && profile[key] !== null) element.value = profile[key];
   });
 
+  if (profile.auditType !== undefined && profile.auditType !== null) {
+    document.querySelectorAll('input[name="auditType"]').forEach(input => {
+      input.checked = input.value === profile.auditType;
+    });
+  }
+
   if (Array.isArray(profile.materialGroups)) {
     document.querySelectorAll('input[name="materialGroup"]').forEach(input => {
       input.checked = profile.materialGroups.includes(input.value);
@@ -5742,7 +5825,7 @@ async function dbEditSelectedAudit() {
   try {
     const { data: record, error } = await sreSupabase
       .from("Audit_record")
-      .select("audit_id, bp_id, raw_data")
+      .select("audit_id, bp_id, audit_type, raw_data")
       .eq("audit_id", dbHistorySelectedAuditId)
       .single();
     if (error) throw error;
@@ -5752,6 +5835,9 @@ async function dbEditSelectedAudit() {
     }
 
     dbRestoreRawData(record.raw_data);
+    document.querySelectorAll('input[name="auditType"]').forEach(input => {
+      input.checked = Boolean(record.audit_type) && input.value === record.audit_type;
+    });
     dbSetEditMode(record.audit_id, record.bp_id);
 
     document.querySelector("main")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -5777,12 +5863,14 @@ async function dbUpdateAuditInSupabase() {
 
   const companyName = document.getElementById("companyName")?.value.trim() || "";
   const auditDate = document.getElementById("auditDate")?.value || "";
+  const auditType = document.querySelector('input[name="auditType"]:checked')?.value || "";
   const checkSheetVersion = document.getElementById("checkSheetVersion")?.value || "";
   const materialGroups = dbGetSelectedMaterialGroups();
   const saveButton = document.getElementById("dbSaveButton");
 
   if (!companyName) { alert("Company Name을 입력해 주세요."); document.getElementById("companyName")?.focus(); return; }
   if (!auditDate) { alert("Audit Date를 입력해 주세요."); document.getElementById("auditDate")?.focus(); return; }
+  if (!auditType) { alert("Audit Type에서 현장심사 또는 문서심사를 선택해 주세요."); document.getElementById("auditTypeOnsite")?.focus(); return; }
   if (!checkSheetVersion) { alert("Check Sheet Version을 선택해 주세요."); return; }
   if (materialGroups.length === 0) { alert("Material Group을 하나 이상 선택해 주세요."); return; }
 
@@ -5819,6 +5907,7 @@ async function dbUpdateAuditInSupabase() {
       .update({
         bp_id: bpId,
         audit_date: auditDate,
+        audit_type: auditType,
         check_sheet_version: checkSheetVersion,
         material_group_snapshot: materialGroups,
         self_audit_score: Number.isFinite(totalScores.selfScore) ? totalScores.selfScore : null,
@@ -5922,6 +6011,7 @@ function dbCaptureRawData() {
       companyName: document.getElementById("companyName")?.value.trim() || "",
       certification: document.getElementById("certification")?.value || "",
       auditDate: document.getElementById("auditDate")?.value || "",
+      auditType: document.querySelector('input[name="auditType"]:checked')?.value || "",
       materialGroups: dbGetSelectedMaterialGroups()
     },
     auditors: {
@@ -6079,6 +6169,7 @@ async function dbSaveAuditToSupabase() {
 
   const companyName = document.getElementById("companyName")?.value.trim() || "";
   const auditDate = document.getElementById("auditDate")?.value || "";
+  const auditType = document.querySelector('input[name="auditType"]:checked')?.value || "";
   const checkSheetVersion = document.getElementById("checkSheetVersion")?.value || "";
   const materialGroups = dbGetSelectedMaterialGroups();
   const saveButton = document.getElementById("dbSaveButton");
@@ -6091,6 +6182,11 @@ async function dbSaveAuditToSupabase() {
   if (!auditDate) {
     alert("Audit Date를 입력해 주세요.");
     document.getElementById("auditDate")?.focus();
+    return;
+  }
+  if (!auditType) {
+    alert("Audit Type에서 현장심사 또는 문서심사를 선택해 주세요.");
+    document.getElementById("auditTypeOnsite")?.focus();
     return;
   }
   if (!checkSheetVersion) {
@@ -6128,6 +6224,7 @@ async function dbSaveAuditToSupabase() {
       .insert({
         bp_id: bpId,
         audit_date: auditDate,
+        audit_type: auditType,
         check_sheet_version: checkSheetVersion,
         material_group_snapshot: materialGroups,
         self_audit_score: Number.isFinite(totalScores.selfScore) ? totalScores.selfScore : null,
