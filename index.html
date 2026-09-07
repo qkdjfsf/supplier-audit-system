@@ -4996,13 +4996,22 @@ function applyEnvironmentSafetyReflectionRules() {
 
 function applyMaterialGroupRules() {
 const selectedGroups = getSelectedMaterialGroups();
+const hasSection17OdmPriority = selectedGroups.includes("ODM") || selectedGroups.includes("M.ODM");
 auditSections.forEach(section => {
 const key = safeKey(section.sectionKey);
 const wrapper = document.getElementById(`section${key}Wrapper`);
-const sectionApplicable = isMaterialApplicable(
+let sectionApplicable = isMaterialApplicable(
 section.materialGroups,
 selectedGroups
 );
+
+// Section 17 우선순위 규칙:
+// ODM 또는 M.ODM이 하나라도 선택되면 "Section 17 - ODM, M.ODM"만 적용하고
+// "Section 17 - OEM"은 화면/점수/DB/Excel Check Sheet에서 모두 제외한다.
+if (section.sectionKey === "17-oem" && hasSection17OdmPriority) {
+  sectionApplicable = false;
+}
+
 wrapper.dataset.applicable = sectionApplicable ? "true" : "false";
 wrapper.style.display = sectionApplicable ? "" : "none";
 if (!sectionApplicable) return;
