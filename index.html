@@ -723,6 +723,7 @@ margin-bottom: 8px;
 .production-card { border-top: 5px solid #e6a8a8; }
 .quality-card { border-top: 5px solid #b9d9a8; }
 .purchase-card { border-top: 5px solid #b8bec6; }
+.environment-safety-card { border-top: 5px solid #9fcfc7; }
 .security-card { border-top: 5px solid #c9b7e8; }
 .system-card { border-top: 5px solid #f2df8b; }
 .compliance-card { border-top: 5px solid #afd8ef; }
@@ -730,6 +731,7 @@ margin-bottom: 8px;
 .production-number { background: #e6a8a8; color: #4d2929; }
 .quality-number { background: #b9d9a8; color: #253022; }
 .purchase-number { background: #b8bec6; color: #2f343a; }
+.environment-safety-number { background: #9fcfc7; color: #24433f; }
 .security-number { background: #c9b7e8; color: #352c47; }
 .system-number { background: #f2df8b; color: #4a431f; }
 .compliance-number { background: #afd8ef; color: #203b4a; }
@@ -743,6 +745,7 @@ margin-bottom: 8px;
 }
 .audit-accordion.dept-quality .accordion-header { background: #dcebd4; color: #263224; }
 .audit-accordion.dept-purchase .accordion-header { background: #eceff2; color: #343a40; }
+.audit-accordion.dept-environment-safety .accordion-header { background: #dff1ee; color: #274742; }
 .audit-accordion.dept-security .accordion-header { background: #e7def4; color: #3c334e; }
 .audit-accordion.dept-system .accordion-header { background: #fbf1bd; color: #494322; }
 .audit-accordion.dept-compliance .accordion-header { background: #dceff8; color: #263e4a; }
@@ -1715,6 +1718,28 @@ body.auth-pending .auth-loading { display: block; }
   .auth-user-bar { align-items: flex-end; flex-direction: column; }
 }
 
+
+/* Environment & Safety */
+.environment-safety-reflection {
+  display:inline-flex; align-items:center; gap:8px; padding:9px 12px;
+  border:1px solid #8fbdb6; border-radius:9px; background:#f2fbf9;
+  color:#315a54; font-size:13px; font-weight:bold; white-space:nowrap;
+}
+.environment-safety-reflection input { width:auto; margin:0; }
+.environment-safety-card.environment-excluded .department-score-board { opacity:.55; }
+.environment-safety-card.environment-excluded .audit-accordion { opacity:.68; }
+.environment-safety-excluded-note { display:none; margin:0 0 14px; padding:12px 14px; border-radius:9px; background:#f3f6f6; color:#697582; font-size:13px; }
+.environment-safety-card.environment-excluded .environment-safety-excluded-note { display:block; }
+.average-table-category { min-width:1400px; }
+.average-table-category th:nth-child(1), .average-table-category td:nth-child(1) { width:6%; text-align:center; }
+.average-table-category th:nth-child(2), .average-table-category td:nth-child(2) { width:11%; text-align:center; }
+.average-table-category th:nth-child(3), .average-table-category td:nth-child(3) { width:22%; }
+.average-table-category th:nth-child(4), .average-table-category td:nth-child(4) { width:27%; }
+.average-table-category th:nth-child(5), .average-table-category td:nth-child(5),
+.average-table-category th:nth-child(6), .average-table-category td:nth-child(6) { width:10%; text-align:center; }
+.average-table-category th:nth-child(7), .average-table-category td:nth-child(7) { width:14%; }
+.average-category-cell { font-weight:bold; background:#f5f7f9; text-align:center; }
+
 </style>
 </head>
 <body class="auth-pending">
@@ -1753,7 +1778,7 @@ body.auth-pending .auth-loading { display: block; }
 </header>
 <main>
 <div class="page-guide">
-<strong>BP社 기본정보 및 생산/품질/구매/보안/시스템/Compliance & Ethics 심사 결과를 입력해 주세요.</strong><br>
+<strong>BP社 기본정보 및 생산/품질/구매/환경안전/보안/시스템/Compliance & Ethics 심사 결과를 입력해 주세요.</strong><br>
 BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비교하여
 해당되는 심사항목만 자동으로 표시합니다.
 </div>
@@ -1938,6 +1963,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 <div class="form-group"><label for="productionAuditor">Production Auditor</label><input id="productionAuditor" type="text" placeholder="Production Auditor Name"></div>
 <div class="form-group"><label for="qualityAuditor">Quality Auditor</label><input id="qualityAuditor" type="text" placeholder="Quality Auditor Name"></div>
 <div class="form-group"><label for="purchaseAuditor">Purchase Auditor</label><input id="purchaseAuditor" type="text" placeholder="Purchase Auditor Name"></div>
+<div class="form-group"><label for="environmentSafetyAuditor">Environment &amp; Safety Auditor</label><input id="environmentSafetyAuditor" type="text" placeholder="Environment & Safety Auditor Name"></div>
 <div class="form-group"><label for="securityAuditor">Security Auditor</label><input id="securityAuditor" type="text" placeholder="Security Auditor Name"></div>
 <div class="form-group"><label for="systemAuditor">System Auditor</label><input id="systemAuditor" type="text" placeholder="System Auditor Name"></div>
 <div class="form-group"><label for="complianceAuditor">Compliance &amp; Ethics Auditor</label><input id="complianceAuditor" type="text" placeholder="Compliance & Ethics Auditor Name"></div>
@@ -1998,9 +2024,21 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </div>
 <div id="purchaseAuditSections"></div>
 </section>
+<section id="environmentSafetyDepartmentCard" class="card department-card environment-safety-card">
+<div class="section-heading department-heading-row">
+  <div class="department-heading-title"><div class="section-number environment-safety-number">04</div><div><h2>Environment &amp; Safety Audit Sections</h2><p>Section 19 - Section 20</p></div></div>
+  <label class="environment-safety-reflection" for="environmentSafetyExcluded"><input id="environmentSafetyExcluded" type="checkbox"> 미반영</label>
+  <div class="department-score-board">
+    <div class="department-score-box"><span>Environment &amp; Safety Self-Audit Score</span><strong id="environmentSafetyDepartmentSelfScore">-</strong></div>
+    <div class="department-score-box audit"><span>Environment &amp; Safety Audit Score</span><strong id="environmentSafetyDepartmentAuditScore">-</strong></div>
+  </div>
+</div>
+<div class="environment-safety-excluded-note">미반영 상태입니다. Section 19·20의 평가항목은 접히며 Summary 및 전체 점수 계산에서 제외됩니다.</div>
+<div id="environmentSafetyAuditSections"></div>
+</section>
 <section class="card department-card security-card">
 <div class="section-heading department-heading-row">
-  <div class="department-heading-title"><div class="section-number security-number">04</div><div><h2>Security Audit Sections</h2><p>Section 21 - Section 25</p></div></div>
+  <div class="department-heading-title"><div class="section-number security-number">05</div><div><h2>Security Audit Sections</h2><p>Section 21 - Section 25</p></div></div>
   <div class="department-score-board">
     <div class="department-score-box"><span>Security Self-Audit Score</span><strong id="securityDepartmentSelfScore">-</strong></div>
     <div class="department-score-box audit"><span>Security Audit Score</span><strong id="securityDepartmentAuditScore">-</strong></div>
@@ -2010,7 +2048,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </section>
 <section class="card department-card system-card">
 <div class="section-heading department-heading-row">
-  <div class="department-heading-title"><div class="section-number system-number">05</div><div><h2>System Audit Sections</h2><p>Section 26</p></div></div>
+  <div class="department-heading-title"><div class="section-number system-number">06</div><div><h2>System Audit Sections</h2><p>Section 26</p></div></div>
   <div class="department-score-board">
     <div class="department-score-box"><span>System Self-Audit Score</span><strong id="systemDepartmentSelfScore">-</strong></div>
     <div class="department-score-box audit"><span>System Audit Score</span><strong id="systemDepartmentAuditScore">-</strong></div>
@@ -2020,7 +2058,7 @@ BP社 Profile의 Material Group과 각 Section의 적용 Material Group을 비�
 </section>
 <section class="card department-card compliance-card">
 <div class="section-heading department-heading-row">
-  <div class="department-heading-title"><div class="section-number compliance-number">06</div><div><h2>Compliance &amp; Ethics Audit Sections</h2><p>Section 27 - Section 28</p></div></div>
+  <div class="department-heading-title"><div class="section-number compliance-number">07</div><div><h2>Compliance &amp; Ethics Audit Sections</h2><p>Section 27 - Section 28</p></div></div>
   <div class="department-score-board">
     <div class="department-score-box"><span>Compliance &amp; Ethics Self-Audit Score</span><strong id="complianceDepartmentSelfScore">-</strong></div>
     <div class="department-score-box audit"><span>Compliance &amp; Ethics Audit Score</span><strong id="complianceDepartmentAuditScore">-</strong></div>
@@ -2248,12 +2286,14 @@ const createAverageQuestionData = (
 number,
 content,
 criteria,
-materialGroups = ["ALL"]
+materialGroups = ["ALL"],
+category = ""
 ) => ({
 number,
 content,
 criteria,
-materialGroups
+materialGroups,
+category
 });
 
 const createComplianceCriteria = () => [
@@ -2727,6 +2767,78 @@ createQuestionData(5, "5.2", "재고 관리 지표는 매년 분석 및 개선�
 ]
 ),
 createSectionData(
+19,
+"안전보건",
+["ALL"],
+[
+createAverageQuestionData(1, `자율안전보건경영시스템 보유<br>A. ISO 45001 혹은 KOSHA 인증서 보유 여부 (50인 미만 사업자는 위험성평가 인정서)<br>E. ISO 45001 혹은 KOSHA 인증서 미보유 (50인 미만 사업자는 위험성평가 인정서)`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(2, `자율안전보건경영시스템 운영<br>A. ISO 인증별 내부심사 결과 및 경영자 검토 여부<br>E. ISO 인증별 내부심사 결과 및 경영자 미검토`, [["운영","A",5],["미운영","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(3, `안전보건방침<br>A. 경영자 확인된 안전보건 방침 수립 및 보유<br>E. 경영자 확인된 안전보건 방침 미수립 및 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(4, `안전보건경영 계획서<br>A. 연간 안전보건관리 계획 수립 및 실행 / KPI 선정 및 진도관리 진행<br>E. 연간 안전보건관리 계획 미수립 / KPI 선정 및 진도관리 미진행`, [["운영","A",5],["미운영","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(5, `안전보건관리규정<br>A. 법적 수립 대상일 경우 산업안전보건법 시행규칙 별표3 내용 포함<br>E. 법적 수립 대상일 경우 산업안전보건법 시행규칙 별표3 내용 미포함`, [["포함","A",5],["미포함","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(6, `산업안전보건위원회, 환경안전회의<br>A. 법적 진행 대상일 경우 분기1회 회의록 보유<br>E. 법적 진행 대상일 경우 분기1회 회의록 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(7, `환경안전조직 보유<br>A. 대표이사, 법적 선임자 등 명시 여부<br>E. 대표이사, 법적 선임자 등 명시 미여부`, [["명시","A",5],["미명시","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(8, `안전보건 관리책임자 선임여부<br>A. 법적 대상일 경우 선임증/교육수료증 보유<br>E. 법적 대상일 경우 선임증/교육수료증 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(9, `관리감독자 선임여부<br>A. 법적 대상일 경우 선임증/교육수료증 보유<br>E. 법적 대상일 경우 선임증/교육수료증 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(10, `안전/보건관리자 선임 및 신고여부<br>A. 법적 대상일 경우 선임증/교육수료증 보유<br>E. 법적 대상일 경우 선임증/교육수료증 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건관리체제"),
+createAverageQuestionData(11, `위험성평가 실시여부<br>A. 위험성평가규정 수립, 위험성평가 실시, 결과 게시 여부<br>E. 위험성평가규정 미수립, 위험성평가 미실시, 결과 미게시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(12, `표준작업절차서(SOP)<br>A. 표준작업절차서 보유 및 안전항목 반영<br>E. 표준작업절차서 미보유 및 안전항목 미반영`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(13, `근골격계 유해요인 조사<br>A. 해당 주기별 근골격계 유해요인 조사 실시<br>E. 해당 주기별 근골격계 유해요인 조사 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(14, `도급사업시의 안전보건조치<br>A. 협의체 운영 1회/월 실시, 순회점검 1회/2일 실시, 합동점검 1회/분기 실시<br>B. A기준에서 한 개 미실시<br>C. A기준에서 두 개 미실시<br>D. 도급사업시의 안전보건조치 미실시`, [["모두 실시","A",5],["두개 실시","B",3],["한 개 실시","C",1],["미실시","D",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(15, `보호구 관리<br>A. 보호구 지급기준, 지급대장, 인증서 보유<br>B. A기준에서 한 개 미실시<br>C. A기준에서 두 개 미실시<br>D. 보호구 관리 미실시`, [["모두 실시","A",5],["두개 실시","B",3],["한 개 실시","C",1],["미실시","D",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(16, `현장점검<br>A. 안전보건관리책임자, 관리감독자 현장점검 일지 보유<br>E. 현장점검 일지 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(17, `산업안전보건관리비 사용 적정성<br>A. 산업안전보건관리비 계획 및 집행 적정성 실시<br>E. 산업안전보건관리비 계획 및 집행 적정성 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(18, `안전보건관리책임자, 관리감독자 업무수행 평가<br>A. 업무수행 평가 기준 마련 및 반기 1회 이상 평가 실시<br>E. 업무수행 평가 기준 미마련 및 반기 1회 이상 평가 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(19, `안전보건에 관한 종사자 의견청취<br>A. 종사자 의견절차 마련 및 반기 1회 이상 이행여부 점검<br>E. 종사자 의견절차 미마련 및 반기 1회 이상 점검 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(20, `일반건강검진<br>A. 국민건강보험공단 자료기준 검진 실시<br>E. 국민건강보험공단 자료기준 검진 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(21, `특수건강검진<br>A. 특수건강검진 대상 배치전/후 검진 실시<br>E. 특수건강검진 대상 배치전/후 검진 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(22, `유소견자 사후관리<br>A. 매 월 의료진 방문을 통한 유소견자 면담 및 이력관리 실시<br>E. 매 월 의료진 방문을 통한 유소견자 면담 및 이력관리 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(23, `신규채용/작업변경시 안전보건교육<br>A. 신규채용자/작업변경시 8시간 교육확인, 교육내용 확인(시행규칙 별표5), 교육서명지 확인<br>E. 교육 미실시 / 교육내용 확인 불가 / 교육서명지 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(24, `정기안전보건교육<br>A. 대상자별 교육 실시(사무직: 6hr/반기, 사무직外 12hr/반기), 교육내용 및 교육서명지 확인<br>E. 대상자별 교육 미실시, 교육내용 확인 불가, 교육서명지 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(25, `특별안전보건교육<br>A. 대상자별 교육 실시(시행규칙 별표5)<br>E. 대상자별 교육 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(26, `적격수급 협력사 선정<br>A. 하수급사 있는 경우 업체 선정시 환경안전검토 반기 1회 이상 점검 실시<br>E. 하수급사 있는 경우 업체 선정시 환경안전검토 반기 1회 이상 점검 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건실행수준"),
+createAverageQuestionData(27, `신호체계, 연락체계<br>A. 자체 비상연락망 보유<br>E. 자체 비상연락망 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건운영관리"),
+createAverageQuestionData(28, `작업환경측정<br>A. 법적 주기별 작업환경측정 실시<br>E. 법적 주기별 작업환경측정 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건운영관리"),
+createAverageQuestionData(29, `물질안전보건자료<br>A. 사용 화학물질의 MSDS 전체 보유, 게시 및 비치 실시<br>E. 사용 화학물질의 MSDS 전체 미보유, 게시 및 비치 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건운영관리"),
+createAverageQuestionData(30, `비상대응체계<br>A. 비상대응체계, 연락체계의 문서화 보유 / 상황별 비상대응 시나리오 보유<br>E. 비상대응체계, 연락체계의 문서화 미보유 / 상황별 비상대응 시나리오 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건운영관리"),
+createAverageQuestionData(31, `중대재해 발생 대응 절차<br>A. 중대재해 발생 전후에 대비하여 절차 수립 및 반기 1회 점검 실시<br>E. 절차 수립 및 반기 1회 점검 미실시`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건운영관리"),
+createAverageQuestionData(32, `비상훈련실시<br>A. 비상훈련 실시(1회/반기), 훈련사진, 훈련 개선점 각평 등 확인<br>E. 비상훈련 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건운영관리"),
+createAverageQuestionData(33, `법령이행여부 점검<br>A. 안전보건 관계 법령에 따른 의무를 이행 했는지 반기 1회 이상 점검 실시<br>E. 반기 1회 이상 점검 미실시`, [["실시","A",5],["미실시","E",0]], ["ALL"], "안전보건운영관리"),
+createAverageQuestionData(34, `산업재해발생<br>A. 최근 3년간 산업재해 발생 확인(산업재해율 확인서)<br>E. 최근 3년간 산업재해 발생 미확인`, [["확인","A",5],["미확인","E",0]], ["ALL"], "안전보건재해발생수준"),
+createAverageQuestionData(35, `산업재해 대책수립 및 사고 처리 절차서<br>A. 산업재해 발생 복기회의 및 근본원인 규명, 사고처리 절차서 보유<br>E. 산업재해 발생 복기회의 및 근본원인 규명 미확인, 사고처리 절차서 미보유`, [["보유","A",5],["미보유","E",0]], ["ALL"], "안전보건재해발생수준"),
+createAverageQuestionData(36, `과태료/벌금<br>A. 고용노동부로부터 받은 벌금/과태료 이력 확인, 환경부/소방청으로부터 받은 벌금/과태료 이력 확인<br>E. 관련 벌금/과태료 이력 미확인`, [["확인","A",5],["미확인","E",0]], ["ALL"], "안전보건재해발생수준")
+],
+false,
+"average"
+),
+createSectionData(
+20,
+"환경/소방/UT",
+["ALL"],
+[
+createAverageQuestionData(1, `환경시설 인허가는 취득하였는가?`, [["기존 시설물 인허가 취득 100%신청, 개조 등 변경사항도 인허가 취득 100%","A",5],["-","B",4],["-","C",3],["법규에 따른 인허가 미취득 (신규, 증설, 변경, 개조)","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(2, `환경 오염물질 배출 관련 법적 선임자는 적합한가?`, [["환경 분야 해당국가 법적 기준대비 선임 100%","A",5],["-","B",4],["-","C",3],["해당국가 법적 기준대비 선임 미달","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(3, `에너지/온실가스 관리 규정, 또는 에너지/온실가스 관리 계획(에너지경영시스템 등)을 보유하고 있습니까?`, [["에너지/온실가스 관리 규정, 또는 에너지/온실가스 관리 계획(에너지경영시스템 등)을 보유","A",5],["-","B",4],["-","C",3],["에너지/온실가스 관리 규정, 또는 에너지/온실가스 관리 계획(에너지경영시스템 등)을 미보유","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(4, `에너지 소비량과 온실가스 배출량을 측정 및 관리하고 있습니까?`, [["에너지 소비량과 온실가스 배출량을 측정 및 관리 Data 보유(Scope1, Scope2)","A",5],["-","B",4],["-","C",3],["에너지 소비량과 온실가스 배출량을 측정 및 관리 Data 미보유(Scope1, Scope2)","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(5, `폐수 위탁처리는 적법한가?`, [["항목별 적법 처리업체와 계약 / 처리업체 점검 실시 반기 1회↑","A",5],["항목별 적법 처리업체와 계약 / 처리업체 점검 실시 년 1회↑","B",4],["항목별 적법 처리업체와 계약 / 처리업체 점검 실시 년 1회↓","C",3],["적격업체와 계약없이 처리, 점검 미실시 / 위탁업체 미 허가 시설에서 처리, 폐수 탱크 누출 방치","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(6, `폐기물은 적법한 업체에 위탁 처리하고 있는가?`, [["항목별 적법 처리업체와 계약 / 처리업체 점검 실시 반기 1회↑","A",5],["항목별 적법 처리업체와 계약 / 처리업체 점검 실시 년 1회↑","B",4],["항목별 적법 처리업체와 계약 / 처리업체 점검 실시 년 1회↓","C",3],["적격업체와 계약없이 처리, 점검 미실시 / 위탁업체에서 미 허가 시설에서 처리, 재위탁 처리","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(7, `폐기물 보관시설 설치는 적합한가?`, [["폐기물 보관장 여유율 20%↑ / 일반·지정(유해)폐기물 별도 보관장소 설치 / 지붕과 벽면, 침출수 유출방지 트렌치 및 집수정 설치","A",5],["일반·지정(유해)폐기물 별도 보관장소 설치 / 지붕과 벽면, 침출수 유출방지 트렌치 및 집수정 설치","B",4],["일반·지정(유해)폐기물 별도 보관장소 설치 / 지붕과 벽면은 있으나 트렌치 및 집수정 미 설치","C",3],["일반·지정(유해)폐기물 별도 보관장소 없음 (옥외보관)","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(8, `폐기물 분리보관 상태는 적합한가?`, [["일반/지정 별도보관, 법적 보관기간 준수 / 일반폐기물 종류별·성상별 구분 양호","A",5],["일반/지정 별도보관, 법적 보관기간 준수 / 일반 폐기물 종류별·성상별 구분 80%↑","B",4],["일반/지정 별도보관, 법적 보관기간 준수 / 일반 폐기물 종류별·성상별 구분 79%↓","C",3],["폐기물(일반/지정) 혼합 보관, 법적 보관기간 미 준수","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(9, `환경법,화학물질관리법 (법적) 위반 사례가 있는가?`, [["최근 3년간 환경법(법적) 위반기록 없음","A",5],["최근 3년간 환경법(법적) 위반기록 발생 즉시 개선 완료","B",4],["최근 3년간 환경법(법적) 위반기록 발생 개선 진행 中","C",3],["최근 3년간 환경법(법적) 위반기록 발생 미개선 中","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(10, `적법한 사고신고 및 기록관리를 운영하는가?<br>(화재, 산재 사고 유무)`, [["법규상(최근 3년) 사고 신고 없음(산재,화재사고 없음)","A",5],["법규상 사고신고 및 기록 관리 미흡 1개 이하","B",4],["법규상 사고신고 및 기록 관리 미흡 3개 이하","C",3],["법규상 사고신고 및 기록 관리 미흡 3개 초과","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(11, `유해화학물질 취급기준 /표시 기준 을 위반하였는가?`, [["기준 준수 100%","A",5],["A등급 대비 2개 항목 미흡","B",4],["A등급 대비 3개 항목 미흡","C",3],["A등급 대비 5개 항목 미흡","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(12, `유해화학물질 신고, 검사, 안전교육 실행 하였는가?`, [["기준 준수 100%","A",5],["A등급 대비 2개 항목 미흡","B",4],["A등급 대비 3개 항목 미흡","C",3],["A등급 대비 4개 항목 미흡","D",0],["해당없음","N/A",null]], ["ALL"], "환경"),
+createAverageQuestionData(13, `소화기 관리는 적합한가?`, [["월 1회↑ 정기점검 실시 및 관리 양호","A",5],["분기 1회↑ 정기점검 실시하나 관리 미흡 2개↓","B",4],["반기 1회↑ 정기점검 실시하나 관리 미흡 5개↓","C",3],["정기점검 미 실시 또는 관리 미흡 6개↑","D",0],["해당없음","N/A",null]], ["ALL"], "소방"),
+createAverageQuestionData(14, `화재수신기 관리는 적합한가?`, [["화재수신기 전원 정상, 주경종·지구경종 상태 'ON', 정기점검 등 관리 양호","A",5],["화재수신기 전원 정상, 주경종·지구경종 상태 'ON', 정기점검 등 관리 미흡 1개","B",4],["화재수신기 전원 정상, 주경종·지구경종 상태 'ON', 정기점검 등 관리 미흡 2개↓","C",3],["화재수신기 전원 OFF, 주경종·지구경종 상태 'OFF', 정기점검 등 관리 미흡 3개↑","D",0],["해당없음","N/A",null]], ["ALL"], "소방"),
+createAverageQuestionData(15, `피난시설 관리는 적합한가?`, [["정기점검 실시 월 1회↑, 관리 양호, 비상탈출구 잠김없음, 피난유도등 고장없음","A",5],["정기점검 실시 분기 1회↑, 비상탈출구 잠김 1개, 피난유도등 고장 1개 등 관리 미흡 2개↓","B",4],["정기점검 실시 년 1회↑, 비상탈출구 잠김 1개, 피난유도등 고장 1개 등 관리 미흡 3개↓","C",3],["정기점검 미 실시, 관리 미흡 4개↑","D",0],["해당없음","N/A",null]], ["ALL"], "소방"),
+createAverageQuestionData(16, `가연성,고압가스 취급공정 운영은 적합한가?`, [["고압가스 사용시설 인허가 진행, 고압가스 용기관리 양호 / 고압가스 안전장치 설치 100% / 가스경보장치 비상전원 24시간 확보 및 방재센터 모니터링 / 점검 실시 월 1회↑, 누설 없음","A",5],["고압가스 사용시설 인허가 진행, 고압가스 용기관리 미흡 1개 / 고압가스 안전장치 설치 100% / 가스경보장치 비상전원 24시간 확보 및 방재센터 모니터링 / 점검 실시 주 1회↑, 누설 없음","B",4],["고압가스 사용시설 인허가 일부 누락, 고압가스 용기관리 미흡 3개↓ / 고압가스 안전장치 100% 설치했으나 일부 보완 필요 / 점검 실시 월 1회↑, 관리미흡으로 일부누설","C",3],["고압가스 사용시설 인허가 누락, 고압가스 용기관리 미흡 4개↑ / 고압가스 안전장치 설치 99%↓ / 점검 미실시, 관리미흡으로 일부누설","D",0],["해당없음","N/A",null]], ["ALL"], "소방"),
+createAverageQuestionData(17, `설비별 법적 검사 및 관리자 선임은 적합한가?`, [["법적 검사, 인허가, 법적 선임 100% / 보유설비 기준 전담인력 확보","A",5],["-","B",4],["-","C",3],["해당국가 법적 기준 미 선임 (공사 중인 시설은 제외) / 각 부문별 전담인력 미 확보 및 야간당직 미 운영","D",0],["해당없음","N/A",null]], ["ALL"], "UT"),
+createAverageQuestionData(18, `외부 공급계약 및 예방정비 계획은 적합한가?`, [["각 부문별 년간 예방정비 계획수립 대비 실시 100% / 도면(계통도), 매뉴얼 확보 및 Pro-3M 기준 준수","A",5],["각 부문별 년간 예방정비 계획수립 대비 실시 100% / 도면(계통도), 매뉴얼 확보 및 Pro-3M 일부 미흡","B",4],["각 부문별 년간 예방정비 계획수립 대비 실시 80%↑ / 도면(계통도), 매뉴얼 관리 및 Pro-3M 일부 미흡","C",3],["각 부문별 년간 예방정비 계획 미 수립 / 도면(계통도), 매뉴얼 관리 및 Pro-3M 불량","D",0],["해당없음","N/A",null]], ["ALL"], "UT")
+],
+false,
+"average"
+),
+createSectionData(
 21,
 "정보보호리더십",
 ["ALL"],
@@ -2963,7 +3075,7 @@ return `
 ${criteria.map(([condition, grade, score]) => `
 <div class="average-criteria-line">
 <span>${condition}</span>
-<strong>${grade}(${score})</strong>
+<strong>${score === null || score === undefined ? grade : `${grade}(${score})`}</strong>
 </div>
 `).join("")}
 </div>
@@ -2976,9 +3088,11 @@ const gradeOptions = [];
 question.criteria.forEach(([, grade]) => {
 if (!gradeOptions.includes(grade)) gradeOptions.push(grade);
 });
+const hasCategory = section.questions.some(item => item.category);
 return `
 <tr data-question-number="${question.number}" data-applicable="true">
 <td class="question-cell">${question.number}</td>
+${hasCategory ? `<td class="average-category-cell">${question.category || ""}</td>` : ""}
 <td class="average-contents-cell"><strong>${question.content}</strong></td>
 <td>${createAverageCriteria(question.criteria)}</td>
 <td class="result-cell">
@@ -3057,6 +3171,7 @@ function getDepartmentClass(sectionNumber) {
 if (sectionNumber >= 1 && sectionNumber <= 5) return "dept-production";
 if (sectionNumber >= 6 && sectionNumber <= 13) return "dept-quality";
 if (sectionNumber >= 14 && sectionNumber <= 18) return "dept-purchase";
+if (sectionNumber >= 19 && sectionNumber <= 20) return "dept-environment-safety";
 if (sectionNumber >= 21 && sectionNumber <= 25) return "dept-security";
 if (sectionNumber === 26) return "dept-system";
 if (sectionNumber >= 27 && sectionNumber <= 28) return "dept-compliance";
@@ -3067,10 +3182,12 @@ function createSectionHtml(section) {
 const key = safeKey(section.sectionKey);
 const totalQuestions = section.questions.length;
 const isAverage = section.scoringType === "average";
+const hasAverageCategory = isAverage && section.questions.some(question => question.category);
 const tableHeader = isAverage
 ? `
 <tr>
 <th>Question Number</th>
+${hasAverageCategory ? "<th>Category</th>" : ""}
 <th>Contents</th>
 <th>Evaluation Contents</th>
 <th>Self Evaluation Grade</th>
@@ -3111,7 +3228,11 @@ const scoringLabel = isAverage ? "Average" : "Level";
 const summaryText = `총 ${totalQuestions}개 평가항목 · ${scoringLabel}`;
 const averageGradeText = section.sectionKey === "14"
 ? "A=5점 / B=4점 / C=3점 / D=1점 / E=0점"
-: "A=5점 / B=3점 / C=1점 / D=0점";
+: (section.sectionKey === "19"
+  ? "문항별 Grade 기준 적용 (A=5점 / B=3점 / C=1점 / D=0점 또는 A=5점 / E=0점)"
+  : (section.sectionKey === "20"
+    ? "A=5점 / B=4점 / C=3점 / D=0점 / N/A=평균 제외"
+    : "A=5점 / B=3점 / C=1점 / D=0점"));
 const scoreRule = isAverage
 ? `
 <strong>Audit Score 계산 기준 · 에버리지제도</strong><br>
@@ -3174,7 +3295,7 @@ ${isAverage ? `
 </div>
 <div class="summary-card">
 <span>Grade</span>
-<strong style="font-size:16px;">${section.sectionKey === "14" ? "A/B/C/D/E" : "A/B/C/D"}</strong>
+<strong style="font-size:16px;">${section.sectionKey === "14" ? "A/B/C/D/E" : (section.sectionKey === "19" ? "A/B/C/D/E" : (section.sectionKey === "20" ? "A/B/C/D/N/A" : "A/B/C/D"))}</strong>
 </div>
 ` : `
 <div class="summary-card">
@@ -3192,7 +3313,7 @@ ${isAverage ? `
 `}
 </div>
 <div class="table-wrap">
-<table class="${isAverage ? "average-table" : ""}">
+<table class="${isAverage ? `average-table${hasAverageCategory ? " average-table-category" : ""}` : ""}">
 <thead>${tableHeader}</thead>
 <tbody id="section${key}Body">${rows}</tbody>
 </table>
@@ -3211,6 +3332,9 @@ section.sectionNumber >= 6 && section.sectionNumber <= 13
 const purchaseSections = auditSections.filter(section =>
 section.sectionNumber >= 14 && section.sectionNumber <= 18
 );
+const environmentSafetySections = auditSections.filter(section =>
+section.sectionNumber >= 19 && section.sectionNumber <= 20
+);
 const securitySections = auditSections.filter(section =>
 section.sectionNumber >= 21 && section.sectionNumber <= 25
 );
@@ -3226,6 +3350,8 @@ document.getElementById("qualityAuditSections").innerHTML =
 qualitySections.map(createSectionHtml).join("");
 document.getElementById("purchaseAuditSections").innerHTML =
 purchaseSections.map(createSectionHtml).join("");
+document.getElementById("environmentSafetyAuditSections").innerHTML =
+environmentSafetySections.map(createSectionHtml).join("");
 document.getElementById("securityAuditSections").innerHTML =
 securitySections.map(createSectionHtml).join("");
 document.getElementById("systemAuditSections").innerHTML =
@@ -3341,17 +3467,22 @@ row.classList.remove(
 );
 
 const matched = question.criteria.find(([, criterionGrade]) => criterionGrade === grade);
-if (grade && matched) {
+if (grade && matched && matched[2] !== null && matched[2] !== undefined) {
 const score = Number(matched[2]);
-totalScore += score;
-completedCount += 1;
-row.classList.add(`average-result-${grade.toLowerCase()}`);
+if (Number.isFinite(score)) {
+  totalScore += score;
+  completedCount += 1;
+  if (grade !== "N/A") row.classList.add(`average-result-${grade.toLowerCase()}`);
+}
 }
 
 const selfMatched = question.criteria.find(([, criterionGrade]) => criterionGrade === selfGrade);
-if (selfGrade && selfMatched) {
-selfTotalScore += Number(selfMatched[2]);
-selfCompletedCount += 1;
+if (selfGrade && selfMatched && selfMatched[2] !== null && selfMatched[2] !== undefined) {
+const selfScore = Number(selfMatched[2]);
+if (Number.isFinite(selfScore)) {
+  selfTotalScore += selfScore;
+  selfCompletedCount += 1;
+}
 }
 });
 
@@ -3386,6 +3517,7 @@ const departmentDefinitions = {
 production: { sectionNumbers: [1, 2, 3, 4, 5] },
 quality: { sectionNumbers: [6, 7, 8, 9, 10, 11, 12, 13] },
 purchase: { sectionNumbers: [14, 15, 16, 17, 18], combineSection17: true },
+environmentSafety: { sectionNumbers: [19, 20] },
 security: { sectionNumbers: [21, 22, 23, 24, 25] },
 system: { sectionNumbers: [26] },
 compliance: { sectionNumbers: [27, 28] }
@@ -3483,6 +3615,7 @@ const summaryDepartmentMap = {
   production: { name: "Production", auditorId: "productionAuditor" },
   quality: { name: "Quality", auditorId: "qualityAuditor" },
   purchase: { name: "Purchase", auditorId: "purchaseAuditor" },
+  environmentSafety: { name: "Environment & Safety", auditorId: "environmentSafetyAuditor" },
   security: { name: "Security", auditorId: "securityAuditor" },
   system: { name: "System", auditorId: "systemAuditor" },
   compliance: { name: "Compliance & Ethics", auditorId: "complianceAuditor" }
@@ -3491,6 +3624,7 @@ function getSummaryDepartment(sectionNumber) {
   if (sectionNumber >= 1 && sectionNumber <= 5) return "production";
   if (sectionNumber >= 6 && sectionNumber <= 13) return "quality";
   if (sectionNumber >= 14 && sectionNumber <= 18) return "purchase";
+  if (sectionNumber >= 19 && sectionNumber <= 20) return "environmentSafety";
   if (sectionNumber >= 21 && sectionNumber <= 25) return "security";
   if (sectionNumber === 26) return "system";
   if (sectionNumber >= 27 && sectionNumber <= 28) return "compliance";
@@ -3529,6 +3663,7 @@ const sreDepartmentOrder = [
   "production",
   "quality",
   "purchase",
+  "environmentSafety",
   "security",
   "system",
   "compliance"
@@ -3687,23 +3822,18 @@ function renderDepartmentRadarChart() {
   const container = document.getElementById("departmentRadarChart");
   if (!container) return;
 
-  const labels = [
-    "Production",
-    "Quality",
-    "Purchase",
-    "Security",
-    "System",
-    "Compliance & Ethics"
-  ];
+  const radarDepartments = [
+    ["production", "Production"],
+    ["quality", "Quality"],
+    ["purchase", "Purchase"],
+    ["environmentSafety", "Environment & Safety"],
+    ["security", "Security"],
+    ["system", "System"],
+    ["compliance", "Compliance & Ethics"]
+  ].filter(([key]) => key !== "environmentSafety" || !isEnvironmentSafetyExcluded());
 
-  const keys = [
-    "production",
-    "quality",
-    "purchase",
-    "security",
-    "system",
-    "compliance"
-  ];
+  const keys = radarDepartments.map(([key]) => key);
+  const labels = radarDepartments.map(([, label]) => label);
 
   const auditScores = keys.map(key => getDepartmentAverages(key).auditAverage);
   const hasAnyScore = auditScores.some(Number.isFinite);
@@ -3841,6 +3971,7 @@ function collectSummaryFindings() {
         const matched = question.criteria.find(([, criterionGrade]) => criterionGrade === grade);
         if (!matched) return;
 
+        if (matched[2] === null || matched[2] === undefined || grade === "N/A") return;
         const score = Number(matched[2]);
         if (!Number.isFinite(score) || score >= 5) return;
 
@@ -4696,6 +4827,42 @@ async function exportSreCheckSheet() {
   }
 }
 
+
+function isEnvironmentSafetyExcluded() {
+  return Boolean(document.getElementById("environmentSafetyExcluded")?.checked);
+}
+function applyEnvironmentSafetyReflectionRules() {
+  const excluded = isEnvironmentSafetyExcluded();
+  const card = document.getElementById("environmentSafetyDepartmentCard");
+  if (card) card.classList.toggle("environment-excluded", excluded);
+
+  [19, 20].forEach(sectionNumber => {
+    const section = auditSections.find(item => item.sectionNumber === sectionNumber);
+    if (!section) return;
+    const key = safeKey(section.sectionKey);
+    const wrapper = document.getElementById(`section${key}Wrapper`);
+    const header = document.getElementById(`section${key}Header`);
+    const content = document.getElementById(`section${key}Content`);
+    if (!wrapper) return;
+
+    wrapper.dataset.environmentExcluded = excluded ? "true" : "false";
+    if (excluded) {
+      wrapper.dataset.applicable = "false";
+      wrapper.style.display = "";
+      header?.classList.remove("open");
+      content?.classList.remove("open");
+      const selfEl = document.getElementById(`section${key}SelfAuditScore`);
+      const auditEl = document.getElementById(`section${key}AuditScore`);
+      if (selfEl) { selfEl.dataset.rawScore = ""; selfEl.textContent = "-"; }
+      if (auditEl) { auditEl.dataset.rawScore = ""; auditEl.textContent = "-"; }
+    } else {
+      wrapper.dataset.applicable = "true";
+      updateSectionResult(section);
+    }
+  });
+  updateAllDepartmentScores();
+}
+
 function applyMaterialGroupRules() {
 const selectedGroups = getSelectedMaterialGroups();
 auditSections.forEach(section => {
@@ -4724,6 +4891,7 @@ row.style.display = questionApplicable ? "" : "none";
 applyServerTypeRules(section);
 updateSectionResult(section);
 });
+applyEnvironmentSafetyReflectionRules();
 updateAllDepartmentScores();
 }
 auditSections.forEach(section => {
@@ -4746,6 +4914,11 @@ updateSectionResult(section);
 });
 updateSectionResult(section);
 });
+document.getElementById("environmentSafetyExcluded")?.addEventListener("change", () => {
+  applyEnvironmentSafetyReflectionRules();
+});
+applyEnvironmentSafetyReflectionRules();
+
 document
 .querySelectorAll('.self-audit-select')
 .forEach(control => {
@@ -5332,6 +5505,7 @@ function dbRestoreRawData(rawData) {
     production: "productionAuditor",
     quality: "qualityAuditor",
     purchase: "purchaseAuditor",
+    environmentSafety: "environmentSafetyAuditor",
     security: "securityAuditor",
     system: "systemAuditor",
     complianceEthics: "complianceAuditor"
@@ -5343,6 +5517,7 @@ function dbRestoreRawData(rawData) {
 
   if (typeof updateCertificationValue === "function") updateCertificationValue();
   if (typeof applyMaterialGroupRules === "function") applyMaterialGroupRules();
+  if (typeof applyEnvironmentSafetyReflectionRules === "function") applyEnvironmentSafetyReflectionRules();
   if (typeof updateAllDepartmentScores === "function") updateAllDepartmentScores();
   if (typeof dbUpdateVersionMode === "function") dbUpdateVersionMode();
 }
@@ -5563,6 +5738,7 @@ function dbCaptureRawData() {
       production: document.getElementById("productionAuditor")?.value || "",
       quality: document.getElementById("qualityAuditor")?.value || "",
       purchase: document.getElementById("purchaseAuditor")?.value || "",
+      environmentSafety: document.getElementById("environmentSafetyAuditor")?.value || "",
       security: document.getElementById("securityAuditor")?.value || "",
       system: document.getElementById("systemAuditor")?.value || "",
       complianceEthics: document.getElementById("complianceAuditor")?.value || ""
