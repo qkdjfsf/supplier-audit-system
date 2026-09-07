@@ -5170,12 +5170,13 @@ function dbUpdateVersionMode() {
       : `${selectedVersion}은 과거/미래 데이터 입력 Version입니다.`;
   }
 
-  // 기존 Summary / ZQMR0270 / Check Sheet 기능 자체는 수정하지 않고,
-  // 현재 Version이 아닐 때 해당 카드의 표시만 제어한다.
+  // Check Sheet Version과 관계없이 Summary / ZQMR0270 / Check Sheet 버튼은 항상 표시한다.
+  // Y2023~Y2025의 Check Sheet Excel 추출 결과는 별도 연도 양식으로 보장하지 않으며,
+  // 기존 Excel 추출 로직 자체는 수정하지 않는다.
   ["generateSummaryButton", "exportZQMR0270Button", "exportCheckSheetButton"].forEach(buttonId => {
     const button = document.getElementById(buttonId);
     const card = button?.closest(".summary-action-card");
-    if (card) card.style.display = isCurrentVersion ? "" : "none";
+    if (card) card.style.display = "";
   });
 }
 
