@@ -1728,6 +1728,8 @@ body.auth-pending .auth-loading { display: block; }
 .environment-safety-reflection input { width:auto; margin:0; }
 .environment-safety-card.environment-excluded .department-score-board { opacity:.55; }
 .environment-safety-card.environment-excluded .audit-accordion { opacity:.68; }
+.environment-safety-card.environment-excluded .audit-accordion .accordion-header { pointer-events:none; cursor:default; opacity:1; }
+.environment-safety-card.environment-excluded .audit-accordion .accordion-content { display:none !important; }
 .environment-safety-excluded-note { display:none; margin:0 0 14px; padding:12px 14px; border-radius:9px; background:#f3f6f6; color:#697582; font-size:13px; }
 .environment-safety-card.environment-excluded .environment-safety-excluded-note { display:block; }
 .average-table-category { min-width:1400px; }
@@ -4971,6 +4973,10 @@ function applyEnvironmentSafetyReflectionRules() {
     if (!wrapper) return;
 
     wrapper.dataset.environmentExcluded = excluded ? "true" : "false";
+    if (header) {
+      header.disabled = excluded;
+      header.setAttribute("aria-disabled", excluded ? "true" : "false");
+    }
     if (excluded) {
       wrapper.dataset.applicable = "false";
       wrapper.style.display = "";
