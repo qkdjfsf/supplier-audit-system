@@ -3380,7 +3380,7 @@ ${isAverage ? `
 </div>
 `;
 }
-const productionSections = auditSections.filter(section =>
+let productionSections = auditSections.filter(section =>
 section.sectionNumber >= 1 && section.sectionNumber <= 5
 );
 let qualitySections = auditSections.filter(section =>
