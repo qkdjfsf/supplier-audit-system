@@ -5103,6 +5103,11 @@ header.classList.toggle("open");
 content.classList.toggle("open");
 });
 body.addEventListener("change", event => {
+if (event.target.matches('input[name="section24ServerType"]')) {
+  applyServerTypeRules(section);
+  updateSectionResult(section);
+  return;
+}
 if (
 event.target.matches('input[type="radio"]') ||
 event.target.matches(".average-grade-select") ||
