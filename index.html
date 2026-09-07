@@ -3081,7 +3081,7 @@ ${criteria.map(([condition, grade, score]) => `
 </div>
 `;
 }
-function createAverageQuestionRow(section, question) {
+function createAverageQuestionRow(section, question, categoryCell = null) {
 const key = safeKey(section.sectionKey);
 const rowKey = `section${key}Average${question.number}`;
 const gradeOptions = [];
@@ -3089,10 +3089,19 @@ question.criteria.forEach(([, grade]) => {
 if (!gradeOptions.includes(grade)) gradeOptions.push(grade);
 });
 const hasCategory = section.questions.some(item => item.category);
+let categoryHtml = "";
+if (hasCategory) {
+  if (categoryCell && categoryCell.show === false) {
+    categoryHtml = "";
+  } else {
+    const rowspan = categoryCell && Number(categoryCell.rowspan) > 1 ? ` rowspan="${categoryCell.rowspan}"` : "";
+    categoryHtml = `<td class="average-category-cell"${rowspan}>${question.category || ""}</td>`;
+  }
+}
 return `
 <tr data-question-number="${question.number}" data-applicable="true">
 <td class="question-cell">${question.number}</td>
-${hasCategory ? `<td class="average-category-cell">${question.category || ""}</td>` : ""}
+${categoryHtml}
 <td class="average-contents-cell"><strong>${question.content}</strong></td>
 <td>${createAverageCriteria(question.criteria)}</td>
 <td class="result-cell">
@@ -3204,9 +3213,24 @@ ${hasAverageCategory ? "<th>Category</th>" : ""}
 <th>PSK Notes / Comments</th>
 </tr>
 `;
+let categoryMergeMap = null;
+if (isAverage && hasAverageCategory && (section.sectionKey === "19" || section.sectionKey === "20")) {
+  categoryMergeMap = new Map();
+  let index = 0;
+  while (index < section.questions.length) {
+    const category = section.questions[index].category || "";
+    let end = index + 1;
+    while (end < section.questions.length && (section.questions[end].category || "") === category) end += 1;
+    categoryMergeMap.set(section.questions[index], { show: true, rowspan: end - index });
+    for (let hiddenIndex = index + 1; hiddenIndex < end; hiddenIndex += 1) {
+      categoryMergeMap.set(section.questions[hiddenIndex], { show: false, rowspan: 0 });
+    }
+    index = end;
+  }
+}
 let rows = section.questions.map(question =>
 isAverage
-? createAverageQuestionRow(section, question)
+? createAverageQuestionRow(section, question, categoryMergeMap ? categoryMergeMap.get(question) : null)
 : createLevelQuestionRow(section, question)
 ).join("");
 
@@ -4214,10 +4238,36 @@ const SRE_AVERAGE_SHEET_CONFIG = {
   }
 };
 
+const SRE_ENVIRONMENT_SAFETY_SHEET_CONFIG = {
+  "19": {
+    sheetName: "Section 19",
+    questionRows: {
+      "1":9,"2":11,"3":13,"4":15,"5":17,"6":19,"7":21,"8":23,"9":25,"10":27,
+      "11":29,"12":31,"13":33,"14":35,"15":39,"16":43,"17":45,"18":47,"19":49,"20":51,
+      "21":53,"22":55,"23":57,"24":59,"25":61,"26":63,"27":65,"28":67,"29":69,"30":71,
+      "31":73,"32":75,"33":77,"34":79,"35":81,"36":83
+    },
+    finalSelfCell: "H86",
+    finalAuditCell: "H87",
+    summaryStartRow: 91
+  },
+  "20": {
+    sheetName: "Section 20",
+    questionRows: {
+      "1":9,"2":14,"3":19,"4":24,"5":29,"6":34,"7":39,"8":44,"9":49,
+      "10":54,"11":59,"12":64,"13":69,"14":74,"15":79,"16":84,"17":89,"18":94
+    },
+    finalSelfCell: "H100",
+    finalAuditCell: "H101",
+    summaryStartRow: 105
+  }
+};
+
 const SRE_RESULT_SECTION_ROWS = [
   ["1",13],["2",14],["3",15],["4",16],["5",17],
   ["6",18],["7",19],["8",20],["9",21],["10",22],["11",23],["12",24],["13",25],
   ["14",26],["15",27],["16",28],["17-oem",29],["17-odm",30],["18",31],
+  ["19",32],["20",33],
   ["21",34],["22",35],["23",36],["24",37],["25",38],["26",39],["27",40],["28",41]
 ];
 
@@ -4225,6 +4275,7 @@ const SRE_RESULT_DEPARTMENT_CELLS = {
   production: ["I13","J13"],
   quality: ["I18","J18"],
   purchase: ["I26","J26"],
+  environmentSafety: ["I32","J32"],
   security: ["I34","J34"],
   system: ["I39","J39"],
   compliance: ["I40","J40"]
@@ -4614,6 +4665,72 @@ async function srePatchAverageSection(zip, manifest, section, config) {
   sreSaveWorksheetDoc(zip, info, doc);
 }
 
+async function srePatchEnvironmentSafetySection(zip, manifest, section, config) {
+  const loaded = await sreLoadWorksheetDoc(zip, manifest, config.sheetName);
+  if (!loaded) return;
+  const { info, doc } = loaded;
+
+  section.questions.forEach(question => {
+    // Match the web item to the Excel item strictly by Question Number.
+    const questionNumber = String(question.number);
+    const rowNumber = config.questionRows[questionNumber];
+    if (!rowNumber) return;
+
+    const selfGrade = sreGetAverageGrade(section, question, true);
+    const auditGrade = sreGetAverageGrade(section, question, false);
+    const selfScore = selfGrade === "N/A" ? null : sreGetGradeScore(question, selfGrade);
+    const auditScore = auditGrade === "N/A" ? null : sreGetGradeScore(question, auditGrade);
+    const comment = sreGetQuestionComment(section, question);
+
+    if (selfGrade) sreSetCellString(doc, `H${rowNumber}`, selfGrade);
+    else sreSetCellBlank(doc, `H${rowNumber}`);
+
+    // N/A has no score and must not be treated as zero.
+    if (Number.isFinite(selfScore)) sreSetCellNumber(doc, `I${rowNumber}`, selfScore);
+    else sreSetCellBlank(doc, `I${rowNumber}`);
+
+    if (auditGrade) sreSetCellString(doc, `J${rowNumber}`, auditGrade);
+    else sreSetCellBlank(doc, `J${rowNumber}`);
+
+    // N/A has no score and must not be treated as zero.
+    if (Number.isFinite(auditScore)) sreSetCellNumber(doc, `K${rowNumber}`, auditScore);
+    else sreSetCellBlank(doc, `K${rowNumber}`);
+
+    if (comment !== "") sreSetCellString(doc, `N${rowNumber}`, comment);
+    else sreSetCellBlank(doc, `N${rowNumber}`);
+
+    const numericQuestionNumber = Number(questionNumber);
+    if (Number.isFinite(numericQuestionNumber)) {
+      const summaryRow = config.summaryStartRow + numericQuestionNumber - 1;
+      if (selfGrade) sreSetCellString(doc, `H${summaryRow}`, selfGrade);
+      else sreSetCellBlank(doc, `H${summaryRow}`);
+      if (auditGrade) sreSetCellString(doc, `I${summaryRow}`, auditGrade);
+      else sreSetCellBlank(doc, `I${summaryRow}`);
+    }
+  });
+
+  const sectionSelfScore = getSectionSelfScore(section);
+  const sectionAuditScore = getSectionAuditScore(section);
+
+  if (Number.isFinite(sectionSelfScore)) {
+    sreSetCellNumber(doc, "P4", sectionSelfScore);
+    sreSetCellNumber(doc, config.finalSelfCell, sectionSelfScore);
+  } else {
+    sreSetCellBlank(doc, "P4");
+    sreSetCellBlank(doc, config.finalSelfCell);
+  }
+
+  if (Number.isFinite(sectionAuditScore)) {
+    sreSetCellNumber(doc, "P5", sectionAuditScore);
+    sreSetCellNumber(doc, config.finalAuditCell, sectionAuditScore);
+  } else {
+    sreSetCellBlank(doc, "P5");
+    sreSetCellBlank(doc, config.finalAuditCell);
+  }
+
+  sreSaveWorksheetDoc(zip, info, doc);
+}
+
 async function srePatchProfileSheet(zip, manifest) {
   const loaded = await sreLoadWorksheetDoc(zip, manifest, "Profile");
   if (!loaded) return;
@@ -4657,9 +4774,12 @@ async function srePatchResultSheet(zip, manifest, findingsData) {
   sreSetCellString(doc, "I6", `${gapCounts["Minor Gap"] || 0}ea`);
   sreSetCellString(doc, "J6", `${gapCounts["Opportunity"] || 0}ea`);
 
+  const environmentSafetyExcluded = isEnvironmentSafetyExcluded();
+
   SRE_RESULT_SECTION_ROWS.forEach(([sectionKey, rowNumber]) => {
     const section = sreFindSection(sectionKey);
-    const applicable = sreIsSectionApplicable(section);
+    const isEnvironmentSafetySection = sectionKey === "19" || sectionKey === "20";
+    const applicable = (!isEnvironmentSafetySection || !environmentSafetyExcluded) && sreIsSectionApplicable(section);
     sreSetRowHidden(doc, rowNumber, !applicable);
     if (!applicable) {
       sreSetCellBlank(doc, `G${rowNumber}`);
@@ -4674,17 +4794,17 @@ async function srePatchResultSheet(zip, manifest, findingsData) {
     else sreSetCellBlank(doc, `H${rowNumber}`);
   });
 
-  // Environment & Safety is excluded from this project. Rows 32 and 33 are always hidden and blank.
-  [32,33].forEach(rowNumber => {
-    sreSetRowHidden(doc, rowNumber, true);
-    sreSetCellBlank(doc, `G${rowNumber}`);
-    sreSetCellBlank(doc, `H${rowNumber}`);
-  });
-
   const departmentAverages = {};
   Object.keys(SRE_RESULT_DEPARTMENT_CELLS).forEach(departmentKey => {
-    departmentAverages[departmentKey] = getDepartmentAverages(departmentKey);
     const [selfCell, auditCell] = SRE_RESULT_DEPARTMENT_CELLS[departmentKey];
+    if (departmentKey === "environmentSafety" && environmentSafetyExcluded) {
+      departmentAverages[departmentKey] = { selfAverage: null, auditAverage: null };
+      sreSetCellBlank(doc, selfCell);
+      sreSetCellBlank(doc, auditCell);
+      return;
+    }
+
+    departmentAverages[departmentKey] = getDepartmentAverages(departmentKey);
     const values = departmentAverages[departmentKey];
     if (Number.isFinite(values.selfAverage)) sreSetCellNumber(doc, selfCell, values.selfAverage);
     else sreSetCellBlank(doc, selfCell);
@@ -4694,6 +4814,7 @@ async function srePatchResultSheet(zip, manifest, findingsData) {
 
   const totalSelfAverage = averageValues(
     SRE_RESULT_SECTION_ROWS.map(([sectionKey]) => {
+      if (environmentSafetyExcluded && (sectionKey === "19" || sectionKey === "20")) return null;
       const section = sreFindSection(sectionKey);
       if (!sreIsSectionApplicable(section)) return null;
       return getSectionSelfScore(section);
@@ -4701,6 +4822,7 @@ async function srePatchResultSheet(zip, manifest, findingsData) {
   );
   const totalAuditAverage = averageValues(
     SRE_RESULT_SECTION_ROWS.map(([sectionKey]) => {
+      if (environmentSafetyExcluded && (sectionKey === "19" || sectionKey === "20")) return null;
       const section = sreFindSection(sectionKey);
       if (!sreIsSectionApplicable(section)) return null;
       return getSectionAuditScore(section);
@@ -4766,9 +4888,12 @@ async function exportSreCheckSheet() {
     const zip = await JSZip.loadAsync(sreBase64ToUint8Array(SRE_CHECK_SHEET_TEMPLATE_BASE64));
     const manifest = await sreLoadWorkbookManifest(zip);
 
-    // Section 19 / 20 are always excluded.
-    sreRemoveSheetFromWorkbook(zip, manifest, "Section 19");
-    sreRemoveSheetFromWorkbook(zip, manifest, "Section 20");
+    // Section 19 / 20 are deleted only when Environment & Safety is marked as excluded.
+    const environmentSafetyExcluded = isEnvironmentSafetyExcluded();
+    if (environmentSafetyExcluded) {
+      sreRemoveSheetFromWorkbook(zip, manifest, "Section 19");
+      sreRemoveSheetFromWorkbook(zip, manifest, "Section 20");
+    }
 
     // Delete an entire Section sheet when that Section is not applicable in the web application.
     Object.entries(SRE_LEVEL_SHEET_CONFIG).forEach(([sectionKey, config]) => {
@@ -4797,6 +4922,15 @@ async function exportSreCheckSheet() {
       const section = sreFindSection(sectionKey);
       if (!section || !sreIsSectionApplicable(section) || manifest.deleted.has(config.sheetName)) continue;
       await srePatchAverageSection(zip, manifest, section, config);
+    }
+
+    // Section 19 / 20 use the dedicated Environment & Safety workbook layout.
+    if (!environmentSafetyExcluded) {
+      for (const [sectionKey, config] of Object.entries(SRE_ENVIRONMENT_SAFETY_SHEET_CONFIG)) {
+        const section = sreFindSection(sectionKey);
+        if (!section || !sreIsSectionApplicable(section) || manifest.deleted.has(config.sheetName)) continue;
+        await srePatchEnvironmentSafetySection(zip, manifest, section, config);
+      }
     }
 
     await srePatchProfileSheet(zip, manifest);
