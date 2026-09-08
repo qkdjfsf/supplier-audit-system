@@ -5690,7 +5690,11 @@ async function activeAuditSaveDepartment(status) {
       .eq("category", department.name);
     if (findingDeleteError) throw findingDeleteError;
 
-    const findingRows = activeAuditBuildDepartmentFindingRecords(activeAuditCurrentAuditId, department.key);
+    const findingRows = activeAuditBuildDepartmentFindingRecords(activeAuditCurrentAuditId, department.key)
+      .map(row => ({
+        ...row,
+        auditor: auditor || row.auditor || null
+      }));
     if (findingRows.length) {
       const { error } = await sreSupabase.from("Findings").insert(findingRows);
       if (error) throw error;
@@ -6319,77 +6323,114 @@ async function dbRestoreAuditRecordForOutput(auditId) {
 
 async function dbLoadAuditDetailAndFindings(auditId) {
   dbHistorySetStageVisibility(true, true);
+
+  // 먼저 Active Audit의 모든 부서 raw_data를 하나로 복원한다.
+  // History의 Audit Detail은 DB 저장 순서(detail_id)가 아니라
+  // Summary와 동일한 현재 복원 상태를 기준으로 다시 생성한다.
   await dbRestoreAuditRecordForOutput(auditId);
 
   const detailContainer = document.getElementById("dbAuditDetailSummaryContainer");
   const findingsBody = document.getElementById("dbFindingsBody");
 
-  const [detailResult, findingsResult] = await Promise.all([
-    sreSupabase.from("Audit_detail").select("detail_id, section_number, section_name, category, self_audit_score, psk_audit_score").eq("audit_id", auditId).order("detail_id", { ascending: true }),
-    sreSupabase.from("Findings").select("finding_id, category, section, gap, auditor, issue_date, evaluation_contents, description").eq("audit_id", auditId).order("finding_id", { ascending: true })
+  const [findingsResult, departmentResult] = await Promise.all([
+    sreSupabase
+      .from("Findings")
+      .select("finding_id, category, section, gap, auditor, issue_date, evaluation_contents, description")
+      .eq("audit_id", auditId)
+      .order("finding_id", { ascending: true }),
+    sreSupabase
+      .from("Audit_department")
+      .select("department, auditor")
+      .eq("audit_id", auditId)
   ]);
-  if (detailResult.error) throw detailResult.error;
-  if (findingsResult.error) throw findingsResult.error;
 
-  const details = detailResult.data || [];
+  if (findingsResult.error) throw findingsResult.error;
+  if (departmentResult.error) throw departmentResult.error;
+
+  // Summary와 동일한 함수가 Production → Quality → Purchase → E&S → Security → System → Compliance 순으로 생성한다.
+  const details = dbBuildAuditDetailRecords(auditId);
+
   if (detailContainer) {
     if (!details.length) {
       detailContainer.innerHTML = '<div class="db-empty">저장된 Audit Detail이 없습니다.</div>';
     } else {
-      const categoryOrder = [];
-      const grouped = new Map();
+      const categoryOrder = sreDepartmentOrder
+        .map(key => summaryDepartmentMap[key]?.name)
+        .filter(Boolean);
 
+      const grouped = new Map();
       details.forEach(row => {
         const category = row.category || "-";
-        if (!grouped.has(category)) {
-          grouped.set(category, []);
-          categoryOrder.push(category);
-        }
+        if (!grouped.has(category)) grouped.set(category, []);
         grouped.get(category).push(row);
+      });
+
+      // 혹시 정의되지 않은 Category가 있으면 마지막에 붙인다.
+      grouped.forEach((_, category) => {
+        if (!categoryOrder.includes(category)) categoryOrder.push(category);
       });
 
       const findSectionDefinition = row => {
         const sameNumber = auditSections.filter(section => Number(section.sectionNumber) === Number(row.section_number));
         if (!sameNumber.length) return null;
-        const exactTitle = sameNumber.find(section => String(section.title || "").trim() === String(row.section_name || "").trim());
+        const exactTitle = sameNumber.find(section =>
+          String(section.title || "").trim() === String(row.section_name || "").trim()
+        );
         return exactTitle || sameNumber[0];
       };
 
-      const bodyRows = categoryOrder.map(category => {
-        const rows = grouped.get(category) || [];
-        const selfAverage = averageValues(rows.map(row => Number(row.self_audit_score)).filter(Number.isFinite));
-        const auditAverage = averageValues(rows.map(row => Number(row.psk_audit_score)).filter(Number.isFinite));
+      const bodyRows = categoryOrder
+        .filter(category => grouped.has(category))
+        .map(category => {
+          const rows = grouped.get(category) || [];
 
-        return rows.map((row, index) => {
-          const section = findSectionDefinition(row);
-          const method = section ? getSectionMethodLabel(section) : ([14, 27, 28].includes(Number(row.section_number)) ? "Average" : "Level");
-          const material = section ? getSectionMaterialLabel(section) : "-";
-          const categoryCell = index === 0
-            ? `<td class="sre-category" rowspan="${rows.length}">${escapeHtml(category)}</td>`
-            : "";
-          const selfAverageCell = index === 0
-            ? `<td class="sre-dept-average" rowspan="${rows.length}">${formatScore(selfAverage, 1)}</td>`
-            : "";
-          const auditAverageCell = index === 0
-            ? `<td class="sre-dept-average" rowspan="${rows.length}">${formatScore(auditAverage, 1)}</td>`
-            : "";
+          // 0을 임의로 제외하지 않는다.
+          // dbBuildAuditDetailRecords()가 Summary와 동일한 실제 복원 점수를 생성하므로,
+          // 여기 평균도 Summary와 완전히 동일해야 한다.
+          const selfAverage = averageValues(
+            rows.map(row => Number(row.self_audit_score)).filter(Number.isFinite)
+          );
+          const auditAverage = averageValues(
+            rows.map(row => Number(row.psk_audit_score)).filter(Number.isFinite)
+          );
 
-          return `
-            <tr>
-              ${categoryCell}
-              <td class="sre-section-no">${escapeHtml(row.section_number ?? "")} (${escapeHtml(method)})</td>
-              <td class="sre-material">${escapeHtml(material)}</td>
-              <td class="sre-section-title">${escapeHtml(row.section_name || "")}</td>
-              <td class="sre-score">${formatScore(Number(row.self_audit_score), 1)}</td>
-              <td class="sre-score">${formatScore(Number(row.psk_audit_score), 1)}</td>
-              ${selfAverageCell}
-              ${auditAverageCell}
-            </tr>`;
+          return rows.map((row, index) => {
+            const section = findSectionDefinition(row);
+            const method = section
+              ? getSectionMethodLabel(section)
+              : ([14, 27, 28].includes(Number(row.section_number)) ? "Average" : "Level");
+            const material = section ? getSectionMaterialLabel(section) : "-";
+
+            const categoryCell = index === 0
+              ? `<td class="sre-category" rowspan="${rows.length}">${escapeHtml(category)}</td>`
+              : "";
+            const selfAverageCell = index === 0
+              ? `<td class="sre-dept-average" rowspan="${rows.length}">${formatScore(selfAverage, 1)}</td>`
+              : "";
+            const auditAverageCell = index === 0
+              ? `<td class="sre-dept-average" rowspan="${rows.length}">${formatScore(auditAverage, 1)}</td>`
+              : "";
+
+            return `
+              <tr>
+                ${categoryCell}
+                <td class="sre-section-no">${escapeHtml(row.section_number ?? "")} (${escapeHtml(method)})</td>
+                <td class="sre-material">${escapeHtml(material)}</td>
+                <td class="sre-section-title">${escapeHtml(row.section_name || "")}</td>
+                <td class="sre-score">${formatScore(Number(row.self_audit_score), 1)}</td>
+                <td class="sre-score">${formatScore(Number(row.psk_audit_score), 1)}</td>
+                ${selfAverageCell}
+                ${auditAverageCell}
+              </tr>`;
+          }).join("");
         }).join("");
-      }).join("");
 
-      const totalSelfAverage = averageValues(details.map(row => Number(row.self_audit_score)).filter(Number.isFinite));
-      const totalAuditAverage = averageValues(details.map(row => Number(row.psk_audit_score)).filter(Number.isFinite));
+      const totalSelfAverage = averageValues(
+        details.map(row => Number(row.self_audit_score)).filter(Number.isFinite)
+      );
+      const totalAuditAverage = averageValues(
+        details.map(row => Number(row.psk_audit_score)).filter(Number.isFinite)
+      );
 
       detailContainer.innerHTML = `
         <div class="sre-table-wrap">
@@ -6419,9 +6460,28 @@ async function dbLoadAuditDetailAndFindings(auditId) {
     }
   }
 
-  const findings = findingsResult.data || [];
+  const departmentAuditorMap = new Map(
+    (departmentResult.data || []).map(row => [
+      String(row.department || ""),
+      String(row.auditor || "").trim()
+    ])
+  );
+
+  const findings = (findingsResult.data || []).map(item => ({
+    ...item,
+    // 과거 Active Audit에서 Findings.auditor가 공란으로 저장된 데이터도
+    // Audit_department의 담당 심사원명을 이용해 즉시 표시한다.
+    auditor: String(item.auditor || "").trim()
+      || departmentAuditorMap.get(String(item.category || ""))
+      || ""
+  }));
+
   const gapCounts = { "Major Gap": 0, "Minor Gap": 0, "Opportunity": 0, "-": 0 };
-  findings.forEach(item => { if (Object.prototype.hasOwnProperty.call(gapCounts, item.gap)) gapCounts[item.gap] += 1; });
+  findings.forEach(item => {
+    if (Object.prototype.hasOwnProperty.call(gapCounts, item.gap)) {
+      gapCounts[item.gap] += 1;
+    }
+  });
 
   if (findingsBody) {
     findingsBody.innerHTML = `
