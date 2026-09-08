@@ -2426,6 +2426,12 @@
       if (!loggedIn) {
         const passwordInput = document.getElementById("authPassword");
         if (passwordInput) passwordInput.value = "";
+      } else {
+        // 로그인 세션이 확정된 뒤 Active Audit을 다시 조회한다.
+        // 다른 PC/브라우저에서도 별도 Refresh 없이 현재 진행 중인 심사가 자동 표시된다.
+        setTimeout(() => {
+          if (typeof activeAuditLoadList === "function") activeAuditLoadList();
+        }, 0);
       }
     }
 
